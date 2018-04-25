@@ -1,22 +1,19 @@
 package io.geekhub.service.questions.service
 
 import io.geekhub.service.questions.model.Question
+import io.geekhub.service.questions.repository.QuestionRepository
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
-class QuestionServiceImpl : QuestionService {
-    override fun saveQuestion(question: Question): Question {
+class QuestionServiceImpl<T : Question>(private val repository: QuestionRepository<T>) : QuestionService<T> {
 
-        println("Save called")
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun saveQuestion(question: T): T {
+        return repository.save(question)
     }
 
-    override fun getQuestion(id: String): Question {
+    override fun getQuestion(id: String): Optional<T> {
 
-        println("Get called")
-        val question = Question()
-        question.id = id
-
-        return question
+        return repository.findById(id)
     }
 }

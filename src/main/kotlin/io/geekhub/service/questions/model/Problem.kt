@@ -2,11 +2,11 @@ package io.geekhub.service.questions.model
 
 class Problem : Question() {
 
-    lateinit var title: String
+    var title: String? = null
 
-    lateinit var htmlProblemStatement: String
+    var htmlProblemStatement: String? = null
 
-    lateinit var difficulty: Difficulty
+    var difficulty: Difficulty? = null
 
 
     enum class Difficulty {
