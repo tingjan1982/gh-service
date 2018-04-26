@@ -1,5 +1,6 @@
 package io.geekhub.service.interview.model
 
+import io.geekhub.service.interview.service.InterviewOption
 import io.geekhub.service.questions.model.Answer
 import io.geekhub.service.questions.model.Question
 import java.util.*
@@ -7,9 +8,15 @@ import javax.persistence.Entity
 import javax.persistence.Id
 
 @Entity
-class Interview {
+class Interview() {
 
     private val maxScore = 100
+
+    constructor(interviewOption: InterviewOption) : this() {
+        this.user = interviewOption.user
+        this.interviewMode = interviewOption.interviewMode
+        this.selectedDuration = interviewOption.duration
+    }
 
     @Id
     lateinit var id: String
@@ -64,7 +71,7 @@ class Interview {
     /**
      * Computes the score of this interview taking into the questions' weight.
      */
-    fun computeScore(): Double {
+    internal fun computeScore(): Double {
 
         var score = 0.0
 
