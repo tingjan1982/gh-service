@@ -9,7 +9,7 @@ import javax.persistence.Transient
  * Represents the base question class.
  */
 @Entity
-open class Question {
+abstract class Question {
 
     @Id
     lateinit var id: String
@@ -29,9 +29,9 @@ open class Question {
 
     var modificationDate: Date = Date()
 
-    var modifiedBy: String = ""
+    var modifiedBy: String? = null
 
-    var contributedBy: String = ""
+    var contributedBy: String? = null
 
 
 

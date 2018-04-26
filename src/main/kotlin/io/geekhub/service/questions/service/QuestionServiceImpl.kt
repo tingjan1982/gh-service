@@ -13,7 +13,6 @@ class QuestionServiceImpl<T : Question>(private val repository: QuestionReposito
     }
 
     override fun getQuestion(id: String): Optional<T> {
-
         return repository.findById(id)
     }
 }

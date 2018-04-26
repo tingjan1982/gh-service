@@ -1,9 +1,12 @@
 package io.geekhub.service.questions.model
 
+import javax.persistence.Entity
+
+@Entity
 class ShortAnswer: Question() {
 
-    lateinit var question: String
+    var question: String? = null
 
-    lateinit var answer: String
+    var answer: String? = null
 
-}
+}                       
