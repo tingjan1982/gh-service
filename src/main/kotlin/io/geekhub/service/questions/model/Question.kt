@@ -9,7 +9,7 @@ import javax.persistence.Transient
  * Represents the base question class.
  */
 @Entity
-abstract class Question {
+abstract class Question<T> {
 
     @Id
     lateinit var id: String
@@ -17,7 +17,7 @@ abstract class Question {
     /**
      * The weight of the question for result calculation.
      */
-    var weight: Double = 0.0
+    var weight: Double = 1.0
 
     @Transient
     var categories: Set<String> = setOf()
@@ -33,6 +33,10 @@ abstract class Question {
 
     var contributedBy: String? = null
 
+    var answer: T? = null
 
+    fun isCorrectAnswer(answer: Answer<T>): Boolean {
+        return this.answer == answer.getAnswer()
+    }
 
 }

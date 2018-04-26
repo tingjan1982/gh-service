@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 
-abstract class AbstractQuestionController<T : Question>(private val service: QuestionService<T>) {
+abstract class AbstractQuestionController<T : Question<*>>(private val service: QuestionService<T>) {
 
     companion object {
         val logger = LoggerFactory.getLogger(AbstractQuestionController::class.java)!!

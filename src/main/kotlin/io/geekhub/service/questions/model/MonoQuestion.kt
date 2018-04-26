@@ -1,8 +1,6 @@
 package io.geekhub.service.questions.model
 
-class MonoQuestion: Question() {
+class MonoQuestion : Question<Boolean>() {
 
-    lateinit var statement: String
-
-    lateinit var answer: String
+    var statement: String? = null
 }

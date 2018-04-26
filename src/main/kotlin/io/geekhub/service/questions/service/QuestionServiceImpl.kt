@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class QuestionServiceImpl<T : Question>(private val repository: QuestionRepository<T>) : QuestionService<T> {
+class QuestionServiceImpl<T : Question<*>>(private val repository: QuestionRepository<T>) : QuestionService<T> {
 
     override fun saveQuestion(question: T): T {
         return repository.save(question)
