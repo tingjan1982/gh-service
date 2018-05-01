@@ -1,4 +1,4 @@
-package io.geekhub.service.questions.config
+package io.geekhub.service.shared.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -9,8 +9,8 @@ import javax.sql.DataSource
 
 
 @Configuration
-@EnableJpaRepositories("io.geekhub.service.questions.repository")
-class QuestionDomainConfig {
+@EnableJpaRepositories("io.geekhub.service")
+class ApplicationConfig {
 
     @Bean
     fun dataSource(): DataSource {

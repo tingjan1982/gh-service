@@ -1,14 +1,13 @@
 package io.geekhub.service.questions.model
 
 import java.util.*
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.Transient
+import javax.persistence.*
 
 /**
  * Represents the base question class.
  */
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 abstract class Question<T> {
 
     @Id
@@ -19,9 +18,17 @@ abstract class Question<T> {
      */
     var weight: Double = 1.0
 
+    var difficulty: Difficulty? = null
+
+    /**
+     * The field of profession this question belongs to.
+     */
     @Transient
     var categories: Set<String> = setOf()
 
+    /**
+     * Specific sub-domains this question relates to.
+     */
     @Transient
     var topics: Set<String> = setOf()
 
@@ -39,4 +46,7 @@ abstract class Question<T> {
         return this.answer == answer.getAnswer()
     }
 
+    enum class Difficulty {
+        EASY, INTERMEDIATE, HARD
+    }
 }

@@ -9,10 +9,5 @@ class Problem : Question<String>() {
 
     var htmlProblemStatement: String? = null
 
-    var difficulty: Difficulty? = null
 
-
-    enum class Difficulty {
-        EASY, INTERMEDIATE, HARD
-    }
 }

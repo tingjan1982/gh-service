@@ -5,6 +5,8 @@ import io.geekhub.service.questions.model.Answer
 import io.geekhub.service.questions.model.Question
 import java.util.*
 import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.Id
 
 @Entity
@@ -19,6 +21,7 @@ class Interview() {
     }
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     lateinit var id: String
 
     var user: String? = null
@@ -38,7 +41,7 @@ class Interview() {
      * Map value is the attempted answer on the question.
      */
     @Transient
-    var answerAttempts: MutableMap<String, Answer<*>> = mutableMapOf()
+    private var answerAttempts: MutableMap<String, Answer<*>> = mutableMapOf()
 
     /**
      * This stores the computed score of this interview.
@@ -56,6 +59,10 @@ class Interview() {
 
     fun addAnswerAttempt(qid: String, answer: Answer<*>) {
         this.answerAttempts[qid] = answer
+    }
+
+    fun questionsCount(): Int {
+        return questions.size
     }
 
     /**
