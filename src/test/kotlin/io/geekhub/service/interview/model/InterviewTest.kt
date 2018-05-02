@@ -29,7 +29,7 @@ internal class InterviewTest {
 
         for (i in 1..10) {
             val monoQuestion = MonoQuestion()
-            monoQuestion.id = i.toString()
+            monoQuestion.id = i.toLong()
             monoQuestion.statement = "Question $i"
 
             if (i % 2 == 0) {
@@ -42,7 +42,7 @@ internal class InterviewTest {
         for (i in 1..10) {
             if (i % 2 == 0) {
                 val answer = Answer(true)
-                interview.addAnswerAttempt(i.toString(), answer)
+                interview.addAnswerAttempt(i.toLong(), answer)
             }
         }
     }
@@ -61,7 +61,7 @@ internal class InterviewTest {
 
         for (i in 1..6) {
             val monoQuestion = MonoQuestion()
-            monoQuestion.id = i.toString()
+            monoQuestion.id = i.toLong()
             monoQuestion.statement = "Question $i"
 
             if (i % 2 == 0) {
@@ -75,7 +75,7 @@ internal class InterviewTest {
         for (i in 1..6) {
             if (i % 2 == 0) {
                 val answer = Answer(true)
-                interview.addAnswerAttempt(i.toString(), answer)
+                interview.addAnswerAttempt(i.toLong(), answer)
             }
         }
     }

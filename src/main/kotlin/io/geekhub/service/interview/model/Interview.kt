@@ -10,7 +10,10 @@ import javax.persistence.GenerationType
 import javax.persistence.Id
 
 @Entity
-class Interview() {
+data class Interview(
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
+        var id: Long = 0) {
 
     private val maxScore = 100
 
@@ -19,10 +22,6 @@ class Interview() {
         this.interviewMode = interviewOption.interviewMode
         this.selectedDuration = interviewOption.duration
     }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    lateinit var id: String
 
     var user: String? = null
 
@@ -34,14 +33,14 @@ class Interview() {
     var selectedDuration: Int = -1
 
     @Transient
-    private val questions: MutableMap<String, Question<*>> = mutableMapOf()
+    private val questions: MutableMap<Long, Question<*>> = mutableMapOf()
 
     /**
      * Map key is question ID.
      * Map value is the attempted answer on the question.
      */
     @Transient
-    private var answerAttempts: MutableMap<String, Answer<*>> = mutableMapOf()
+    private var answerAttempts: MutableMap<Long, Answer<*>> = mutableMapOf()
 
     /**
      * This stores the computed score of this interview.
@@ -57,7 +56,7 @@ class Interview() {
         questions[question.id] = question
     }
 
-    fun addAnswerAttempt(qid: String, answer: Answer<*>) {
+    fun addAnswerAttempt(qid: Long, answer: Answer<*>) {
         this.answerAttempts[qid] = answer
     }
 
@@ -101,7 +100,7 @@ class Interview() {
         return score
     }
 
-    private fun calculateQuestionsWeight(): Map<String, Double> {
+    private fun calculateQuestionsWeight(): Map<Long, Double> {
 
         val averageWeight = maxScore / this.questions.size
 

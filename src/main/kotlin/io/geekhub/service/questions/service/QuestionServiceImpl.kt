@@ -5,6 +5,7 @@ import io.geekhub.service.questions.repository.QuestionRepository
 import org.springframework.stereotype.Service
 import java.util.*
 
+// TODO: create integration test
 @Service
 class QuestionServiceImpl<T : Question<*>>(private val repository: QuestionRepository<T>) : QuestionService<T> {
 

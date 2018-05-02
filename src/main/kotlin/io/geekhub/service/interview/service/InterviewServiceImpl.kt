@@ -15,14 +15,16 @@ class InterviewServiceImpl(val questionRepository: QuestionRepository<*>, val in
         const val questionCount = 10
     }
 
-    /**
-     *
-     */
     override fun createInterview(interviewOption: InterviewOption): Interview {
+
+        val questionsCount = questionRepository.count()
+
+        if (questionsCount <= 0) {
+            throw Exception("There is no questions available. Unable to create interview.")
+        }
 
         var interview = Interview(interviewOption)
 
-        val questionsCount = questionRepository.count()
         val allQuestions = questionRepository.findAllQuestions()
         val numbers = mutableMapOf<Int, Int>()
 

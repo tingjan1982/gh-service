@@ -5,13 +5,16 @@ import javax.persistence.*
 
 /**
  * Represents the base question class.
+ *
+ * Reference on JPA hierarchical class options: https://www.thoughts-on-java.org/complete-guide-inheritance-strategies-jpa-hibernate/
  */
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS) // TODO: determine best strategy and eliminate deployment error
 abstract class Question<T> {
 
     @Id
-    lateinit var id: String
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    var id: Long = 0
 
     /**
      * The weight of the question for result calculation.

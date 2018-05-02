@@ -16,7 +16,7 @@ import org.mockito.MockitoAnnotations.initMocks
 
 internal class InterviewServiceImplTest {
 
-    private lateinit var interviewService: InterviewService
+    private lateinit var interviewService: InterviewServiceImpl
 
     @Mock
     private lateinit var questionRepository: QuestionRepository<Question<*>>
@@ -37,14 +37,14 @@ internal class InterviewServiceImplTest {
 
         for (i in 1..100) {
             val question = MonoQuestion()
-            question.id = i.toString()
+            question.id = i.toLong()
             questions.add(question)
         }
 
         `when`(this.questionRepository.findAllQuestions()).thenReturn(questions)
         `when`(this.interviewRepository.save(any(Interview::class.java))).thenAnswer({
                 val interview: Interview = it.getArgument(0) as Interview
-                interview.id = "id"
+                interview.id = 1
                 return@thenAnswer interview
             })
 
