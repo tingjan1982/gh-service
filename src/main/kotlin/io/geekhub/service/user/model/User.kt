@@ -12,13 +12,14 @@ data class User(
         @GeneratedValue(strategy = GenerationType.SEQUENCE)
         var id: Long = 0,
         val username: String,
-        var firstName: String = "",
-        var lastName: String = ""
-) : BaseAuditableObject<User, Long>() {
+        var firstName: String,
+        var lastName: String) : BaseAuditableObject<User, Long>() {
+
+    constructor(username: String): this(username = username, firstName = "", lastName = "")
 
     var rank: Rank? = null
 
-    @OneToMany
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     var interviews: MutableList<Interview> = mutableListOf()
 
 

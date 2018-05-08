@@ -65,6 +65,5 @@ internal class InterviewServiceImplTest {
         assertEquals(60, createdInterview.selectedDuration)
         assertEquals(InterviewServiceImpl.questionCount, createdInterview.questionsCount())
         assertNotNull(createdInterview.startDate)
-
     }
 }

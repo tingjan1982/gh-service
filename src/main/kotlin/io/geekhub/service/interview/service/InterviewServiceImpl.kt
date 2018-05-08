@@ -8,8 +8,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.concurrent.ThreadLocalRandom
 import javax.persistence.EntityNotFoundException
+import javax.transaction.Transactional
 
 @Service
+@Transactional
 class InterviewServiceImpl(val questionRepository: QuestionRepository<*>,
                            val interviewRepository: InterviewRepository,
                            val userRepository: UserRepository) : InterviewService {

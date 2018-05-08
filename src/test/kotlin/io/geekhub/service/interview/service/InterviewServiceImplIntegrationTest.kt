@@ -54,6 +54,12 @@ internal class InterviewServiceImplIntegrationTest {
         assertEquals(interviewOption.duration, createdInterview.selectedDuration)
         assertEquals(InterviewServiceImpl.questionCount, createdInterview.questionsCount())
         assertNotNull(createdInterview.startDate)
+
+        this.userRepository.findByUsername("username").let {
+            it.ifPresent({
+                assertEquals(1, it.interviews.size)
+            })
+        }
     }
 
     @Test
