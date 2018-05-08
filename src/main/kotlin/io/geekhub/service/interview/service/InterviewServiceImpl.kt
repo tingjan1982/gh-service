@@ -3,12 +3,16 @@ package io.geekhub.service.interview.service
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.questions.repository.QuestionRepository
+import io.geekhub.service.user.repository.UserRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.concurrent.ThreadLocalRandom
+import javax.persistence.EntityNotFoundException
 
 @Service
-class InterviewServiceImpl(val questionRepository: QuestionRepository<*>, val interviewRepository: InterviewRepository) : InterviewService {
+class InterviewServiceImpl(val questionRepository: QuestionRepository<*>,
+                           val interviewRepository: InterviewRepository,
+                           val userRepository: UserRepository) : InterviewService {
 
     companion object {
         val logger = LoggerFactory.getLogger(InterviewServiceImpl::class.java)!!
@@ -23,7 +27,14 @@ class InterviewServiceImpl(val questionRepository: QuestionRepository<*>, val in
             throw Exception("There is no questions available. Unable to create interview.")
         }
 
-        var interview = Interview(interviewOption)
+        val foundUser = this.userRepository.findByUsername(interviewOption.username).orElseThrow {
+            EntityNotFoundException("User is not found: ${interviewOption.username}")
+        }
+
+        var interview = Interview(user = foundUser).apply {
+            this.interviewMode = interviewOption.interviewMode
+            this.selectedDuration = interviewOption.duration
+        }
 
         val allQuestions = questionRepository.findAllQuestions()
         val numbers = mutableMapOf<Int, Int>()

@@ -1,29 +1,20 @@
 package io.geekhub.service.interview.model
 
-import io.geekhub.service.interview.service.InterviewOption
 import io.geekhub.service.questions.model.Answer
 import io.geekhub.service.questions.model.Question
+import io.geekhub.service.user.model.User
 import java.util.*
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
+import javax.persistence.*
 
 @Entity
 data class Interview(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE)
-        var id: Long = 0) {
+        var id: Long = 0,
+        @ManyToOne
+        var user: User) {
 
     private val maxScore = 100
-
-    constructor(interviewOption: InterviewOption) : this() {
-        this.user = interviewOption.user
-        this.interviewMode = interviewOption.interviewMode
-        this.selectedDuration = interviewOption.duration
-    }
-
-    var user: String? = null
 
     var interviewMode: InterviewMode = InterviewMode.MOCK
 

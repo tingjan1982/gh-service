@@ -2,6 +2,7 @@ package io.geekhub.service.interview.model
 
 import io.geekhub.service.questions.model.Answer
 import io.geekhub.service.questions.model.MonoQuestion
+import io.geekhub.service.user.model.User
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -15,7 +16,7 @@ internal class InterviewTest {
     @Test
     fun assessInterview() {
 
-        val interview = Interview()
+        val interview = Interview(user = User(username = "username"))
         this.createQuestionsWithPartialAnswers(interview)
 
         logger.info("Initialized interview: {}", interview)
@@ -50,7 +51,7 @@ internal class InterviewTest {
     @Test
     fun computeScore_DifferentQuestionWeight() {
 
-        val interview = Interview()
+        val interview = Interview(user = User(username = "username"))
         this.createDifferentWeightQuestions(interview)
 
         val score = interview.computeScore()

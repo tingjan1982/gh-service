@@ -3,23 +3,22 @@ package io.geekhub.service.user.model
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.shared.model.BaseAuditableObject
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.Id
-import javax.persistence.Transient
+import javax.persistence.*
 
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 data class User(
         @Id
-        var id: Long,
-        var firstName: String,
-        var lastName: String
+        @GeneratedValue(strategy = GenerationType.SEQUENCE)
+        var id: Long = 0,
+        val username: String,
+        var firstName: String = "",
+        var lastName: String = ""
 ) : BaseAuditableObject<User, Long>() {
 
     var rank: Rank? = null
 
-    @Transient
+    @OneToMany
     var interviews: MutableList<Interview> = mutableListOf()
 
 
