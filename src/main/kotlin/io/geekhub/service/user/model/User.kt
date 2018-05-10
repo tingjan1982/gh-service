@@ -8,6 +8,7 @@ import javax.persistence.*
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 data class User(
+        // TODO: change id type to String if possible.
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE)
         var id: Long = 0,
