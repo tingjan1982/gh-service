@@ -22,21 +22,21 @@ class UserServiceImpl(val repository: UserRepository) : UserService {
     }
 
 
-    override fun getUser(id: Long): User {
+    override fun getUser(id: String): User {
         return this.repository.getOne(id)
     }
 
-    override fun updateUser(id: Long, userRequest: UserRequest): User {
+    override fun updateUser(id: String, userRequest: UserRequest): User {
 
         val user = userRequest.toEntity().apply {
-            this.id = id
+            this.userId = id
         }
 
         return this.updateUser(user)
     }
 
     override fun updateUser(user: User): User {
-        return this.repository.getOne(user.id).apply {
+        return this.repository.getOne(user.id!!).apply {
             this.firstName = user.firstName
             this.lastName = user.lastName
             this.rank = user.rank

@@ -9,6 +9,5 @@ class DefaultAuditorProvider : AuditorAware<User> {
     override fun getCurrentAuditor(): Optional<User> {
 
         return Optional.empty()
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

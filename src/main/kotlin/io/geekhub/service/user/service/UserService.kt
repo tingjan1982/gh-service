@@ -9,10 +9,10 @@ interface UserService {
 
     fun createUser(user: User): User
 
-    fun getUser(id: Long): User
+    fun getUser(id: String): User
 
     fun updateUser(user: User): User
 
-    fun updateUser(id: Long, userRequest: UserRequest): User
+    fun updateUser(id: String, userRequest: UserRequest): User
 
 }

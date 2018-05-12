@@ -7,12 +7,14 @@ import io.geekhub.service.user.web.bean.UserResponse
 fun UserRequest.toEntity() = User(
         username = this.username,
         firstName = this.firstName,
-        lastName = this.lastName
+        lastName = this.lastName,
+        email = this.email
 )
 
 fun User.toDTO() = UserResponse(
-        this.id,
+        this.id.toString(),
         this.username,
         this.firstName,
-        this.lastName
-)
+        this.lastName,
+        this.email
+)                        
