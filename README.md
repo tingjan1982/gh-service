@@ -1,4 +1,4 @@
-<a href="http://localhost:8111/viewType.html?buildTypeId=GhService_Build&guest=1">
+<a href="http://192.168.2.244:8111/viewType.html?buildTypeId=GhService_Build&guest=1">
     <img src="http://192.168.2.244:8111/app/rest/builds/buildType:(id:GhService_Build)/statusIcon"/>
 </a>
 
