@@ -10,16 +10,29 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import org.springframework.transaction.annotation.EnableTransactionManagement
+import springfox.documentation.builders.PathSelectors
+import springfox.documentation.builders.RequestHandlerSelectors
+import springfox.documentation.service.ApiInfo
+import springfox.documentation.service.Contact
+import springfox.documentation.spi.DocumentationType
+import springfox.documentation.spring.web.plugins.Docket
+import springfox.documentation.swagger2.annotations.EnableSwagger2
 import javax.sql.DataSource
+
 
 /**
  * Reference on @EnableTransactionManagement:
  * https://stackoverflow.com/questions/40724100/enabletransactionmanagement-in-spring-boot
+ *
+ * Reference on @EnableSwagger2
+ * http://www.baeldung.com/swagger-2-documentation-for-spring-rest-api
+ * https://springframework.guru/spring-boot-restful-api-documentation-with-swagger-2/
  */
 @Configuration
 @EnableJpaRepositories("io.geekhub.service")
 @EnableJpaAuditing
 @EnableTransactionManagement
+@EnableSwagger2
 class ApplicationConfig {
 
     @Bean
@@ -39,5 +52,30 @@ class ApplicationConfig {
     @Bean
     fun auditorProvider(): AuditorAware<User> {
         return DefaultAuditorProvider()
+    }
+
+    @Bean
+    fun api(): Docket {
+        return Docket(DocumentationType.SWAGGER_2)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("io.geekhub.service"))
+                .paths(PathSelectors.any())
+                .build()
+                .apiInfo(apiInfo())
+    }
+
+    /**
+     * Information on licensing a private project:
+     * https://softwareengineering.stackexchange.com/questions/312009/what-kind-of-license-to-put-a-private-project
+     */
+    private fun apiInfo(): ApiInfo {
+        return ApiInfo(
+                "GeekHub REST API",
+                "GeekHub API Backend",
+                "0.1.0",
+                "Terms of service",
+                Contact("Joe Lin", "www.geekhub.io", "tingjan1982@geekhub.io"),
+                "Copyright (c) 2018 Joe Lin", "",
+                setOf())
     }
 }
