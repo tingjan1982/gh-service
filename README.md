@@ -1,3 +1,6 @@
+<a href="http://localhost:8111/viewType.html?buildTypeId=GhService_Build&guest=1">
+    <img src="http://localhost:8111/app/rest/builds/buildType:(id:GhService_Build)/statusIcon"/>
+</a>
 # gh-service
 
 
