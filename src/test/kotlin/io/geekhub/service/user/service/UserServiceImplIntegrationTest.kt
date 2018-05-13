@@ -27,7 +27,9 @@ internal class UserServiceImplIntegrationTest {
 
     @Test
     fun updateUser() {
-        val createdUser = this.userService.createUser(User(username = "joelin", firstName = "Joe", lastName = "Lin"))
+        val createdUser = this.userService.createUser(User(
+                username = "joelin", firstName = "Joe", lastName = "Lin", email = "tingjan1982@gmail.com"
+        ))
         createdUser.lastName = "Changed"
         val updatedUser = this.userService.updateUser(createdUser)
 
