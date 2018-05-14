@@ -4,8 +4,8 @@
 
 # gh-service
 
+## Run the service
 
-## Reference
 ### Setup Postgresql Database 
 
 https://hub.docker.com/_/postgres/       
@@ -16,11 +16,30 @@ https://hub.docker.com/_/postgres/
 This command gets the alpine version of the postgres image.
 
 > Run the postgres in the backend:
+
 `sudo docker run --name gh-service-postgres -e POSTGRES_PASSWORD=%90nw3Uhw -p 5432:5432 -d postgres:alpine`
 
-> Connect to database via psql client
+> Connect to database via psql client:
+
 `sudo docker run -it --rm --link gh-service-postgres:postgres postgres:alpine psql -h postgres -U postgres`
  
+>Create the gh-service database:
+
+`create database "gh-service";`
+
+### Build in Docker
+
+`./gradlew docker`
+
+This will build the Spring Boot execution jar and build the Docker image as specified by the Dockerfile.
+
+> Run in Docker container
+
+`sudo docker run --rm -p 8080:8080 --name gh-service-api io.geekhub/gh-service`
+
+Enter \l to verify the created database.
+
+## Reference
 
 ### Issue Tracking Configuration
 
