@@ -11,6 +11,7 @@ import javax.persistence.*
 @Entity(name = "gh_question")
 @Inheritance(strategy = InheritanceType.JOINED) // TODO: do we need discriminator column?
 @SequenceGenerator(name = "question_sequence", sequenceName = "question_sequence")
+@DiscriminatorColumn
 abstract class Question<T> {
 
     @Id
