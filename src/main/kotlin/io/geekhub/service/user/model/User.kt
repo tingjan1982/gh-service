@@ -10,7 +10,7 @@ import javax.persistence.*
  * List of additional generators:
  * http://docs.jboss.org/hibernate/core/3.6/reference/en-US/html/mapping.html#d0e5294
  */
-@Entity
+@Entity(name = "gh_user")
 @EntityListeners(AuditingEntityListener::class)
 @AttributeOverride(name = "id", column = Column(name = "id2"))
 data class User(

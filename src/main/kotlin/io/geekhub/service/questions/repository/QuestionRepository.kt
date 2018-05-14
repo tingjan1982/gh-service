@@ -6,6 +6,10 @@ import org.springframework.data.repository.CrudRepository
 
 interface QuestionRepository<T : Question<*>> : CrudRepository<T, String> {
 
-    @Query("select q from Question q")
+    /**
+     * Reference on the use of SpEL for resolving table name:
+     * https://docs.spring.io/spring-data/jpa/docs/2.0.7.RELEASE/reference/html/#jpa.query.spel-expressions
+     */
+    @Query("select q from #{#entityName} q")
     fun findAllQuestions(): List<Question<*>>
 }

@@ -4,6 +4,7 @@ import io.geekhub.service.shared.auditing.DefaultAuditorProvider
 import io.geekhub.service.user.model.User
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.data.domain.AuditorAware
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
@@ -35,7 +36,11 @@ import javax.sql.DataSource
 @EnableSwagger2
 class ApplicationConfig {
 
+    /**
+     * Embedded datasource will be activated when one of the specified profiles is activated.
+     */
     @Bean
+    @Profile("test", "embedded")
     fun dataSource(): DataSource {
         val builder = EmbeddedDatabaseBuilder()
         return builder.setType(EmbeddedDatabaseType.HSQL).build()

@@ -6,6 +6,22 @@
 
 
 ## Reference
+### Setup Postgresql Database 
+
+https://hub.docker.com/_/postgres/       
+
+> Pull Docker image:
+`sudo docker pull postgres:alpine`
+
+This command gets the alpine version of the postgres image.
+
+> Run the postgres in the backend:
+`sudo docker run --name gh-service-postgres -e POSTGRES_PASSWORD=%90nw3Uhw -p 5432:5432 -d postgres:alpine`
+
+> Connect to database via psql client
+`sudo docker run -it --rm --link gh-service-postgres:postgres postgres:alpine psql -h postgres -U postgres`
+ 
+
 ### Issue Tracking Configuration
 
 IntelliJ YouTrack Plugin

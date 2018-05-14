@@ -6,10 +6,11 @@ import io.geekhub.service.user.model.User
 import java.util.*
 import javax.persistence.*
 
-@Entity
+@Entity(name = "gh_interview")
+@SequenceGenerator(name = "interview_sequence", sequenceName = "interview_sequence")
 data class Interview(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE)
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "interview_sequence")
         var id: Long = 0,
         @ManyToOne
         var user: User) {

@@ -8,12 +8,13 @@ import javax.persistence.*
  *
  * Reference on JPA hierarchical class options: https://www.thoughts-on-java.org/complete-guide-inheritance-strategies-jpa-hibernate/
  */
-@Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS) // TODO: determine best strategy and eliminate deployment error
+@Entity(name = "gh_question")
+@Inheritance(strategy = InheritanceType.JOINED) // TODO: do we need discriminator column?
+@SequenceGenerator(name = "question_sequence", sequenceName = "question_sequence")
 abstract class Question<T> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "question_sequence")
     var id: Long = 0
 
     /**
