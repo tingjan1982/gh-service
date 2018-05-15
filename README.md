@@ -17,15 +17,12 @@ This command gets the alpine version of the postgres image.
 
 > Run the postgres in the backend:
 
-`sudo docker run --name gh-service-postgres -e POSTGRES_PASSWORD=%90nw3Uhw -p 5432:5432 -d postgres:alpine`
+`sudo docker run --name gh-service-postgres -e POSTGRES_PASSWORD=%90nw3Uhw -e POSTGRES_DB=gh-service -p 5432:5432 -d postgres:alpine`
 
 > Connect to database via psql client:
 
-`sudo docker run -it --rm --link gh-service-postgres:postgres postgres:alpine psql -h postgres -U postgres`
+`sudo docker run -it --rm --link gh-service-postgres:postgres postgres:alpine psql -h postgres -U postgres -d gh-service`
  
->Create the gh-service database:
-
-`create database "gh-service";`
 
 ### Build in Docker
 
@@ -70,7 +67,7 @@ Teamcity Agent (https://hub.docker.com/r/jetbrains/teamcity-agent/)
 `sudo docker pull jetbrains/teamcity-agent`
 
 > Run Docker Container:
-`sudo docker run -it -e SERVER_URL="192.168.2.244:8111" -v /Users/jlin/teamcity-agent/conf:/data/teamcity_agent/conf jetbrains/teamcity-agent`
+`sudo docker run -it -e SERVER_URL="192.168.2.244:8111" -v /Users/jlin/teamcity-agent/conf:/data/teamcity_agent/conf --name teamcity-agent-instance jetbrains/teamcity-agent`
 
 The commands run an agent docker container and binds the conf directory. 
 
