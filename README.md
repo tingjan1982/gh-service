@@ -4,16 +4,25 @@
 
 # gh-service
 
+GeekHub REST API Service
+
 ## Run the service
 
-### Setup Postgres Database 
+### Embedded Mode
+
+> Start the service with an embedded database.
+
+`./gradlew bootRun`
+
+### Postgres Mode 
 
 https://hub.docker.com/_/postgres/       
 
 > Pull Docker image:
+
 `sudo docker pull postgres:alpine`
 
-This command gets the alpine version of the postgres image.
+This command gets the alpine version of the Postgres image.
 
 > Run the postgres in the backend:
 
@@ -23,12 +32,16 @@ This command gets the alpine version of the postgres image.
 
 `sudo docker run -it --rm --link gh-service-postgres:postgres postgres:alpine psql -h postgres -U postgres -d gh-service`
  
+> Run in Gradle
 
-### Build in Docker
+`./gradlew bootRun -Pspring.profiles.active=default` 
+ 
+> Run in Docker
 
 `./gradlew docker`
 
-This will build the Spring Boot execution jar and build the Docker image as specified by the Dockerfile.
+This will build the Spring Boot execution jar and build the Docker image 
+with name as specified by the Dockerfile.
 
 > Run in Docker container
 
