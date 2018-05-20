@@ -6,7 +6,7 @@
 
 ## Run the service
 
-### Setup Postgresql Database 
+### Setup Postgres Database 
 
 https://hub.docker.com/_/postgres/       
 
