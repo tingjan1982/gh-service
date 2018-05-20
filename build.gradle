@@ -60,7 +60,7 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-couchbase')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-mail')
-//	compile('org.springframework.boot:spring-boot-starter-security')
+	compile('org.springframework.boot:spring-boot-starter-security')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-websocket')
     compile('io.springfox:springfox-swagger2:2.7.0')
@@ -89,6 +89,18 @@ dependencies {
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+/**
+ * Includes non source code files from kotlin directory
+ */
+sourceSets {
+    main {
+        resources {
+            srcDirs 'src/main/kotlin'
+            includes '**/*.ddl'
+        }
     }
 }
 

@@ -34,7 +34,6 @@ This will build the Spring Boot execution jar and build the Docker image as spec
 
 `sudo docker run --rm -p 8080:8080 --name gh-service-api io.geekhub/gh-service`
 
-Enter \l to verify the created database.
 
 ## Reference
 
