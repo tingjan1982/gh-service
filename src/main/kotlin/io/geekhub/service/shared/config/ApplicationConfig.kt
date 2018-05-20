@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement
 import springfox.documentation.builders.PathSelectors
 import springfox.documentation.builders.RequestHandlerSelectors
 import springfox.documentation.service.ApiInfo
+import springfox.documentation.service.BasicAuth
 import springfox.documentation.service.Contact
 import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spring.web.plugins.Docket
@@ -61,12 +62,14 @@ class ApplicationConfig {
 
     @Bean
     fun api(): Docket {
+        val basicAuthScheme = BasicAuth("geekhub")
         return Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("io.geekhub.service"))
                 .paths(PathSelectors.any())
                 .build()
                 .apiInfo(apiInfo())
+                .securitySchemes(listOf(basicAuthScheme))
     }
 
     /**
