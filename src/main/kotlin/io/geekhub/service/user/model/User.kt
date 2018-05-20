@@ -12,7 +12,6 @@ import javax.persistence.*
  */
 @Entity(name = "gh_user")
 @EntityListeners(AuditingEntityListener::class)
-@AttributeOverride(name = "id", column = Column(name = "id2"))
 data class User(
         @Id
         @GeneratedValue(generator = "uuid")
