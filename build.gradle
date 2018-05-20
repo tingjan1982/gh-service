@@ -140,6 +140,7 @@ docker {
     buildArgs(['JAR_FILE': "${bootJar.archiveName}"])
 }
 
+/*
 github {
     owner = 'tingjan1982'
     repo = 'gh-service'
@@ -148,4 +149,4 @@ github {
     targetCommitish = 'master'
     name = 'v0.1.0'
     assets = "/build/libs/gh-service-0.0.1-SNAPSHOT.jar"
-}
+}*/
