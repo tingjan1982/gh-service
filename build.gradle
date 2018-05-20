@@ -93,7 +93,7 @@ dependencyManagement {
 }
 
 /**
- * Includes non source code files from kotlin directory
+ * Customize resources directory to include non soure code files from kotlin directory.
  */
 sourceSets {
     main {
@@ -101,6 +101,26 @@ sourceSets {
             srcDirs 'src/main/resources', 'src/main/kotlin'
             exclude '*.kt'
         }
+    }
+}
+
+/**
+ * Add the ability to pass spring active profile when running spring boot via Gradle.
+ * The default is embedded which will initialize an embedded HSQL database.
+ *
+ * The spring profile can be specified by using Gradle's -P option like so:
+ * ./gradlew bootRun -Pspring.profiles.active=<profile name>
+ */
+bootRun {
+    doFirst() {
+        def springProfile = "embedded"
+
+        if (project.findProperty("spring.profiles.active")) {
+            springProfile = project.property("spring.profiles.active")
+        }
+        
+        logger.info("Spring profile to use: ${springProfile}")
+        systemProperty 'spring.profiles.active', springProfile
     }
 }
 
