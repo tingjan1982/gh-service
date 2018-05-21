@@ -1,7 +1,12 @@
+/**
+ * Gradle properties explained:
+ * https://docs.gradle.org/current/userguide/build_environment.html
+ */
 buildscript {
     ext {
         kotlinVersion = '1.2.41'
         springBootVersion = '2.0.1.RELEASE'
+        githubToken = System.getProperty("githubToken")
     }
     repositories {
         mavenCentral()
@@ -140,13 +145,15 @@ docker {
     buildArgs(['JAR_FILE': "${bootJar.archiveName}"])
 }
 
-/*
+/**
+ * Reference: https://developer.github.com/v3/repos/releases/
+ */
 github {
     owner = 'tingjan1982'
     repo = 'gh-service'
-    token = ''
+    token = "${githubToken}"
     tagName = 'v0.1.0'
     targetCommitish = 'master'
     name = 'v0.1.0'
-    assets = "/build/libs/gh-service-0.0.1-SNAPSHOT.jar"
-}*/
+    assets = ["${bootJar.archivePath}"]
+}

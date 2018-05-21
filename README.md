@@ -78,8 +78,8 @@ Teamcity Agent (https://hub.docker.com/r/jetbrains/teamcity-agent/)
 > Pull Docker Image:
 `sudo docker pull jetbrains/teamcity-agent`
 
-> Run Docker Container:
-`sudo docker run -it -e SERVER_URL="192.168.2.244:8111" -v /Users/jlin/teamcity-agent/conf:/data/teamcity_agent/conf --name teamcity-agent-instance jetbrains/teamcity-agent`
+> Run Docker Container with Docker daemon enabled:
+`sudo docker run -it -e SERVER_URL="192.168.2.244:8111" -v /Users/jlin/teamcity-agent/conf:/data/teamcity_agent/conf -v docker_volumes:/var/lib/docker --privileged -e DOCKER_IN_DOCKER=start --name teamcity-agent jetbrains/teamcity-agent`
 
 The commands run an agent docker container and binds the conf directory. 
 
