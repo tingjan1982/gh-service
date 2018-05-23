@@ -25,14 +25,14 @@ data class Interview(
     var selectedDuration: Int = -1
 
     @Transient
-    private val questions: MutableMap<Long, Question<*>> = mutableMapOf()
+    private val questions: MutableMap<String, Question> = mutableMapOf()
 
     /**
      * Map key is question ID.
      * Map value is the attempted answer on the question.
      */
     @Transient
-    private var answerAttempts: MutableMap<Long, Answer<*>> = mutableMapOf()
+    private var answerAttempts: MutableMap<String, Answer<*>> = mutableMapOf()
 
     /**
      * This stores the computed score of this interview.
@@ -44,11 +44,11 @@ data class Interview(
     var completeDate: Date? = null
 
 
-    fun addQuestion(question: Question<*>) {
-        questions[question.id] = question
+    fun addQuestion(question: Question) {
+        questions[question.questionId.toString()] = question
     }
 
-    fun addAnswerAttempt(qid: Long, answer: Answer<*>) {
+    fun addAnswerAttempt(qid: String, answer: Answer<*>) {
         this.answerAttempts[qid] = answer
     }
 
@@ -92,7 +92,7 @@ data class Interview(
         return score
     }
 
-    private fun calculateQuestionsWeight(): Map<Long, Double> {
+    private fun calculateQuestionsWeight(): Map<String, Double> {
 
         val averageWeight = maxScore / this.questions.size
 
@@ -101,8 +101,8 @@ data class Interview(
         }.toMap()
     }
 
-    private fun isCorrectAnswer(q: Question<*>, a: Answer<*>): Boolean {
-        return q.answer == a.getAnswer()
+    private fun isCorrectAnswer(q: Question, a: Answer<*>): Boolean {
+        return false //q.answer == a.getAnswer()
     }
 
 

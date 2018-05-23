@@ -12,7 +12,7 @@ import javax.transaction.Transactional
 
 @Service
 @Transactional
-class InterviewServiceImpl(val questionRepository: QuestionRepository<*>,
+class InterviewServiceImpl(val questionRepository: QuestionRepository,
                            val interviewRepository: InterviewRepository,
                            val userRepository: UserRepository) : InterviewService {
 

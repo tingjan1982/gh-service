@@ -61,8 +61,7 @@ Link Commit to YouTrack Issue
 
 ### Teamcity Configuration
 
-####
-Teamcity Server (https://hub.docker.com/r/jetbrains/teamcity-server/)
+#### Teamcity Server (https://hub.docker.com/r/jetbrains/teamcity-server/)
 
 > Pull Docker Image:
 `sudo docker pull jetbrains/teamcity-server`
@@ -72,8 +71,14 @@ Teamcity Server (https://hub.docker.com/r/jetbrains/teamcity-server/)
 
 The command runs a server docker container, binds data directory, logs directory and port.
 
-####
-Teamcity Agent (https://hub.docker.com/r/jetbrains/teamcity-agent/)
+> Upgrade Teamcity Server
+
+* Execute the Pull Docker Image command.
+* Stop the currently running teamcity server container.
+* Remove the stopped teamcity server container. 
+* Execute the Run Docker Container command. 
+
+#### Teamcity Agent (https://hub.docker.com/r/jetbrains/teamcity-agent/)
 
 > Pull Docker Image:
 `sudo docker pull jetbrains/teamcity-agent`

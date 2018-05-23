@@ -1,7 +1,7 @@
 package io.geekhub.service.interview.service
 
 import io.geekhub.service.interview.model.Interview
-import io.geekhub.service.questions.model.MonoQuestion
+import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.user.model.User
 import io.geekhub.service.user.repository.UserRepository
@@ -26,7 +26,7 @@ internal class InterviewServiceImplIntegrationTest {
     private lateinit var interviewService: InterviewService
 
     @Autowired
-    private lateinit var questionRepository: QuestionRepository<MonoQuestion>
+    private lateinit var questionRepository: QuestionRepository
 
     @Autowired
     private lateinit var userRepository: UserRepository
@@ -34,8 +34,8 @@ internal class InterviewServiceImplIntegrationTest {
     @BeforeAll
     fun populateData() {
         for (i in 1..50) {
-            val monoQuestion = MonoQuestion()
-            monoQuestion.statement = "Q $i - true or false?"
+            val monoQuestion = Question()
+            monoQuestion.question = "Q $i - true or false?"
             questionRepository.save(monoQuestion)
         }
 

@@ -1,7 +1,12 @@
 package io.geekhub.service.questions.model
 
-import java.util.*
-import javax.persistence.*
+import io.geekhub.service.shared.model.BaseAuditableObject
+import org.hibernate.annotations.GenericGenerator
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.GeneratedValue
+import javax.persistence.Id
 
 /**
  * Represents the base question class.
@@ -9,46 +14,35 @@ import javax.persistence.*
  * Reference on JPA hierarchical class options: https://www.thoughts-on-java.org/complete-guide-inheritance-strategies-jpa-hibernate/
  */
 @Entity(name = "gh_question")
-@Inheritance(strategy = InheritanceType.JOINED) // TODO: do we need discriminator column?
-@SequenceGenerator(name = "question_sequence", sequenceName = "question_sequence")
-@DiscriminatorColumn
-abstract class Question<T> {
+@EntityListeners(AuditingEntityListener::class)
+data class Question(
+        @Id
+        @GeneratedValue(generator = "uuid")
+        @GenericGenerator(name = "uuid", strategy = "uuid2")
+        var questionId: String? = null,
+        var question: String,
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "question_sequence")
-    var id: Long = 0
+        /**
+         * The weight of the question for result calculation.
+         */
+        var weight: Double = 1.0,
+        var difficulty: Difficulty,
 
-    /**
-     * The weight of the question for result calculation.
-     */
-    var weight: Double = 1.0
+        /**
+         * The field of profession this question belongs to.
+         */
+        var category: String,
 
-    var difficulty: Difficulty? = null
+        /**
+         * Specific sub-domains this question relates to.
+         */
+        var topic: String,
+        var contributedBy: String? = null) : BaseAuditableObject<Question, String>() {
 
-    /**
-     * The field of profession this question belongs to.
-     */
-    @Transient
-    var categories: Set<String> = setOf()
+    constructor() : this(question = "", difficulty = Difficulty.INTERMEDIATE, category = "", topic = "")
 
-    /**
-     * Specific sub-domains this question relates to.
-     */
-    @Transient
-    var topics: Set<String> = setOf()
-
-    var creationDate: Date = Date()
-
-    var modificationDate: Date = Date()
-
-    var modifiedBy: String? = null
-
-    var contributedBy: String? = null
-
-    var answer: T? = null
-
-    fun isCorrectAnswer(answer: Answer<T>): Boolean {
-        return this.answer == answer.getAnswer()
+    override fun getId(): String? {
+        return this.questionId
     }
 
     enum class Difficulty {

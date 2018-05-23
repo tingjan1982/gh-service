@@ -7,13 +7,13 @@ import java.util.*
 
 // TODO: create integration test
 @Service
-class QuestionServiceImpl<T : Question<*>>(private val repository: QuestionRepository<T>) : QuestionService<T> {
+class QuestionServiceImpl(val repository: QuestionRepository) : QuestionService {
 
-    override fun saveQuestion(question: T): T {
+    override fun saveQuestion(question: Question): Question {
         return repository.save(question)
     }
 
-    override fun getQuestion(id: String): Optional<T> {
+    override fun getQuestion(id: String): Optional<Question> {
         return repository.findById(id)
     }
 }

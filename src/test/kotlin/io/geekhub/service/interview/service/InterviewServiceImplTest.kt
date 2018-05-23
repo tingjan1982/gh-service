@@ -2,7 +2,6 @@ package io.geekhub.service.interview.service
 
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.repository.InterviewRepository
-import io.geekhub.service.questions.model.MonoQuestion
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.user.model.User
@@ -22,7 +21,7 @@ internal class InterviewServiceImplTest {
     private lateinit var interviewService: InterviewServiceImpl
 
     @Mock
-    private lateinit var questionRepository: QuestionRepository<Question<*>>
+    private lateinit var questionRepository: QuestionRepository
 
     @Mock
     private lateinit var interviewRepository: InterviewRepository
@@ -39,11 +38,11 @@ internal class InterviewServiceImplTest {
     @Test
     fun createInterview() {
         `when`(this.questionRepository.count()).thenReturn(100)
-        val questions = mutableListOf<Question<*>>()
+        val questions = mutableListOf<Question>()
 
         for (i in 1..100) {
-            val question = MonoQuestion()
-            question.id = i.toLong()
+            val question = Question()
+            question.questionId = i.toString()
             questions.add(question)
         }
 
