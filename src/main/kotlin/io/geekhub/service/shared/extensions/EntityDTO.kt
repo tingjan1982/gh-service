@@ -34,5 +34,6 @@ fun Question.toDTO() = QuestionResponse(
         this.question,
         this.category,
         this.topic,
-        this.difficulty
+        this.difficulty,
+        this.getAnswer()
 )

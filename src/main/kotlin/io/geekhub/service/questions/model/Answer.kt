@@ -1,8 +1,15 @@
 package io.geekhub.service.questions.model
 
-data class Answer<T>(val ans: T) {
+import javax.persistence.Entity
+import javax.persistence.Id
 
-    fun getAnswer(): T {
-        return ans
-    }
+// TODO: work on this
+@Entity
+data class Answer(
+        @Id
+        val id: Long? = null
+        
+) {
+
+
 }

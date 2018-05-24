@@ -3,7 +3,7 @@ package io.geekhub.service.questions.web.bean
 import io.geekhub.service.questions.model.Question
 
 /**
- * category is like the domain of the question.
+ * category is the domain of the question.
  * Example: Programming, Database, Design pattern.
  *
  * Topic is a further breakdown of areas within a category.

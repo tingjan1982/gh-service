@@ -1,10 +1,10 @@
 package io.geekhub.service.questions.repository
 
 import io.geekhub.service.questions.model.Question
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.CrudRepository
 
-interface QuestionRepository : CrudRepository<Question, String> {
+interface QuestionRepository : JpaRepository<Question, String> {
 
     /**
      * Reference on the use of SpEL for resolving table name:

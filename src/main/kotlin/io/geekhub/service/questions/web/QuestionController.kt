@@ -18,7 +18,7 @@ class QuestionController(val service: QuestionService) {
     }
 
     @PostMapping
-    fun createQues(@RequestBody question: QuestionRequest): QuestionResponse {
+    fun createQuestion(@RequestBody question: QuestionRequest): QuestionResponse {
         logger.info("Received creation request for: $question")
 
         val questionToCreate = question.toEntity()
@@ -34,6 +34,16 @@ class QuestionController(val service: QuestionService) {
     fun getQuestion(@PathVariable id: String): QuestionResponse {
         logger.info("Attempt to lookup question by id: $id")
 
-        return service.getQuestion(id).orElseThrow({ EntityNotFoundException("not found") }).toDTO()
+        return service.getQuestion(id)?.toDTO() ?: throw EntityNotFoundException("Question $id is not found")
+    }
+
+    @PostMapping("/{id}/answer")
+    fun createAnswer(@PathVariable id: String, @RequestBody answer: String): QuestionResponse {
+
+        this.service.createQuestionAnswer(id, answer).let {
+            logger.info("Created answer: $it")
+        }
+
+        return this.service.loadQuestion(id).toDTO()
     }
 }

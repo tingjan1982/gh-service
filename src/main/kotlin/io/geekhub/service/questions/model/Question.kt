@@ -3,10 +3,7 @@ package io.geekhub.service.questions.model
 import io.geekhub.service.shared.model.BaseAuditableObject
 import org.hibernate.annotations.GenericGenerator
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
+import javax.persistence.*
 
 /**
  * Represents the base question class.
@@ -39,7 +36,22 @@ data class Question(
         var topic: String,
         var contributedBy: String? = null) : BaseAuditableObject<Question, String>() {
 
+    // TODO: remove this after refactoring
     constructor() : this(question = "", difficulty = Difficulty.INTERMEDIATE, category = "", topic = "")
+
+    constructor(question: String) : this(question = question, difficulty = Difficulty.INTERMEDIATE, category = "", topic = "")
+
+    companion object {
+        const val ANSWER = "ANSWER"
+    }
+
+    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
+    @MapKey(name = "key")
+    val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf()
+
+    fun getAnswer(): String? {
+        return this.attributes[ANSWER]?.value
+    }
 
     override fun getId(): String? {
         return this.questionId

@@ -1,5 +1,6 @@
 package io.geekhub.service.shared.web
 
+import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -10,8 +11,8 @@ import javax.persistence.EntityNotFoundException
 @ControllerAdvice
 class ApiExceptionResolver : ResponseEntityExceptionHandler() {
 
-    @ExceptionHandler(EntityNotFoundException::class)
-    fun handleEntityNotFound(exception: EntityNotFoundException): ResponseEntity<String> {
+    @ExceptionHandler(EntityNotFoundException::class, BusinessObjectNotFoundException::class)
+    fun handleEntityNotFound(exception: Exception): ResponseEntity<String> {
 
         return ResponseEntity.badRequest().body(exception.message)
     }

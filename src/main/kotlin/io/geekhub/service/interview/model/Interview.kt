@@ -32,7 +32,7 @@ data class Interview(
      * Map value is the attempted answer on the question.
      */
     @Transient
-    private var answerAttempts: MutableMap<String, Answer<*>> = mutableMapOf()
+    private var answerAttempts: MutableMap<String, Answer> = mutableMapOf()
 
     /**
      * This stores the computed score of this interview.
@@ -48,7 +48,7 @@ data class Interview(
         questions[question.questionId.toString()] = question
     }
 
-    fun addAnswerAttempt(qid: String, answer: Answer<*>) {
+    fun addAnswerAttempt(qid: String, answer: Answer) {
         this.answerAttempts[qid] = answer
     }
 
@@ -101,7 +101,7 @@ data class Interview(
         }.toMap()
     }
 
-    private fun isCorrectAnswer(q: Question, a: Answer<*>): Boolean {
+    private fun isCorrectAnswer(q: Question, a: Answer): Boolean {
         return false //q.answer == a.getAnswer()
     }
 

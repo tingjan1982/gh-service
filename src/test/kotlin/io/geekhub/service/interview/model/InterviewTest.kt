@@ -1,6 +1,5 @@
 package io.geekhub.service.interview.model
 
-import io.geekhub.service.questions.model.Answer
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.user.model.User
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -41,8 +40,8 @@ internal class InterviewTest {
 
         for (i in 1..10) {
             if (i % 2 == 0) {
-                val answer = Answer(true)
-                interview.addAnswerAttempt(i.toString(), answer)
+//                val answer = Answer(true)
+//                interview.addAnswerAttempt(i.toString(), answer)
             }
         }
     }
@@ -74,8 +73,8 @@ internal class InterviewTest {
 
         for (i in 1..6) {
             if (i % 2 == 0) {
-                val answer = Answer(true)
-                interview.addAnswerAttempt(i.toString(), answer)
+//                val answer = Answer(true)
+//                interview.addAnswerAttempt(i.toString(), answer)
             }
         }
     }

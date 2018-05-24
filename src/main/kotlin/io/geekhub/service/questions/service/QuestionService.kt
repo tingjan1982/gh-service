@@ -1,11 +1,15 @@
 package io.geekhub.service.questions.service
 
 import io.geekhub.service.questions.model.Question
-import java.util.*
+import io.geekhub.service.questions.model.QuestionAttribute
 
 interface QuestionService {
 
     fun saveQuestion(question: Question): Question
 
-    fun getQuestion(id: String): Optional<Question>
+    fun getQuestion(id: String): Question?
+
+    fun loadQuestion(id: String): Question
+
+    fun createQuestionAnswer(id: String, answer: String): QuestionAttribute
 }
