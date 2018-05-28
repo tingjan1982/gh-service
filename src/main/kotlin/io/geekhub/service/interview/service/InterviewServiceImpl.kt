@@ -3,11 +3,13 @@ package io.geekhub.service.interview.service
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.questions.repository.QuestionRepository
+import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
+import io.geekhub.service.user.model.User
 import io.geekhub.service.user.repository.UserRepository
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.concurrent.ThreadLocalRandom
-import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 
 @Service
@@ -17,7 +19,7 @@ class InterviewServiceImpl(val questionRepository: QuestionRepository,
                            val userRepository: UserRepository) : InterviewService {
 
     companion object {
-        val logger = LoggerFactory.getLogger(InterviewServiceImpl::class.java)!!
+        val logger: Logger = LoggerFactory.getLogger(InterviewServiceImpl::class.java)
         const val questionCount = 10
     }
 
@@ -30,7 +32,7 @@ class InterviewServiceImpl(val questionRepository: QuestionRepository,
         }
 
         val foundUser = this.userRepository.findByUsername(interviewOption.username).orElseThrow {
-            EntityNotFoundException("User is not found: ${interviewOption.username}")
+            BusinessObjectNotFoundException(User::class, interviewOption.username)
         }
 
         var interview = Interview(user = foundUser).apply {
