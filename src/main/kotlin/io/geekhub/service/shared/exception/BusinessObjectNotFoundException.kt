@@ -1,12 +1,6 @@
 package io.geekhub.service.shared.exception
 
 import javax.persistence.EntityNotFoundException
+import kotlin.reflect.KClass
 
-class BusinessObjectNotFoundException : EntityNotFoundException {
-
-    lateinit var businessObjectType: Any
-
-    constructor(businessObjectType: Any, id: Any): super("Business object $businessObjectType with [$id] cannot be found") {
-        this.businessObjectType = businessObjectType
-    }
-}
+class BusinessObjectNotFoundException(businessObjectType: KClass<*>, id: Any) : EntityNotFoundException("Business object $businessObjectType with [$id] cannot be found")

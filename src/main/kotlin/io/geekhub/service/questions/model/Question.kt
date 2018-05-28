@@ -43,6 +43,7 @@ data class Question(
 
     companion object {
         const val ANSWER = "ANSWER"
+        const val POSSIBLE_PREFIX = "POSSIBLE_"
     }
 
     @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
@@ -51,6 +52,22 @@ data class Question(
 
     fun getAnswer(): String? {
         return this.attributes[ANSWER]?.value
+    }
+
+    fun getAnswerDetails(): Answer {
+
+        this.getAnswer()?.let {
+            val answer = Answer(it)
+
+            for (i in 0..2) {
+                this.attributes["$POSSIBLE_PREFIX$i"]?.let {
+                    answer.possibleAnswers.add(it.value)
+                }
+            }
+
+            return answer
+
+        } ?: return Answer.noAnswer()
     }
 
     override fun getId(): String? {

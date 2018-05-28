@@ -4,7 +4,9 @@ import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.model.QuestionAttribute
 import io.geekhub.service.questions.repository.QuestionAttributeRepository
 import io.geekhub.service.questions.repository.QuestionRepository
+import io.geekhub.service.questions.web.bean.AnswerRequest
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import javax.persistence.EntityManager
@@ -18,7 +20,7 @@ import javax.transaction.Transactional
 class QuestionServiceImpl(val questionRepository: QuestionRepository, val questionAttributeRepository: QuestionAttributeRepository, val entityManager: EntityManager) : QuestionService {
 
     companion object {
-        val logger = LoggerFactory.getLogger(QuestionServiceImpl::class.java)
+        val logger: Logger = LoggerFactory.getLogger(QuestionServiceImpl::class.java)
     }
 
     override fun saveQuestion(question: Question): Question {
@@ -34,17 +36,23 @@ class QuestionServiceImpl(val questionRepository: QuestionRepository, val questi
             entityManager.refresh(it)
 
             return it
-        } ?: throw BusinessObjectNotFoundException(Question, id)
+        } ?: throw BusinessObjectNotFoundException(Question::class, id)
     }
 
-    override fun createQuestionAnswer(id: String, answer: String): QuestionAttribute {
+    override fun createQuestionAnswer(id: String, answer: AnswerRequest) {
+
+        logger.info("Pass in answer: $answer")
 
         this.getQuestion(id)?.let {
-            val questionAttribute = QuestionAttribute(question = it, key = Question.ANSWER, value = answer)
+            val questionAttribute = QuestionAttribute(question = it, key = Question.ANSWER, value = answer.correctAnswer)
+            this.questionAttributeRepository.save(questionAttribute)
 
-            return questionAttributeRepository.save(questionAttribute).also {
-                logger.debug("Created attribute: $it")
-            }
-        } ?: throw BusinessObjectNotFoundException(Question, id)
+            answer.possibleAnswers?.forEachIndexed({ idx, ans ->
+                QuestionAttribute(question = it, key = Question.POSSIBLE_PREFIX + idx, value = ans).let {
+                    this.questionAttributeRepository.save(it)
+                }
+            })
+
+        } ?: throw BusinessObjectNotFoundException(Question::class, id)
     }
 }

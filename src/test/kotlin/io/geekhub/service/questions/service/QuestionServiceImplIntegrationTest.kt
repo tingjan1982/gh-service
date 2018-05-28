@@ -1,6 +1,7 @@
 package io.geekhub.service.questions.service
 
 import io.geekhub.service.questions.model.Question
+import io.geekhub.service.questions.web.bean.AnswerRequest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -35,8 +36,7 @@ internal class QuestionServiceImplIntegrationTest {
         val questionId = question.questionId!!
         assertNotNull(questionId)
 
-        val createdAnswer = this.questionService.createQuestionAnswer(questionId, "hello")
-        assertNotNull(createdAnswer.attributeId)
+        this.questionService.createQuestionAnswer(questionId, AnswerRequest("hello"))
 
         this.questionService.getQuestion(questionId).let {
             assertEquals(1, it?.attributes?.size)

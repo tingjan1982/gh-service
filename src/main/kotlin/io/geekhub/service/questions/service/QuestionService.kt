@@ -1,7 +1,7 @@
 package io.geekhub.service.questions.service
 
 import io.geekhub.service.questions.model.Question
-import io.geekhub.service.questions.model.QuestionAttribute
+import io.geekhub.service.questions.web.bean.AnswerRequest
 
 interface QuestionService {
 
@@ -11,5 +11,5 @@ interface QuestionService {
 
     fun loadQuestion(id: String): Question
 
-    fun createQuestionAnswer(id: String, answer: String): QuestionAttribute
+    fun createQuestionAnswer(id: String, answer: AnswerRequest)
 }
