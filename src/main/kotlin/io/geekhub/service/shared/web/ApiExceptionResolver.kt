@@ -24,7 +24,7 @@ class ApiExceptionResolver : ResponseEntityExceptionHandler() {
     }
 
     @ExceptionHandler(EntityExistsException::class, ConstraintViolationException::class)
-    fun `handle entity exists and Constraint error`(request: HttpServletRequest, exception: Exception): ResponseEntity<ApiError> {
+    fun `handle entity exists and constraint error`(request: HttpServletRequest, exception: Exception): ResponseEntity<ApiError> {
 
         return this.logError(HttpStatus.BAD_REQUEST, exception, request)
     }
