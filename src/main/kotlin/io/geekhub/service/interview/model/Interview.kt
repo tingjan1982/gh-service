@@ -2,18 +2,22 @@ package io.geekhub.service.interview.model
 
 import io.geekhub.service.questions.model.Answer
 import io.geekhub.service.questions.model.Question
+import io.geekhub.service.shared.model.BaseAuditableObject
 import io.geekhub.service.user.model.User
+import org.hibernate.annotations.GenericGenerator
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.util.*
 import javax.persistence.*
 
 @Entity(name = "gh_interview")
-@SequenceGenerator(name = "interview_sequence", sequenceName = "interview_sequence")
+@EntityListeners(AuditingEntityListener::class)
 data class Interview(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "interview_sequence")
-        var id: Long = 0,
+        @GeneratedValue(generator = "uuid")
+        @GenericGenerator(name = "uuid", strategy = "uuid2")
+        var interviewId: String? = null,
         @ManyToOne
-        var user: User) {
+        var user: User): BaseAuditableObject<Interview, String>() {
 
     private val maxScore = 100
 
@@ -24,7 +28,9 @@ data class Interview(
      */
     var selectedDuration: Int = -1
 
-    @Transient
+    @JoinTable(name = "gh_interview_questions")
+    @MapKey
+    @ManyToMany(fetch = FetchType.EAGER)
     private val questions: MutableMap<String, Question> = mutableMapOf()
 
     /**
@@ -50,6 +56,10 @@ data class Interview(
 
     fun addAnswerAttempt(qid: String, answer: Answer) {
         this.answerAttempts[qid] = answer
+    }
+
+    fun getQustions(): Map<String, Question> {
+        return this.questions.toMap()
     }
 
     fun questionsCount(): Int {
@@ -105,6 +115,10 @@ data class Interview(
         return false //q.answer == a.getAnswer()
     }
 
+
+    override fun getId(): String? {
+        return this.interviewId
+    }
 
     enum class InterviewMode {
         MOCK, REAL

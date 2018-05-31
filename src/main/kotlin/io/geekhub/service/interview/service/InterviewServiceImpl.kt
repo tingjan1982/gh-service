@@ -20,7 +20,6 @@ class InterviewServiceImpl(val questionRepository: QuestionRepository,
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(InterviewServiceImpl::class.java)
-        const val questionCount = 10
     }
 
     override fun createInterview(interviewOption: InterviewOption): Interview {
@@ -35,37 +34,47 @@ class InterviewServiceImpl(val questionRepository: QuestionRepository,
             BusinessObjectNotFoundException(User::class, interviewOption.username)
         }
 
-        var interview = Interview(user = foundUser).apply {
+        val interview = Interview(user = foundUser).apply {
             this.interviewMode = interviewOption.interviewMode
             this.selectedDuration = interviewOption.duration
         }
 
+        this.populateQuestions(interviewOption, interview)
+
+        return this.interviewRepository.save(interview).also {
+            logger.info("Created interview: $it")
+        }
+    }
+
+    private fun populateQuestions(interviewOption: InterviewOption, interview: Interview) {
+
         val allQuestions = questionRepository.findAllQuestions()
         val numbers = mutableMapOf<Int, Int>()
 
-        for (i in 1..questionCount) {
-            val nextInt = this.generateUniqueRandomNumber(questionsCount, numbers)
+        for (i in 1..interviewOption.questionCount) {
+            val nextInt = this.generateUniqueRandomNumber(allQuestions.size, numbers)
             val selectedQuestion = allQuestions[nextInt]
             interview.addQuestion(selectedQuestion)
         }
-
-        interview = this.interviewRepository.save(interview)
-        logger.info("Created interview: $interview")
-
-        return interview
     }
 
-    private fun generateUniqueRandomNumber(questionsCount: Long, numbers: MutableMap<Int, Int>): Int {
+    private fun generateUniqueRandomNumber(questionsCount: Int, numbers: MutableMap<Int, Int>): Int {
 
         var nextInt: Int
 
         do {
-            nextInt = ThreadLocalRandom.current().nextInt(0, (questionsCount - 1).toInt())
+            nextInt = ThreadLocalRandom.current().nextInt(0, (questionsCount - 1))
         } while (numbers.containsKey(nextInt))
 
         numbers[nextInt] = nextInt
-        logger.debug("Generated random integer: $nextInt")
+        logger.trace("Generated random integer: $nextInt")
 
         return nextInt
     }
+
+    override fun getInterview(id: String): Interview {
+        return this.interviewRepository.findById(id).orElseThrow { BusinessObjectNotFoundException(Interview::class, id) }
+    }
+
+
 }

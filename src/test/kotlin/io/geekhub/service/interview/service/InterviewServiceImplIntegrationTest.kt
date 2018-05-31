@@ -31,12 +31,13 @@ internal class InterviewServiceImplIntegrationTest {
     @Autowired
     private lateinit var userRepository: UserRepository
 
+    /**
+     * This function should only run once.
+     */
     @BeforeAll
     fun populateData() {
         for (i in 1..50) {
-            val monoQuestion = Question()
-            monoQuestion.question = "Q $i - true or false?"
-            questionRepository.save(monoQuestion)
+            questionRepository.save(Question(question = "Q $i"))
         }
 
         val count = questionRepository.count()
@@ -47,14 +48,14 @@ internal class InterviewServiceImplIntegrationTest {
 
     @Test
     fun createInterview() {
-        val interviewOption = InterviewOption("username", Interview.InterviewMode.REAL, 0)
+        val interviewOption = InterviewOption(username = "username", interviewMode = Interview.InterviewMode.REAL, questionCount = 5)
         val createdInterview = this.interviewService.createInterview(interviewOption)
 
         assertNotNull(createdInterview.id)
         assertNotNull(createdInterview.user)
         assertEquals(interviewOption.interviewMode, createdInterview.interviewMode)
         assertEquals(interviewOption.duration, createdInterview.selectedDuration)
-        assertEquals(InterviewServiceImpl.questionCount, createdInterview.questionsCount())
+        assertEquals(interviewOption.questionCount, createdInterview.questionsCount())
         assertNotNull(createdInterview.startDate)
 
         this.userRepository.findByUsername("username").let {
@@ -62,6 +63,13 @@ internal class InterviewServiceImplIntegrationTest {
                 assertEquals(1, it.interviews.size)
             })
         }
+
+        val interview = this.interviewService.getInterview(createdInterview.interviewId.toString())
+
+        assertEquals(interviewOption.questionCount, interview.questionsCount())
+        interview.getQustions().forEach({
+            assertEquals(it.key, it.value.questionId)
+        })
     }
 
     @Test

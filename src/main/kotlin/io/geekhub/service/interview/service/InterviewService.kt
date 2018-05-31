@@ -5,4 +5,6 @@ import io.geekhub.service.interview.model.Interview
 interface InterviewService {
 
     fun createInterview(interviewOption: InterviewOption): Interview
+
+    fun getInterview(id: String): Interview
 }
