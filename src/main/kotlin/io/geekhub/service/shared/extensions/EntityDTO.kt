@@ -1,6 +1,8 @@
 package io.geekhub.service.shared.extensions
 
+import io.geekhub.service.questions.model.Answer
 import io.geekhub.service.questions.model.Question
+import io.geekhub.service.questions.web.bean.AnswerRequest
 import io.geekhub.service.questions.web.bean.QuestionRequest
 import io.geekhub.service.questions.web.bean.QuestionResponse
 import io.geekhub.service.user.model.User
@@ -36,4 +38,9 @@ fun Question.toDTO() = QuestionResponse(
         this.topic,
         this.difficulty,
         this.getAnswer()
+)
+
+fun AnswerRequest.toEntity() = Answer(
+        correctAnswer = this.correctAnswer,
+        possibleAnswers = this.possibleAnswers?.toMutableList() ?: mutableListOf()
 )

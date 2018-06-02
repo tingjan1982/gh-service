@@ -1,6 +1,5 @@
 package io.geekhub.service.interview.model
 
-import io.geekhub.service.questions.model.Answer
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.model.BaseAuditableObject
 import io.geekhub.service.user.model.User
@@ -28,17 +27,10 @@ data class Interview(
      */
     var selectedDuration: Int = -1
 
-    @JoinTable(name = "gh_interview_questions")
-    @MapKey
-    @ManyToMany(fetch = FetchType.EAGER)
-    private val questions: MutableMap<String, Question> = mutableMapOf()
-
-    /**
-     * Map key is question ID.
-     * Map value is the attempted answer on the question.
-     */
-    @Transient
-    private var answerAttempts: MutableMap<String, Answer> = mutableMapOf()
+    @OneToMany(mappedBy = "id.interview", fetch = FetchType.EAGER, cascade = [(CascadeType.ALL)])
+    @MapKeyClass(Question::class)
+    @MapKeyJoinColumn(name = "question_id")
+    private val questions: MutableMap<Question, InterviewQuestionAnswer> = mutableMapOf()
 
     /**
      * This stores the computed score of this interview.
@@ -51,15 +43,21 @@ data class Interview(
 
 
     fun addQuestion(question: Question) {
-        questions[question.questionId.toString()] = question
+        questions[question] = InterviewQuestionAnswer(InterviewQuestionAnswer.PK(this, question))
     }
 
-    fun addAnswerAttempt(qid: String, answer: Answer) {
-        this.answerAttempts[qid] = answer
+    fun addAnswerAttempt(question: Question, answer: String) {
+
+        questions[question]?.let {
+            it.answer = answer
+
+        } ?: throw EntityNotFoundException("Question {id=${question.id}} is not found in the interview {id=$interviewId")
     }
 
-    fun getQustions(): Map<String, Question> {
-        return this.questions.toMap()
+    fun getQuestions(): Map<String, Question> {
+        return this.questions.map {
+            Pair(it.key.questionId.toString(), it.key)
+        }.toMap()
     }
 
     fun questionsCount(): Int {
@@ -82,21 +80,14 @@ data class Interview(
     internal fun computeScore(): Double {
 
         var score = 0.0
+        val weightsMap = this.calculateQuestionsWeight()
 
-        if (questions.isNotEmpty() && answerAttempts.isNotEmpty()) {
-            val weightsMap = this.calculateQuestionsWeight()
-
-            score = answerAttempts.filter {
-                this.isCorrectAnswer(this.questions[it.key]!!, it.value)
-                //this.questions[it.key]!!.isCorrectAnswer(it.value)
-
-            }.map {
-                weightsMap[it.key]!!
-
-            }.sumByDouble {
-                score + it
-            }
-
+        score = questions.filter {
+            it.value.answer == it.key.getAnswer()
+        }.map {
+            weightsMap[it.key.id]
+        }.sumByDouble {
+            score + it!!
         }
 
         return score
@@ -107,14 +98,9 @@ data class Interview(
         val averageWeight = maxScore / this.questions.size
 
         return this.questions.map {
-            it.key to it.value.weight * averageWeight
+            it.key.id.toString() to it.key.weight * averageWeight
         }.toMap()
     }
-
-    private fun isCorrectAnswer(q: Question, a: Answer): Boolean {
-        return false //q.answer == a.getAnswer()
-    }
-
 
     override fun getId(): String? {
         return this.interviewId

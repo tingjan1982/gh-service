@@ -23,7 +23,7 @@ data class Question(
          * The weight of the question for result calculation.
          */
         var weight: Double = 1.0,
-        var difficulty: Difficulty,
+        var difficulty: Difficulty = Difficulty.INTERMEDIATE,
 
         /**
          * The field of profession this question belongs to.
@@ -36,19 +36,31 @@ data class Question(
         var topic: String,
         var contributedBy: String? = null) : BaseAuditableObject<Question, String>() {
 
-    // TODO: remove this after refactoring
-    constructor() : this(question = "", difficulty = Difficulty.INTERMEDIATE, category = "", topic = "")
-
     constructor(question: String) : this(question = question, difficulty = Difficulty.INTERMEDIATE, category = "", topic = "")
 
     companion object {
         const val ANSWER = "ANSWER"
-        const val POSSIBLE_PREFIX = "POSSIBLE_"
+        const val POSSIBLE_PREFIX = "POSSIBLE_ANSWER_"
+        const val POSSIBLE_TOTAL = "POSSIBLE_TOTAL"
     }
 
-    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     @MapKey(name = "key")
-    val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf()
+    private val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf()
+
+    fun addAnswer(answer: Answer) {
+        val questionAttribute = QuestionAttribute(question = this, key = Question.ANSWER, value = answer.correctAnswer)
+        this.attributes[ANSWER] = questionAttribute
+
+        answer.possibleAnswers.forEachIndexed({ idx, ans ->
+            val possibleAnswerKey = Question.POSSIBLE_PREFIX + idx
+            QuestionAttribute(question = this, key = possibleAnswerKey, value = ans).let {
+                this.attributes[possibleAnswerKey] = it
+            }
+        })
+
+        this.attributes[POSSIBLE_TOTAL] = QuestionAttribute(question = this, key = POSSIBLE_TOTAL, value = answer.possibleAnswers.size.toString())
+    }
 
     fun getAnswer(): String? {
         return this.attributes[ANSWER]?.value
@@ -58,8 +70,8 @@ data class Question(
 
         this.getAnswer()?.let {
             val answer = Answer(it)
-
-            for (i in 0..2) {
+            val idx = this.attributes[POSSIBLE_TOTAL]?.value?.toInt() ?: 0
+            for (i in 0 until idx) {
                 this.attributes["$POSSIBLE_PREFIX$i"]?.let {
                     answer.possibleAnswers.add(it.value)
                 }

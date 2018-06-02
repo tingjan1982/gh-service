@@ -67,7 +67,7 @@ internal class InterviewServiceImplIntegrationTest {
         val interview = this.interviewService.getInterview(createdInterview.interviewId.toString())
 
         assertEquals(interviewOption.questionCount, interview.questionsCount())
-        interview.getQustions().forEach({
+        interview.getQuestions().forEach({
             assertEquals(it.key, it.value.questionId)
         })
     }

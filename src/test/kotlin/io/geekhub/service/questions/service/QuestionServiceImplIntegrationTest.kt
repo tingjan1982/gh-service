@@ -32,14 +32,17 @@ internal class QuestionServiceImplIntegrationTest {
     @Test
     fun createQuestionAnswer() {
 
-        val question = this.questionService.saveQuestion(Question())
-        val questionId = question.questionId!!
+        val question = this.questionService.saveQuestion(Question(question = "Question"))
+        val questionId = question.questionId.toString()
         assertNotNull(questionId)
 
-        this.questionService.createQuestionAnswer(questionId, AnswerRequest("hello"))
+        this.questionService.createQuestionAnswer(questionId, AnswerRequest("correct", listOf("possible 1", "possible 2")))
 
-        this.questionService.getQuestion(questionId).let {
-            assertEquals(1, it?.attributes?.size)
+        this.questionService.getQuestion(questionId)?.let {
+            it.getAnswerDetails().let {
+                assertEquals("correct", it.correctAnswer)
+                assertEquals(2, it.possibleAnswers.size)
+            }
         }
     }
 }

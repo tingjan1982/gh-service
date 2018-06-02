@@ -1,11 +1,10 @@
 package io.geekhub.service.questions.service
 
 import io.geekhub.service.questions.model.Question
-import io.geekhub.service.questions.model.QuestionAttribute
-import io.geekhub.service.questions.repository.QuestionAttributeRepository
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.questions.web.bean.AnswerRequest
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
+import io.geekhub.service.shared.extensions.toEntity
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -17,7 +16,7 @@ import javax.transaction.Transactional
  */
 @Service
 @Transactional
-class QuestionServiceImpl(val questionRepository: QuestionRepository, val questionAttributeRepository: QuestionAttributeRepository, val entityManager: EntityManager) : QuestionService {
+class QuestionServiceImpl(val questionRepository: QuestionRepository, val entityManager: EntityManager) : QuestionService {
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(QuestionServiceImpl::class.java)
@@ -42,17 +41,6 @@ class QuestionServiceImpl(val questionRepository: QuestionRepository, val questi
     override fun createQuestionAnswer(id: String, answer: AnswerRequest) {
 
         logger.info("Pass in answer: $answer")
-
-        this.getQuestion(id)?.let {
-            val questionAttribute = QuestionAttribute(question = it, key = Question.ANSWER, value = answer.correctAnswer)
-            this.questionAttributeRepository.save(questionAttribute)
-
-            answer.possibleAnswers?.forEachIndexed({ idx, ans ->
-                QuestionAttribute(question = it, key = Question.POSSIBLE_PREFIX + idx, value = ans).let {
-                    this.questionAttributeRepository.save(it)
-                }
-            })
-
-        } ?: throw BusinessObjectNotFoundException(Question::class, id)
+        this.getQuestion(id)?.addAnswer(answer.toEntity()) ?: throw BusinessObjectNotFoundException(Question::class, id)
     }
 }
