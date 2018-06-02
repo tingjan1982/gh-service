@@ -24,9 +24,20 @@ class ApiExceptionResolver : ResponseEntityExceptionHandler() {
     }
 
     @ExceptionHandler(EntityExistsException::class, ConstraintViolationException::class)
-    fun `handle entity exists and constraint error`(request: HttpServletRequest, exception: Exception): ResponseEntity<ApiError> {
+    fun handlePersistenceRelatedExceptions(request: HttpServletRequest, exception: Exception): ResponseEntity<ApiError> {
 
         return this.logError(HttpStatus.BAD_REQUEST, exception, request)
+    }
+
+    /**
+     * 422 is recommended by a couple of post:
+     * http://parker0phil.com/2014/10/16/REST_http_4xx_status_codes_syntax_and_sematics/
+     * http://www.restapitutorial.com/httpstatuscodes.html
+     */
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleValidationException(request: HttpServletRequest, exception: Exception): ResponseEntity<ApiError> {
+
+        return this.logError(HttpStatus.UNPROCESSABLE_ENTITY, exception, request)
     }
 
     /**

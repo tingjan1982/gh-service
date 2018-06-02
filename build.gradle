@@ -30,7 +30,7 @@ plugins {
 
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-spring'
-apply plugin: 'kotlin-jpa'
+apply plugin: 'kotlin-jpa' // https://blog.codecentric.de/en/2017/06/kotlin-spring-working-jpa-data-classes/
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
@@ -100,6 +100,7 @@ dependencies {
     testCompile('org.junit.jupiter:junit-jupiter-api:5.1.0')
     testRuntime('org.junit.jupiter:junit-jupiter-engine:5.1.0')
     testRuntime('org.junit.platform:junit-platform-launcher:1.1.0')
+    testCompile 'com.willowtreeapps.assertk:assertk:0.10'
 }
 
 dependencyManagement {
@@ -109,7 +110,7 @@ dependencyManagement {
 }
 
 /**
- * Customize resources directory to include non soure code files from kotlin directory.
+ * Customize resources directory to include non source code files from kotlin directory.
  */
 sourceSets {
     main {

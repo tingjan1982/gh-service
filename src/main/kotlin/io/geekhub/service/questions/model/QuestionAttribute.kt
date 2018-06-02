@@ -4,7 +4,7 @@ import io.geekhub.service.shared.model.BaseAuditableObject
 import javax.persistence.*
 
 @Entity(name = "gh_question_attribute")
-@SequenceGenerator(name = "question_attribute_sequence", sequenceName = "question_attribute_sequence")
+@SequenceGenerator(name = "question_attribute_sequence", sequenceName = "gh_question_attribute_seq")
 @Table(uniqueConstraints = [(UniqueConstraint(columnNames = arrayOf("question_id", "key")))])
 data class QuestionAttribute(
         @Id
