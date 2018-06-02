@@ -30,4 +30,10 @@ class UserController(val userService: UserService) {
         val updatedUser = this.userService.updateUser(id, userRequest)
         return updatedUser.toDTO()
     }
+
+    @PostMapping("/{id}/questions")
+    fun addQuestionsToCollection(@PathVariable id: String, @RequestBody questions: List<String>): UserResponse {
+
+        return this.userService.addSavedQuestion(id, questions).toDTO()
+    }
 }

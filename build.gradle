@@ -87,6 +87,7 @@ dependencies {
     compile('org.springframework.session:spring-session-core')
     compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compile("org.jetbrains.kotlin:kotlin-reflect")
+    compileOnly "org.springframework.boot:spring-boot-configuration-processor"
     runtime('org.springframework.boot:spring-boot-devtools')
     runtime('org.postgresql:postgresql')
     runtime('org.hsqldb:hsqldb')
@@ -120,6 +121,11 @@ sourceSets {
         }
     }
 }
+
+/**
+ * https://docs.spring.io/spring-boot/docs/2.0.1.RELEASE/reference/html/configuration-metadata.html#configuration-metadata-annotation-processor
+ */
+compileJava.dependsOn(processResources)
 
 /**
  * Add the ability to pass spring active profile when running spring boot via Gradle.

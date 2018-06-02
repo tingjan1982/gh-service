@@ -11,8 +11,11 @@ interface UserService {
 
     fun getUser(id: String): User
 
+    fun checkUserExists(id: String): Boolean
+
     fun updateUser(user: User): User
 
     fun updateUser(id: String, userRequest: UserRequest): User
 
+    fun addSavedQuestion(id: String, questions: List<String>): User
 }

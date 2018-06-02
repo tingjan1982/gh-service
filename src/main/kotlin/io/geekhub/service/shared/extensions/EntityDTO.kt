@@ -21,14 +21,16 @@ fun User.toDTO() = UserResponse(
         this.username,
         this.firstName,
         this.lastName,
-        this.email
+        this.email,
+        this.savedQuestions.map { it.value.toDTO() }
 )
 
 fun QuestionRequest.toEntity() = Question(
         question = this.question,
         category = this.category,
         topic = this.topic,
-        difficulty = this.difficulty
+        difficulty = this.difficulty,
+        contributedBy = this.contributedBy
 )
 
 fun Question.toDTO() = QuestionResponse(
@@ -37,6 +39,7 @@ fun Question.toDTO() = QuestionResponse(
         this.category,
         this.topic,
         this.difficulty,
+        this.contributedBy,
         this.getAnswer()
 )
 

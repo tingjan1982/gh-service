@@ -13,5 +13,6 @@ data class QuestionRequest(
         val question: String,
         val category: String,
         val topic: String,
-        val difficulty: Question.Difficulty
+        val difficulty: Question.Difficulty,
+        var contributedBy: String? = null
 )

@@ -27,6 +27,9 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
     lateinit var dataSource: DataSource
 
     @Autowired
+    lateinit var ghServiceConfigProperties: GhServiceConfigProperties
+
+    @Autowired
     lateinit var environment: Environment
 
     override fun afterPropertiesSet() {
@@ -42,9 +45,17 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
      * https://security.stackexchange.com/questions/166724/should-i-use-csrf-protection-on-rest-api-endpoints
      */
     override fun configure(http: HttpSecurity) {
-        http.csrf().csrfTokenRepository(csrfTokenRepository())
-                .and()
-                .authorizeRequests()
+
+        this.ghServiceConfigProperties.apply {
+            if (csrfEnabled) {
+                http.csrf().csrfTokenRepository(csrfTokenRepository())
+            } else {
+                http.csrf().disable()
+            }
+        }
+
+        http.cors()
+                .and().authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/users").permitAll()
                 .antMatchers("/actuator/**").permitAll()
                 .antMatchers("/csrf-token").hasRole("ADMIN")

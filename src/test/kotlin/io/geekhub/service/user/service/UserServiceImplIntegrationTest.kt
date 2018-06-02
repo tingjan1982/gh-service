@@ -1,8 +1,12 @@
 package io.geekhub.service.user.service
 
+import assertk.assert
+import assertk.assertions.isEqualTo
+import io.geekhub.service.questions.model.Question
+import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.user.model.User
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -20,21 +24,42 @@ internal class UserServiceImplIntegrationTest {
     @Autowired
     private lateinit var userService: UserService
 
+    @Autowired
+    private lateinit var questionService: QuestionService
+
+    private lateinit var createdUser: User
+
+    @BeforeEach
+    fun prepare() {
+        this.createdUser = this.userService.createUser(User(username = "joelin", firstName = "Joe", lastName = "Lin", email = "tingjan1982@gmail.com"))
+
+    }
+
     @Test
     fun createUser() {
-        val createdUser = this.userService.createUser(User(username = "joelin"))
-
-        assertNotNull(createdUser.id)
+        assertNotNull(this.createdUser.id)
     }
 
     @Test
     fun updateUser() {
-        val createdUser = this.userService.createUser(User(
-                username = "joelin", firstName = "Joe", lastName = "Lin", email = "tingjan1982@gmail.com"
-        ))
-        createdUser.lastName = "Changed"
-        val updatedUser = this.userService.updateUser(createdUser)
+        this.createdUser.lastName = "Changed"
 
-        assertEquals("Changed", updatedUser.lastName)
+        this.userService.updateUser(createdUser).let {
+            assert(it.lastName).isEqualTo("Changed")
+        }
+    }
+
+    @Test
+    fun createUserWithSavedQuestions() {
+
+        val createdQuestion = this.questionService.saveQuestion(Question("sample question"))
+
+        val user = this.createdUser.also {
+            it.savedQuestions[createdQuestion.questionId.toString()] = createdQuestion
+        }
+
+        this.userService.createUser(user).let {
+            assert(it.savedQuestions.size).isEqualTo(1)
+        }
     }
 }

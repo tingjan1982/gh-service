@@ -7,8 +7,12 @@ import io.geekhub.service.questions.web.bean.AnswerRequest
 import io.geekhub.service.questions.web.bean.QuestionRequest
 import io.geekhub.service.questions.web.bean.QuestionResponse
 import io.geekhub.service.questions.web.bean.SearchRequest
+import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
+import io.geekhub.service.user.model.User
+import io.geekhub.service.user.service.UserService
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -16,15 +20,21 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/questions")
-class QuestionController(val questionService: QuestionService, val questionSearchService: QuestionSearchService) {
+class QuestionController(val questionService: QuestionService, val questionSearchService: QuestionSearchService, val userService: UserService) {
 
     companion object {
-        val logger = LoggerFactory.getLogger(QuestionController::class.java)!!
+        val logger: Logger = LoggerFactory.getLogger(QuestionController::class.java)
     }
 
     @PostMapping
     fun createQuestion(@RequestBody question: QuestionRequest): QuestionResponse {
         logger.info("Received creation request for: $question")
+
+        question.contributedBy?.let {
+            if (!userService.checkUserExists(it)) {
+                throw BusinessObjectNotFoundException(User::class, it)
+            }
+        }
 
         val questionToCreate = question.toEntity()
         val createdQuestion = this.questionService.saveQuestion(questionToCreate)

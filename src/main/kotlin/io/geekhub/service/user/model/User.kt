@@ -1,6 +1,7 @@
 package io.geekhub.service.user.model
 
 import io.geekhub.service.interview.model.Interview
+import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.model.BaseAuditableObject
 import org.hibernate.annotations.GenericGenerator
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -28,6 +29,12 @@ data class User(
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     var interviews: MutableList<Interview> = mutableListOf()
+
+    @ElementCollection
+    @JoinTable(name = "gh_user_saved_questions")
+    @JoinColumn(name = "saved_question_id")
+    @MapKey(name = "questionId")
+    var savedQuestions: MutableMap<String, Question> = mutableMapOf()
 
     override fun getId(): String? {
         return userId

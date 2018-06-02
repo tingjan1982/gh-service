@@ -1,5 +1,6 @@
 package io.geekhub.service.user.service
 
+import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.user.model.User
 import io.geekhub.service.user.repository.UserRepository
@@ -15,7 +16,12 @@ import org.springframework.security.core.userdetails.User as SpringSecurityUser
 
 @Service
 @Transactional
-class UserServiceImpl(val repository: UserRepository, val userDetailsManager: JdbcUserDetailsManager, val passwordEncoder: PasswordEncoder) : UserService {
+class UserServiceImpl(
+        val repository: UserRepository,
+        val questionService: QuestionService,
+        val userDetailsManager: JdbcUserDetailsManager,
+        val passwordEncoder: PasswordEncoder
+) : UserService {
 
     private val logger: Logger = LoggerFactory.getLogger(UserServiceImpl::class.java)
 
@@ -54,6 +60,10 @@ class UserServiceImpl(val repository: UserRepository, val userDetailsManager: Jd
         return this.repository.getOne(id)
     }
 
+    override fun checkUserExists(id: String): Boolean {
+        return this.repository.existsById(id)
+    }
+
     override fun updateUser(id: String, userRequest: UserRequest): User {
 
         val user = userRequest.toEntity().apply {
@@ -64,10 +74,21 @@ class UserServiceImpl(val repository: UserRepository, val userDetailsManager: Jd
     }
 
     override fun updateUser(user: User): User {
-        return this.repository.getOne(user.id!!).apply {
+        return this.repository.getOne(user.id.toString()).apply {
             this.firstName = user.firstName
             this.lastName = user.lastName
             this.rank = user.rank
+        }
+    }
+
+    override fun addSavedQuestion(id: String, questions: List<String>): User {
+
+        return this.getUser(id).apply {
+            questions.forEach({
+                questionService.getQuestion(it)?.let { question ->
+                    this.savedQuestions[it] = question
+                }
+            })
         }
     }
 }

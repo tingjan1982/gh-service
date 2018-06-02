@@ -8,5 +8,6 @@ data class QuestionResponse(
         val category: String,
         val topic: String,
         val difficulty: Question.Difficulty,
+        val contributedBy: String?,
         val answer: String?
 )
