@@ -31,6 +31,8 @@ internal class InterviewServiceImplIntegrationTest {
     @Autowired
     private lateinit var userRepository: UserRepository
 
+    private var questionCount: Long = 0
+
     /**
      * This function should only run once.
      */
@@ -40,8 +42,11 @@ internal class InterviewServiceImplIntegrationTest {
             questionRepository.save(Question(question = "Q $i"))
         }
 
-        val count = questionRepository.count()
-        assertEquals(50, count)
+        if (questionCount == 0L) {
+            questionCount = questionRepository.count()
+        }
+
+        assertEquals(questionCount, questionRepository.count())
 
         this.userRepository.save(User(username = "username"))
     }
@@ -73,7 +78,7 @@ internal class InterviewServiceImplIntegrationTest {
     }
 
     @Test
-    fun `this test exists to verify that populateDate only run once`() {
+    fun `this test exists to verify that populateData only run once`() {
 
     }
 }
