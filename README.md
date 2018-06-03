@@ -91,4 +91,42 @@ The commands run an agent docker container and binds the conf directory.
 Note: when the agent is connected to the server, it is unauthorized. It is necessary to go into the Unauthorized
 tab under Agents to authorize it.   
 
+#### ELK on Docker (http://elk-docker.readthedocs.io/)
+
+> Pull Docker Image:
+
+`sudo docker pull sebp/elk:latest`
+
+> Create bridge work in Docker to connect containers.
+
+`sudo docker network create -d bridge elknet`
+
+> Run Docker Container:
+
+`sudo docker run -p 5601:5601 -p 9200:9200 -p 5044:5044 -e MAX_MAP_COUNT=262144 -it --network=elknet --name elk sebp/elk`
+
+Refer to the prerequisite section for details on the MAX_MAP_COUNT environment variable.
+
+#### Filebeat on Docker (https://www.elastic.co/guide/en/beats/filebeat/current/running-on-docker.html)
+
+> Pull Docker Image:
+
+`docker pull docker.elastic.co/beats/filebeat:6.2.4`
+
+> Run Docker Container:
+
+`sudo docker run -it  
+-v <gh-service home>/src/main/resources/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml 
+-v <gh-service home>/src/main/resources/filebeat/logstash-beats.crt:/etc/pki/tls/certs/logstash-beats.crt 
+-v /Users/jlin/IdeaProjects/gh-service/:/logs/ 
+--network=elknet --name filebeat docker.elastic.co/beats/filebeat:6.2.4`
+
+This Docker run command binds filebeat.yml for filebeat configuration, binds logstash-beats.crt for server side authentication, and gh-service directory
+as the log source defined in filebeat.yml.
+
+##### Reference: 
+
+Filebreat for Spring Boot: http://wayne-yuen.blogspot.com/2017/03/setup-elk-stack-to-monitor-spring.html
+Filebeat reference yml: https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-reference-yml.html
+
 Copyright (c) 2018 Joe Lin
