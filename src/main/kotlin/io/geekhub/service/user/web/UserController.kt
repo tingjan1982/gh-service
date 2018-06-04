@@ -5,13 +5,14 @@ import io.geekhub.service.user.service.UserService
 import io.geekhub.service.user.web.bean.UserRequest
 import io.geekhub.service.user.web.bean.UserResponse
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/users")
 class UserController(val userService: UserService) {
 
     @PostMapping
-    fun createUser(@RequestBody userRequest: UserRequest): UserResponse {
+    fun createUser(@Valid @RequestBody userRequest: UserRequest): UserResponse {
 
         val createdUser = this.userService.createUser(userRequest)
         return createdUser.toDTO()

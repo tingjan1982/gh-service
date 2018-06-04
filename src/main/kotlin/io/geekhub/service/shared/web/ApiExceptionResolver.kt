@@ -1,20 +1,29 @@
 package io.geekhub.service.shared.web
 
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
+import io.geekhub.service.shared.exception.FriendlyMethodArgumentNotValidException
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.time.LocalDateTime
 import javax.persistence.EntityExistsException
 import javax.persistence.EntityNotFoundException
 import javax.servlet.http.HttpServletRequest
 import javax.validation.ConstraintViolationException
 
-@ControllerAdvice
+/**
+ * RestControllerAdvice saves user from having to specify @ResponseBody,
+ * similar to what RestController does.
+ *
+ * TODO: try using @ResponseStatus to specify http status.
+ */
+@RestControllerAdvice
 class ApiExceptionResolver : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(EntityNotFoundException::class, BusinessObjectNotFoundException::class)
@@ -41,19 +50,38 @@ class ApiExceptionResolver : ResponseEntityExceptionHandler() {
     }
 
     /**
+     * https://stackoverflow.com/questions/33663801/how-do-i-customize-default-error-message-from-spring-valid-validation
+     */
+    override fun handleMethodArgumentNotValid(ex: MethodArgumentNotValidException, headers: HttpHeaders, status: HttpStatus, request: WebRequest): ResponseEntity<Any> {
+
+        val friendlyException = FriendlyMethodArgumentNotValidException(ex)
+        val apiError = this.constructApiError(HttpStatus.UNPROCESSABLE_ENTITY, friendlyException, request.getParameter("debug") != null)
+
+        friendlyException.fieldErrors.forEach({
+            apiError.subErrors.add(ApiError.ApiSubError(it.objectName, it.field, it.rejectedValue.toString(), it.defaultMessage.toString()))
+        })
+
+        return this.handleExceptionInternal(ex, apiError, headers, status, request)
+    }
+
+    /**
      * https://kotlinlang.org/docs/reference/lambdas.html
      */
-    val logError = {
-        httpStatus: HttpStatus, exception: Exception, request: HttpServletRequest ->
-        val debugMessage = if (request.getParameter("debug") != null) {
+    val logError = { httpStatus: HttpStatus, exception: Exception, request: HttpServletRequest ->
+
+        constructApiError(httpStatus, exception, request.getParameter("debug") != null).let {
+            return@let ResponseEntity(it, httpStatus)
+        }
+    }
+
+    val constructApiError = { httpStatus: HttpStatus, exception: Exception, debug: Boolean ->
+        val debugMessage = if (debug) {
             exception.stackTraceString
         } else {
             "Turn debug on to view"
         }
 
-        ApiError(httpStatus.value(), LocalDateTime.now(), exception.message ?: "Not available", debugMessage).let {
-            return@let ResponseEntity(it, httpStatus)
-        }
+        ApiError(status = httpStatus.value(), message = exception.message ?: "Not available", debugMessage = debugMessage)
     }
 }
 
