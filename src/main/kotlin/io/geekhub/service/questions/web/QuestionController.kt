@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/questions")
@@ -27,7 +28,7 @@ class QuestionController(val questionService: QuestionService, val questionSearc
     }
 
     @PostMapping
-    fun createQuestion(@RequestBody question: QuestionRequest): QuestionResponse {
+    fun createQuestion(@Valid @RequestBody question: QuestionRequest): QuestionResponse {
         logger.info("Received creation request for: $question")
 
         question.contributedBy?.let {
@@ -61,7 +62,7 @@ class QuestionController(val questionService: QuestionService, val questionSearc
 
 
     @PostMapping("/{id}/answers")
-    fun createAnswer(@PathVariable id: String, @RequestBody answerRequest: AnswerRequest): QuestionResponse {
+    fun createAnswer(@PathVariable id: String, @Valid @RequestBody answerRequest: AnswerRequest): QuestionResponse {
 
         this.questionService.createQuestionAnswer(id, answerRequest)
 

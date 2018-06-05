@@ -9,6 +9,7 @@ import java.util.*
  * to hide implementation details.
  *
  * https://stackoverflow.com/questions/33663801/how-do-i-customize-default-error-message-from-spring-valid-validation
+ * http://www.springboottutorial.com/spring-boot-validation-for-rest-services
  */
 class FriendlyMethodArgumentNotValidException(private val exception: MethodArgumentNotValidException) : Exception() {
 
