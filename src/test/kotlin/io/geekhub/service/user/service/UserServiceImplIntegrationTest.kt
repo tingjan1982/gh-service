@@ -54,12 +54,9 @@ internal class UserServiceImplIntegrationTest {
 
         val createdQuestion = this.questionService.saveQuestion(Question("sample question"))
 
-        val user = this.createdUser.also {
-            it.savedQuestions[createdQuestion.questionId.toString()] = createdQuestion
-        }
+        val user = this.userService.addSavedQuestion(this.createdUser.userId.toString(),
+                listOf(createdQuestion.questionId.toString()))
 
-        this.userService.createUser(user).let {
-            assert(it.savedQuestions.size).isEqualTo(1)
-        }
+        assert(user.savedQuestions.size).isEqualTo(1)
     }
 }

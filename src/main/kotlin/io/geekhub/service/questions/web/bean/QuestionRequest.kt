@@ -17,6 +17,8 @@ data class QuestionRequest(
         val category: String,
         @field:NotEmpty
         val topic: String,
-        val difficulty: Question.Difficulty,
+        val difficulty: Question.Difficulty = Question.Difficulty.INTERMEDIATE,
+        val status: Question.QuestionStatus = Question.QuestionStatus.DRAFT,
+        val visibilityScope: Question.VisibilityScope = Question.VisibilityScope.PUBLIC,
         var contributedBy: String? = null
 )

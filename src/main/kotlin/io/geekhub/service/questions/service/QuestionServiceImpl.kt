@@ -17,11 +17,10 @@ import javax.transaction.Transactional
 @Service
 @Transactional
 class QuestionServiceImpl(val questionRepository: QuestionRepository, val entityManager: EntityManager) : QuestionService {
-
     companion object {
+
         val logger: Logger = LoggerFactory.getLogger(QuestionServiceImpl::class.java)
     }
-
     override fun saveQuestion(question: Question): Question {
         return questionRepository.save(question)
     }
@@ -42,5 +41,16 @@ class QuestionServiceImpl(val questionRepository: QuestionRepository, val entity
 
         logger.info("Pass in answer: $answer")
         this.getQuestion(id)?.addAnswer(answer.toEntity()) ?: throw BusinessObjectNotFoundException(Question::class, id)
+    }
+
+    override fun changeQuestionStatus(id: String, statusToChange: Question.QuestionStatus): Question {
+
+        this.getQuestion(id)?.let {
+            logger.info("Updating question status from ${it.status} to $statusToChange")
+            it.status = statusToChange
+
+            return it
+
+        } ?: throw BusinessObjectNotFoundException(Question::class, id)
     }
 }

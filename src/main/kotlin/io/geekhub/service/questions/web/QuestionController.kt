@@ -1,6 +1,7 @@
 package io.geekhub.service.questions.web
 
 import io.geekhub.service.questions.model.Answer
+import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.service.QuestionSearchService
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.questions.web.bean.AnswerRequest
@@ -16,6 +17,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.http.HttpEntity
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
@@ -75,5 +77,15 @@ class QuestionController(val questionService: QuestionService, val questionSearc
         this.questionService.loadQuestion(id).let {
             return it.getAnswerDetails()
         }
+    }
+
+    @PutMapping("/{id}/status")
+    fun changeStatus(@PathVariable id: String,  status: HttpEntity<String>): QuestionResponse {
+
+        status.body?.let {
+            return this.questionService.changeQuestionStatus(id, Question.QuestionStatus.valueOf(it)).toDTO()
+
+        } ?: throw IllegalArgumentException("Status is required")
+
     }
 }

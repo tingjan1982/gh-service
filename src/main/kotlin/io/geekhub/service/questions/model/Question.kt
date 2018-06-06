@@ -34,9 +34,19 @@ data class Question(
          * Specific sub-domains this question relates to.
          */
         var topic: String,
+
+        /**
+         * Use this to control whether changes will be made public.
+         */
+        var status: QuestionStatus = QuestionStatus.DRAFT,
+
+        /**
+         * Use this to control who sees the question.
+         */
+        var visibilityScope: VisibilityScope = VisibilityScope.PUBLIC,
         var contributedBy: String? = null) : BaseAuditableObject<Question, String>() {
 
-    constructor(question: String) : this(question = question, difficulty = Difficulty.INTERMEDIATE, category = "", topic = "")
+    constructor(question: String) : this(question = question, category = "", topic = "")
 
     companion object {
         const val ANSWER = "ANSWER"
@@ -88,5 +98,13 @@ data class Question(
 
     enum class Difficulty {
         EASY, INTERMEDIATE, HARD
+    }
+
+    enum class QuestionStatus {
+        DRAFT, PUBLISHED
+    }
+
+    enum class VisibilityScope {
+        PUBLIC, PRIVATE
     }
 }

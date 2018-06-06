@@ -12,4 +12,6 @@ interface QuestionService {
     fun loadQuestion(id: String): Question
 
     fun createQuestionAnswer(id: String, answer: AnswerRequest)
+
+    fun changeQuestionStatus(id: String, statusToChange: Question.QuestionStatus): Question
 }

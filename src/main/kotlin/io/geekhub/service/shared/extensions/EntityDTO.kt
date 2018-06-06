@@ -30,6 +30,8 @@ fun QuestionRequest.toEntity() = Question(
         category = this.category,
         topic = this.topic,
         difficulty = this.difficulty,
+        status = this.status,
+        visibilityScope = this.visibilityScope,
         contributedBy = this.contributedBy
 )
 
@@ -39,6 +41,8 @@ fun Question.toDTO() = QuestionResponse(
         this.category,
         this.topic,
         this.difficulty,
+        this.status,
+        this.visibilityScope,
         this.contributedBy,
         this.getAnswer()
 )
