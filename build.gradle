@@ -152,6 +152,8 @@ bootRun {
 /**
  * GitHub - https://github.com/palantir/gradle-docker
  * Gradle Plugin - https://plugins.gradle.org/plugin/com.palantir.docker
+ *
+ * Docker push to docker.io/<namespace>/<repository>
  */
 docker {
     dependsOn build

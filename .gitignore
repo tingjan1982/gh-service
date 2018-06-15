@@ -27,3 +27,6 @@
 /.nb-gradle/
 
 gh-service.log*
+
+### private keys
+*.pem

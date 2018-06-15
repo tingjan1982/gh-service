@@ -47,6 +47,12 @@ with name as specified by the Dockerfile.
 
 `sudo docker run --rm -p 8080:8080 --name gh-service-api io.geekhub/gh-service`
 
+### Aws ECS
+
+> Login to EC2 instance. Remember to change the pem file mode to 600, and expose port 22 in the EC2 configuration.
+
+`ssh -i <pem> ec2-user@<ip>`
+
 
 ## Reference
 
