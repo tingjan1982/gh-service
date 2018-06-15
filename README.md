@@ -134,5 +134,17 @@ as the log source defined in filebeat.yml.
 
 Filebreat for Spring Boot: http://wayne-yuen.blogspot.com/2017/03/setup-elk-stack-to-monitor-spring.html
 Filebeat reference yml: https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-reference-yml.html
+Dockerized AWS CLI: https://hub.docker.com/r/mesosphere/aws-cli/
+
+Aws Parameter Store:
+https://medium.com/@tdi/ssm-parameter-store-for-keeping-secrets-in-a-structured-way-53a25d48166a
+https://www.whaletech.co/2017/08/01/Secure-Credentials-for-ECS-Tasks.html
+https://aws.amazon.com/blogs/compute/managing-secrets-for-amazon-ecs-applications-using-parameter-store-and-iam-roles-for-tasks/
+
+utility to store parameters as environment variables - https://github.com/Droplr/aws-env
+
+Remove dangling images
+
+`docker rmi $(docker images -q -f dangling=true)`
 
 Copyright (c) 2018 Joe Lin

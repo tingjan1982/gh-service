@@ -1,3 +1,4 @@
+-- todo: don't drop for staging and production profile
 drop index if exists ix_auth_username;
 
 drop table if exists authorities;
