@@ -10,8 +10,9 @@ COPY ${JAR_FILE} app.jar
 # https://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html
 RUN wget https://github.com/Droplr/aws-env/raw/master/bin/aws-env-linux-amd64 -O /bin/aws-env && chmod +x /bin/aws-env
 
-# this should only have effect if building images locally since Aws will use IAM role.
-COPY credentials /credentials
+# This should only have effect when building the image with build time argument (--build-arg CREDENTIAL_FILE=<file path>
+ARG CREDENTIAL_FILE
+COPY ${CREDENTIAL_FILE} /credentials
 ENV AWS_SHARED_CREDENTIALS_FILE /credentials
 ENV profile embedded
 
