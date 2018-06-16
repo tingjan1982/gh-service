@@ -85,7 +85,7 @@ Upon user creation, you should see access key and secret key, which you will use
 `aws cli`
 
 And supply the user access key and secret key, and region, in our case, is using ap-northeast-1 (Tokyo DC).                                    
-    
+More details on region can be found [here](https://docs.aws.amazon.com/general/latest/gr/rande.html):     
 * Create the required application properties in SSM (Simple Systems Manager) Parameter Store
 
 ```
