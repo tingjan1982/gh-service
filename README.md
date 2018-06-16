@@ -230,7 +230,7 @@ as the log source defined in filebeat.yml.
 
 Filebreat for Spring Boot: http://wayne-yuen.blogspot.com/2017/03/setup-elk-stack-to-monitor-spring.html
 Filebeat reference yml: https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-reference-yml.html
-Dockerized AWS CLI: https://hub.docker.com/r/mesosphere/aws-cli/
+
 
 #### Useful Docker Commands
 
@@ -238,5 +238,10 @@ Remove dangling images
 
 `docker rmi $(docker images -q -f dangling=true)`
 
+#### Build Gradle project in Docker
+https://stackoverflow.com/questions/46792438/build-gradle-project-inside-a-docker
+
+#### Dockerized AWS CLI
+https://hub.docker.com/r/mesosphere/aws-cli/
 
 Copyright (c) 2018 Joe Lin

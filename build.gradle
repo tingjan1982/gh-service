@@ -149,6 +149,8 @@ bootRun {
     }
 }
 
+def userHome = System.properties['user.home']
+
 /**
  * GitHub - https://github.com/palantir/gradle-docker
  * Gradle Plugin - https://plugins.gradle.org/plugin/com.palantir.docker
@@ -161,7 +163,7 @@ docker {
     dependsOn build
     name "joelin/${bootJar.baseName}"
     tags 'latest'
-    files bootJar.archivePath, "${project.rootDir}/credentials"
+    files bootJar.archivePath, "${project.rootDir}/credentials", "${userHome}/.aws/credentials"
     buildArgs(['JAR_FILE': "${bootJar.archiveName}", 'CREDENTIAL_FILE': "credentials"])
 }
 
