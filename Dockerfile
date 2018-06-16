@@ -5,19 +5,19 @@ VOLUME /tmp
 ARG JAR_FILE
 COPY ${JAR_FILE} app.jar
 
-# Access Aws Parameter Store and populates parameters as environment variables:
+# Access Amazon SSM Parameter Store and populates parameters as environment variables:
 # https://github.com/Droplr/aws-env
 # https://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html
 RUN wget https://github.com/Droplr/aws-env/raw/master/bin/aws-env-linux-amd64 -O /bin/aws-env && chmod +x /bin/aws-env
 
-# This should only have effect when building the image with build time argument (--build-arg CREDENTIAL_FILE=<file path>
+# This should only have effect when building the image with build time argument (--build-arg CREDENTIAL_FILE=<file path>)
 ARG CREDENTIAL_FILE
 COPY ${CREDENTIAL_FILE} /credentials
 ENV AWS_SHARED_CREDENTIALS_FILE /credentials
 ENV profile embedded
 
-# dependency on environment variables - dbhost, dbuser, dbpassword.
-# They are created using aws ssm put-parameter command.
+# Dependency on environment variables - dbhost, dbuser, dbpassword.
+# Details are covered in the README.
 ENTRYPOINT eval $(AWS_ENV_PATH=/production/gh-service AWS_REGION=ap-northeast-1 /bin/aws-env) && \\
 java -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=${profile} -Ddatabase.host=${dbhost} -Ddatabase.password=${dbpassword} -jar /app.jar
 

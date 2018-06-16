@@ -154,13 +154,15 @@ bootRun {
  * Gradle Plugin - https://plugins.gradle.org/plugin/com.palantir.docker
  *
  * Docker push to docker.io/<namespace>/<repository>
+ *
+ * Because docker builds the image off the build/docker directory. So any needed arguments will need to specified in files property, before it can be used to buildArgs.
  */
 docker {
     dependsOn build
     name "joelin/${bootJar.baseName}"
     tags 'latest'
-    files bootJar.archivePath
-    buildArgs(['JAR_FILE': "${bootJar.archiveName}"])
+    files bootJar.archivePath, "${project.rootDir}/credentials"
+    buildArgs(['JAR_FILE': "${bootJar.archiveName}", 'CREDENTIAL_FILE': "credentials"])
 }
 
 githubRelease {
