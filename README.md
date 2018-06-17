@@ -74,6 +74,12 @@ or
 
 We use Amazon ECS to deploy gh-service. To enable this, we need to download the aws cli.  
 
+### Provision ECS via CloudFormation
+
+* Create Stack
+
+`aws cloudformation create-stack --stack-name gh-stack --template-body file://gh-stack.yaml --parameters ParameterKey=VpcId,ParameterValue=vpc-026dbabc10b599de1 ParameterKey=SubnetId,ParameterValue=subnet-06abac4bc1ae65fb6\\,subnet-068f56681310f74ad --capabilities CAPABILITY_NAMED_IAM`
+
 ### Create Properties via Parameter Store
 
 * Create Aws credentials using the Aws IAM console to create an user with the following permissions:

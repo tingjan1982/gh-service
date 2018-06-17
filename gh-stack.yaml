@@ -1,0 +1,364 @@
+## Reference:
+## https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/quickref-ecs.html#quickref-ecs-example-1.yaml
+## https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: gh-service template
+Parameters:
+  EnvironmentName:
+    Description: An environment name that will be prefixed to resource names
+    Type: String
+    Default: staging
+    AllowedValues: [staging, production]
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: Select a VPC that allows instances access to the Internet.
+  SubnetId:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Select at least two subnets in your selected VPC.
+  DesiredCount:
+    Description: How many instances of this task should we run across our cluster?
+    Type: Number
+    Default: 1
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues: [t2.micro, t2.small, t2.medium, t2.large, m3.medium, m3.large,
+      m3.xlarge, m3.2xlarge, m4.large, m4.xlarge, m4.2xlarge, m4.4xlarge, m4.10xlarge,
+      c4.large, c4.xlarge, c4.2xlarge, c4.4xlarge, c4.8xlarge, c3.large, c3.xlarge,
+      c3.2xlarge, c3.4xlarge, c3.8xlarge, r3.large, r3.xlarge, r3.2xlarge, r3.4xlarge,
+      r3.8xlarge, i2.xlarge, i2.2xlarge, i2.4xlarge, i2.8xlarge]
+    ConstraintDescription: Please choose a valid instance type.
+  DesiredCapacity:
+    Type: Number
+    Default: '1'
+    Description: Number of instances to launch in your ECS cluster.
+  MaxSize:
+    Type: Number
+    Default: '2'
+    Description: Maximum number of instances that can be launched in your ECS cluster.
+
+Mappings:
+  AWSRegionToAMI:
+    ap-northeast-1:
+      AMIID: ami-f3f8098c
+
+Resources:
+  GHCluster:
+    Type: "AWS::ECS::Cluster"
+    Properties:
+      ClusterName: !Join ['-', [!Ref 'AWS::StackName', !Ref EnvironmentName]]
+
+##### Task definition section #####
+  GHTaskDefinition:
+    Type: "AWS::ECS::TaskDefinition"
+    Properties:
+      Family: !Join ['-', [!Ref 'AWS::StackName', task-definition]]
+      TaskRoleArn: !Ref ECSTaskRole
+      NetworkMode: bridge
+      RequiresCompatibilities:
+        - "EC2"
+      ContainerDefinitions:
+        -
+          Name: gh-service
+          Image: "joelin/gh-service:latest"
+          # Cpu: 10
+          Memory: 512
+          Essential: true
+          PortMappings:
+            - ContainerPort: 8080
+              HostPort: 8080
+          Environment:
+            - Name: "profile"
+              Value: !Ref EnvironmentName
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudwatchLogsGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: gh-service-stream
+
+  CloudwatchLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join ['-', [!Ref 'AWS::StackName', log-group]]
+      RetentionInDays: 14
+
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-ecs-task-role
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ecs-tasks.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Policies:
+        - PolicyName: !Sub ${AWS::StackName}-ecs-task-policy
+          PolicyDocument:
+            Statement:
+            - Effect: Allow
+              Action: [
+                "ssm:*" # permission to access Parameter Store
+                ]
+              Resource: '*'
+
+###### Service and Application Load Balancer definition section #####
+  GHService:
+    Type: AWS::ECS::Service
+    DependsOn: ALBListener
+    Properties:
+      ServiceName: !Sub ${AWS::StackName}-service
+      Cluster: !Ref GHCluster
+      TaskDefinition: !Ref GHTaskDefinition
+      Role: arn:aws:iam::912120796431:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS #!Ref EcsServiceRole
+      DesiredCount: !Ref DesiredCount
+      LoadBalancers:
+        - ContainerName: gh-service
+          ContainerPort: '8080'
+          TargetGroupArn: !Ref ECSTargetGroup
+
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    #DependsOn: EcsServiceRole
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref ECSTargetGroup
+      LoadBalancerArn: !Ref ECSALB
+      Port: '80'
+      Protocol: HTTP
+
+  ECSALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Join ['-', [!Ref 'AWS::StackName', ecs-apploadbalancer]]
+      Type: application
+      Scheme: internet-facing
+      Subnets: !Ref SubnetId
+      SecurityGroups: [!Ref ECSSecurityGroup]
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: '30'
+
+  ECSALBListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    DependsOn: ALBListener
+    Properties:
+      Actions:
+      - Type: forward
+        TargetGroupArn: !Ref ECSTargetGroup
+      Conditions:
+      - Field: path-pattern
+        Values: [/]
+      ListenerArn: !Ref ALBListener
+      Priority: 1
+
+  ECSTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: ECSALB
+    Properties:
+      Name: !Sub ${AWS::StackName}-target-group
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /api/actuator/health
+      HealthCheckProtocol: HTTP
+      Protocol: HTTP
+      Port: 8080
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref VpcId
+
+#  EcsServiceRole:
+#    Type: AWS::IAM::Role
+#    Properties:
+#      AssumeRolePolicyDocument:
+#        Statement:
+#        - Effect: Allow
+#          Principal:
+#            Service: [ecs.amazonaws.com]
+#          Action: ['sts:AssumeRole']
+#      ManagedPolicyArns:
+#        - "arn:aws:iam::aws:policy/aws-service-role/AmazonECSServiceRolePolicy"
+#      Path: /
+#      Policies:
+#      - PolicyName: !Sub ${AWS::StackName}-ecs-service-policy
+#        PolicyDocument:
+#          Statement:
+#          - Effect: Allow
+#            Action: [
+#              'elasticloadbalancing:DeregisterInstancesFromLoadBalancer',
+#              'elasticloadbalancing:DeregisterTargets',
+#              'elasticloadbalancing:Describe*',
+#              'elasticloadbalancing:RegisterInstancesWithLoadBalancer',
+#              'elasticloadbalancing:RegisterTargets',
+#              'ec2:Describe*',
+#              'ec2:AuthorizeSecurityGroupIngress'
+#              ]
+#            Resource: '*'
+
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${AWS::StackName}-security-group
+      GroupDescription: !Sub ${AWS::StackName} ECS Security Group
+      VpcId: !Ref VpcId
+
+  EcsSecurityGroupHTTPinbound:
+      Type: AWS::EC2::SecurityGroupIngress
+      Properties:
+        GroupId: !Ref ECSSecurityGroup
+        IpProtocol: tcp
+        FromPort: '80'
+        ToPort: '80'
+        CidrIp: 0.0.0.0/0
+
+  EcsSecurityGroupSpringBootinbound:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref ECSSecurityGroup
+      IpProtocol: tcp
+      FromPort: '8080'
+      ToPort: '8080'
+      CidrIp: 0.0.0.0/0
+
+  EcsSecurityGroupSSHinbound:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref ECSSecurityGroup
+      IpProtocol: tcp
+      FromPort: '22'
+      ToPort: '22'
+      CidrIp: 0.0.0.0/0
+
+  EcsSecurityGroupALBports:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref ECSSecurityGroup
+      IpProtocol: tcp
+      FromPort: '31000'
+      ToPort: '61000'
+      SourceSecurityGroupId: !Ref ECSSecurityGroup
+
+##### Auto Scaling and Container Instance definition section #####
+  ECSAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: !Sub ${AWS::StackName}-autoscaling-group
+      VPCZoneIdentifier: !Ref SubnetId
+      LaunchConfigurationName: !Ref ContainerInstances
+      MinSize: '1'
+      MaxSize: !Ref MaxSize
+      DesiredCapacity: !Ref DesiredCapacity
+    CreationPolicy:
+      ResourceSignal:
+        Count: !Ref DesiredCapacity
+        Timeout: PT5M
+    UpdatePolicy:
+      AutoScalingReplacingUpdate:
+        WillReplace: true
+        # MinInstancesInService: "1"
+        WaitOnResourceSignals: "true"
+
+  ServiceScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: GHService
+    Properties:
+      MinCapacity: 1
+      MaxCapacity: !Ref MaxSize
+      ResourceId: !Join ['', [service/, !Ref 'GHCluster', /, !GetAtt [GHService, Name]]]
+      RoleARN: arn:aws:iam::912120796431:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling #!GetAtt [AutoscalingRole, Arn]
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+#  AutoscalingRole:
+#    Type: AWS::IAM::Role
+#    Properties:
+#      AssumeRolePolicyDocument:
+#        Statement:
+#        - Effect: Allow
+#          Principal:
+#            Service: [application-autoscaling.amazonaws.com]
+#          Action: ['sts:AssumeRole']
+#      ManagedPolicyArns:
+#        - "arn:aws:iam::aws:policy/aws-service-role/AutoScalingServiceRolePolicy"
+#      Path: /
+#      Policies:
+#      - PolicyName: !Sub ${AWS::StackName}-scalable-target-policy
+#        PolicyDocument:
+#          Statement:
+#          - Effect: Allow
+#            Action: [
+#              'application-autoscaling:*',
+#              'cloudwatch:DescribeAlarms',
+#              'cloudwatch:PutMetricAlarm',
+#              'ecs:DescribeServices',
+#              'ecs:UpdateService'
+#              ]
+#            Resource: '*'
+
+  ServiceScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: !Sub ${AWS::StackName}-autoscaling-policy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ServiceScalingTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: PercentChangeInCapacity
+        Cooldown: 60
+        MetricAggregationType: Average
+        StepAdjustments:
+        - MetricIntervalLowerBound: 0
+          ScalingAdjustment: 200
+
+  ContainerInstances:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMIID]
+      SecurityGroups: [!Ref ECSSecurityGroup]
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      KeyName: ecs-gh-service
+      AssociatePublicIpAddress: true
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          echo ECS_CLUSTER=${GHCluster} >> /etc/ecs/ecs.config
+          yum install -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}
+
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles: [ecsInstanceRole] # [!Ref EC2Role]
+
+#  EC2Role:
+#    Type: AWS::IAM::Role
+#    Properties:
+#      AssumeRolePolicyDocument:
+#        Statement:
+#        - Effect: Allow
+#          Principal:
+#            Service: [ec2.amazonaws.com]
+#          Action: ['sts:AssumeRole']
+#      Path: /
+#      Policies:
+#      - PolicyName: !Sub ${AWS::StackName}-ec2-instance-policy
+#        PolicyDocument:
+#          Statement:
+#          - Effect: Allow
+#            Action: [
+#              'ecs:CreateCluster',
+#              'ecs:DeregisterContainerInstance',
+#              'ecs:DiscoverPollEndpoint',
+#              'ecs:Poll',
+#              'ecs:RegisterContainerInstance',
+#              'ecs:StartTelemetrySession',
+#              'ecs:Submit*',
+#              'logs:CreateLogStream',
+#              'logs:PutLogEvents']
+#            Resource: '*'
