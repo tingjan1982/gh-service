@@ -1,3 +1,5 @@
+import com.amazonaws.services.cloudformation.model.Capability
+
 /**
  * Gradle properties explained:
  * https://docs.gradle.org/current/userguide/build_environment.html
@@ -24,8 +26,12 @@ buildscript {
     }
 }
 
+/**
+ * Build script snippet for plugins DSL for Gradle 2.1 and later.
+ */
 plugins {
     id "co.riiid.gradle" version "0.4.2"
+    id "jp.classmethod.aws.iam" version "0.38"
 }
 
 /**
@@ -40,6 +46,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'org.junit.platform.gradle.plugin'
 apply plugin: 'com.palantir.docker'
+apply plugin: 'jp.classmethod.aws.cloudformation'
 
 group = 'io.geekhub'
 version = '0.0.1-SNAPSHOT'
@@ -197,4 +204,24 @@ github {
     targetCommitish = 'master'
     name = "${tagVersion}"
     assets = ["${bootJar.archivePath}"]
+}
+
+/**
+ * https://github.com/classmethod/gradle-aws-plugin
+ */
+aws {
+    profileName = 'default'
+    region = 'ap-northeast-1'
+}
+
+cloudFormation {
+    stackName 'gh-stack'
+    stackParams([
+            VpcId: 'vpc-026dbabc10b599de1',
+            SubnetId: 'subnet-06abac4bc1ae65fb6,subnet-068f56681310f74ad'
+    ])
+    capabilityIam true
+    useCapabilityIam Capability.CAPABILITY_NAMED_IAM
+    templateFile project.file("./gh-stack.yaml")
+    templateURL "file:./gh-stack.yaml"
 }

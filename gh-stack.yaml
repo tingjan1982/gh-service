@@ -1,6 +1,8 @@
 ## Reference:
-## https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/quickref-ecs.html#quickref-ecs-example-1.yaml
-## https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html
+## CloudFormation template snippet: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/quickref-ecs.html#quickref-ecs-example-1.yaml
+## CloudFormation resource definition reference: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html
+## CloudFormation template: https://github.com/awslabs/aws-cloudformation-templates
+## Reference architecture for ECS with CloudFormation: https://github.com/aws-samples/ecs-refarch-cloudformation
 
 AWSTemplateFormatVersion: "2010-09-09"
 Description: gh-service template
@@ -19,11 +21,11 @@ Parameters:
   DesiredCount:
     Description: How many instances of this task should we run across our cluster?
     Type: Number
-    Default: 1
+    Default: 2
   InstanceType:
     Description: EC2 instance type
     Type: String
-    Default: t2.micro
+    Default: t2.small
     AllowedValues: [t2.micro, t2.small, t2.medium, t2.large, m3.medium, m3.large,
       m3.xlarge, m3.2xlarge, m4.large, m4.xlarge, m4.2xlarge, m4.4xlarge, m4.10xlarge,
       c4.large, c4.xlarge, c4.2xlarge, c4.4xlarge, c4.8xlarge, c3.large, c3.xlarge,
@@ -63,12 +65,15 @@ Resources:
         -
           Name: gh-service
           Image: "joelin/gh-service:latest"
-          # Cpu: 10
           Memory: 512
           Essential: true
+#          Ulimits:
+#            - Name: memblock
+#              SoftLimit: 500
+#              HardLimit: 500
           PortMappings:
             - ContainerPort: 8080
-              HostPort: 8080
+              HostPort: 0
           Environment:
             - Name: "profile"
               Value: !Ref EnvironmentName
@@ -116,6 +121,10 @@ Resources:
       TaskDefinition: !Ref GHTaskDefinition
       Role: arn:aws:iam::912120796431:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS #!Ref EcsServiceRole
       DesiredCount: !Ref DesiredCount
+      HealthCheckGracePeriodSeconds: 90 # important setting to remedy a unhealthy target issue
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 50
       LoadBalancers:
         - ContainerName: gh-service
           ContainerPort: '8080'
@@ -125,12 +134,12 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     #DependsOn: EcsServiceRole
     Properties:
+      Port: '80'
+      Protocol: HTTP
+      LoadBalancerArn: !Ref ECSALB
       DefaultActions:
       - Type: forward
         TargetGroupArn: !Ref ECSTargetGroup
-      LoadBalancerArn: !Ref ECSALB
-      Port: '80'
-      Protocol: HTTP
 
   ECSALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -139,7 +148,7 @@ Resources:
       Type: application
       Scheme: internet-facing
       Subnets: !Ref SubnetId
-      SecurityGroups: [!Ref ECSSecurityGroup]
+      SecurityGroups: [!Ref ALBSecurityGroup]
       LoadBalancerAttributes:
         - Key: idle_timeout.timeout_seconds
           Value: '30'
@@ -162,7 +171,7 @@ Resources:
     DependsOn: ECSALB
     Properties:
       Name: !Sub ${AWS::StackName}-target-group
-      HealthCheckIntervalSeconds: 30
+      HealthCheckIntervalSeconds: 10
       HealthCheckPath: /api/actuator/health
       HealthCheckProtocol: HTTP
       Protocol: HTTP
@@ -200,48 +209,47 @@ Resources:
 #              ]
 #            Resource: '*'
 
+
+  ## Troubleshoot dynamic port issue: https://aws.amazon.com/premiumsupport/knowledge-center/troubleshoot-unhealthy-checks-ecs/
+  ## CloudFormation circular dependency fix: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group.html
   ECSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: !Sub ${AWS::StackName}-security-group
-      GroupDescription: !Sub ${AWS::StackName} ECS Security Group
       VpcId: !Ref VpcId
+      GroupName: !Sub ${AWS::StackName}-ecs-security-group
+      GroupDescription: !Sub ${AWS::StackName} ECS Security Group
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
 
-  EcsSecurityGroupHTTPinbound:
+  ## Use ephemeral port
+  ECSSecurityGroupDynamicPortInbound:
       Type: AWS::EC2::SecurityGroupIngress
       Properties:
         GroupId: !Ref ECSSecurityGroup
         IpProtocol: tcp
-        FromPort: '80'
-        ToPort: '80'
-        CidrIp: 0.0.0.0/0
+        FromPort: 32768
+        ToPort: 65535
+        SourceSecurityGroupId: !Ref ALBSecurityGroup
 
-  EcsSecurityGroupSpringBootinbound:
-    Type: AWS::EC2::SecurityGroupIngress
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupId: !Ref ECSSecurityGroup
-      IpProtocol: tcp
-      FromPort: '8080'
-      ToPort: '8080'
-      CidrIp: 0.0.0.0/0
+      VpcId: !Ref VpcId
+      GroupName: !Sub ${AWS::StackName}-alb-security-group
+      GroupDescription: !Sub ${AWS::StackName} ECS Security Group
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
 
-  EcsSecurityGroupSSHinbound:
-    Type: AWS::EC2::SecurityGroupIngress
+  ALBSecurityGroupDynamicPortOutbound:
+    Type: AWS::EC2::SecurityGroupEgress
     Properties:
-      GroupId: !Ref ECSSecurityGroup
-      IpProtocol: tcp
-      FromPort: '22'
-      ToPort: '22'
-      CidrIp: 0.0.0.0/0
-
-  EcsSecurityGroupALBports:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !Ref ECSSecurityGroup
-      IpProtocol: tcp
-      FromPort: '31000'
-      ToPort: '61000'
-      SourceSecurityGroupId: !Ref ECSSecurityGroup
+      GroupId: !Ref ALBSecurityGroup
+      IpProtocol: -1
+      DestinationSecurityGroupId: !Ref ECSSecurityGroup
 
 ##### Auto Scaling and Container Instance definition section #####
   ECSAutoScalingGroup:
@@ -255,7 +263,7 @@ Resources:
       DesiredCapacity: !Ref DesiredCapacity
     CreationPolicy:
       ResourceSignal:
-        Count: !Ref DesiredCapacity
+        # Count: !Ref DesiredCapacity
         Timeout: PT5M
     UpdatePolicy:
       AutoScalingReplacingUpdate:
