@@ -20,8 +20,8 @@ data class User(
         var userId: String? = null,
         val username: String,
         var firstName: String,
-        var email: String,
-        var lastName: String) : BaseAuditableObject<User, String>() {
+        var lastName: String,
+        var email: String) : BaseAuditableObject<User, String>() {
 
     constructor(username: String): this(username = username, firstName = "", lastName = "", email = "")
 

@@ -17,6 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.JdbcUserDetailsManager
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.csrf.CsrfTokenRepository
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import javax.sql.DataSource
 
 
@@ -61,6 +64,26 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
                 .antMatchers("/csrf-token").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and().httpBasic()
+    }
+
+    /**
+     * https://docs.spring.io/spring/docs/5.0.5.RELEASE/spring-framework-reference/web.html#mvc-cors
+     */
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+
+        val configuration = CorsConfiguration().apply {
+            this.allowedOrigins = listOf("*")
+            this.allowedMethods = listOf("*")
+            this.allowedHeaders = listOf("*")
+            this.allowCredentials = true
+            this.maxAge = 3600
+        }
+
+        UrlBasedCorsConfigurationSource().let {
+            it.registerCorsConfiguration("/**", configuration)
+            return it
+        }
     }
 
     @Bean
