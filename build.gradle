@@ -216,12 +216,7 @@ aws {
 
 cloudFormation {
     stackName 'gh-stack'
-    stackParams([
-            VpcId: 'vpc-026dbabc10b599de1',
-            SubnetId: 'subnet-06abac4bc1ae65fb6,subnet-068f56681310f74ad'
-    ])
     capabilityIam true
     useCapabilityIam Capability.CAPABILITY_NAMED_IAM
     templateFile project.file("./gh-stack.yaml")
-    templateURL "file:./gh-stack.yaml"
 }

@@ -12,12 +12,12 @@ Parameters:
     Type: String
     Default: staging
     AllowedValues: [staging, production]
-  VpcId:
-    Type: AWS::EC2::VPC::Id
-    Description: Select a VPC that allows instances access to the Internet.
-  SubnetId:
-    Type: List<AWS::EC2::Subnet::Id>
-    Description: Select at least two subnets in your selected VPC.
+#  VpcId:
+#    Type: AWS::EC2::VPC::Id
+#    Description: Select a VPC that allows instances access to the Internet.
+#  SubnetId:
+#    Type: List<AWS::EC2::Subnet::Id>
+#    Description: Select at least two subnets in your selected VPC.
   DesiredCount:
     Description: How many instances of this task should we run across our cluster?
     Type: Number
@@ -47,12 +47,86 @@ Mappings:
       AMIID: ami-f3f8098c
 
 Resources:
+##### VPC and Subnet section #####
+  GHVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.192.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-VPC
+
+  GHInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Gateway
+
+  GHInternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref GHInternetGateway
+      VpcId: !Ref GHVPC
+
+  GHPublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref GHVPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: 10.192.0.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName} Public Subnet (AZ1)
+
+  GHPublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref GHVPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: 10.192.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName} Public Subnet (AZ2)
+
+  GHPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref GHVPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName} Public Routes
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GHInternetGatewayAttachment
+    Properties:
+        RouteTableId: !Ref GHPublicRouteTable
+        DestinationCidrBlock: 0.0.0.0/0
+        GatewayId: !Ref GHInternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref GHPublicRouteTable
+      SubnetId: !Ref GHPublicSubnet1
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref GHPublicRouteTable
+      SubnetId: !Ref GHPublicSubnet2
+
+##### ECS cluster and task definition section #####
   GHCluster:
     Type: "AWS::ECS::Cluster"
     Properties:
       ClusterName: !Join ['-', [!Ref 'AWS::StackName', !Ref EnvironmentName]]
 
-##### Task definition section #####
   GHTaskDefinition:
     Type: "AWS::ECS::TaskDefinition"
     Properties:
@@ -147,7 +221,9 @@ Resources:
       Name: !Join ['-', [!Ref 'AWS::StackName', ecs-apploadbalancer]]
       Type: application
       Scheme: internet-facing
-      Subnets: !Ref SubnetId
+      Subnets:
+        - !Ref GHPublicSubnet1
+        - !Ref GHPublicSubnet2
       SecurityGroups: [!Ref ALBSecurityGroup]
       LoadBalancerAttributes:
         - Key: idle_timeout.timeout_seconds
@@ -179,7 +255,7 @@ Resources:
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       UnhealthyThresholdCount: 2
-      VpcId: !Ref VpcId
+      VpcId: !Ref GHVPC
 
 #  EcsServiceRole:
 #    Type: AWS::IAM::Role
@@ -215,7 +291,7 @@ Resources:
   ECSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      VpcId: !Ref VpcId
+      VpcId: !Ref GHVPC
       GroupName: !Sub ${AWS::StackName}-ecs-security-group
       GroupDescription: !Sub ${AWS::StackName} ECS Security Group
       SecurityGroupIngress:
@@ -237,7 +313,7 @@ Resources:
   ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      VpcId: !Ref VpcId
+      VpcId: !Ref GHVPC
       GroupName: !Sub ${AWS::StackName}-alb-security-group
       GroupDescription: !Sub ${AWS::StackName} ECS Security Group
       SecurityGroupIngress:
@@ -256,7 +332,9 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       AutoScalingGroupName: !Sub ${AWS::StackName}-autoscaling-group
-      VPCZoneIdentifier: !Ref SubnetId
+      VPCZoneIdentifier:
+        - !Ref GHPublicSubnet1
+        - !Ref GHPublicSubnet2
       LaunchConfigurationName: !Ref ContainerInstances
       MinSize: '1'
       MaxSize: !Ref MaxSize
