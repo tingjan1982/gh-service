@@ -1,5 +1,7 @@
 package io.geekhub.service.shared.config
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -7,6 +9,7 @@ import org.springframework.core.env.Environment
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpMethod
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
+import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -20,11 +23,16 @@ import org.springframework.security.web.csrf.CsrfTokenRepository
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import javax.annotation.PreDestroy
 import javax.sql.DataSource
 
 
 @EnableWebSecurity
 class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(SecurityConfig::class.java)
+    }
 
     @Autowired
     lateinit var dataSource: DataSource
@@ -36,8 +44,27 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
     lateinit var environment: Environment
 
     override fun afterPropertiesSet() {
-        val classPathResource = ClassPathResource("security-schema.ddl", SecurityConfig::class.java)
-        ResourceDatabasePopulator(classPathResource).execute(dataSource)
+        val securitySchema = ClassPathResource("security-schema.ddl", SecurityConfig::class.java)
+        ResourceDatabasePopulator(securitySchema).execute(dataSource).let {
+            logger.info("Applied schema: ${securitySchema.path}")
+        }
+
+    }
+
+    @PreDestroy
+    fun cleanUpSecuritySchema() {
+        logger.info("Cleanup security schema...")
+
+        when {
+            this.environment.activeProfiles.any { it == "dev" || it == "test" } ||
+            this.environment.defaultProfiles.isNotEmpty() -> {
+
+                val securitySchema = ClassPathResource("security-schema-drop.ddl", SecurityConfig::class.java)
+                ResourceDatabasePopulator(securitySchema).execute(dataSource).let {
+                    logger.info("Applied schema: ${securitySchema.path}")
+                }
+            }
+        }
     }
 
     /**
@@ -92,12 +119,13 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
     override fun configure(auth: AuthenticationManagerBuilder) {
         val passwordEncoder = this.passwordEncoder()
         auth.inMemoryAuthentication().passwordEncoder(passwordEncoder)
-                .withUser("user").password(passwordEncoder.encode("password")).roles("USER")
+                .withUser("admin").password(passwordEncoder.encode("admin")).roles("ADMIN")
 
         auth.userDetailsService(this.userDetailsManager())
+
         auth.jdbcAuthentication()
                 .dataSource(dataSource)
-                .withUser("admin").password(passwordEncoder.encode("admin")).roles("ADMIN")
+                //.withUser("admin").password(passwordEncoder.encode("admin")).roles("ADMIN")
     }
 
     @Bean
@@ -113,6 +141,14 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
     @Bean
     override fun userDetailsServiceBean(): UserDetailsService {
         return super.userDetailsServiceBean()
+    }
+
+    /**
+     * Expose AuthenticationManager instance as bean for other services to use.
+     */
+    @Bean
+    override fun authenticationManagerBean(): AuthenticationManager {
+        return super.authenticationManagerBean()
     }
 
     @Bean

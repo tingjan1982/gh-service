@@ -2,6 +2,7 @@ package io.geekhub.service.user.service
 
 import assertk.assert
 import assertk.assertions.isEqualTo
+import assertk.assertions.isNotEqualTo
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.user.model.User
@@ -38,6 +39,7 @@ internal class UserServiceImplIntegrationTest {
     @Test
     fun createUser() {
         assertNotNull(this.createdUser.id)
+        assert(this.createdUser.lastModifiedDate.get()).isEqualTo(this.createdUser.createdDate.get())
     }
 
     @Test
@@ -46,6 +48,7 @@ internal class UserServiceImplIntegrationTest {
 
         this.userService.updateUser(createdUser).let {
             assert(it.lastName).isEqualTo("Changed")
+            assert(it.lastModifiedDate.get()).isNotEqualTo(it.createdDate.get())
         }
     }
 

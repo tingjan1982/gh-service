@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
 import javax.persistence.ManyToOne
+import javax.persistence.MappedSuperclass
 import javax.persistence.Temporal
 import javax.persistence.TemporalType
 
@@ -16,6 +17,7 @@ import javax.persistence.TemporalType
  *
  * Subclass will need to use a different name other than 'id' for @Id and override getId() method.
  */
+@MappedSuperclass
 abstract class BaseAuditableObject<U, PK : Serializable> : Auditable<U, PK, LocalDateTime> {
 
     override fun isNew(): Boolean {
