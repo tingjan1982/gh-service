@@ -30,8 +30,9 @@ buildscript {
  * Build script snippet for plugins DSL for Gradle 2.1 and later.
  */
 plugins {
-    id "co.riiid.gradle" version "0.4.2"
-    id "jp.classmethod.aws.iam" version "0.38"
+    id "co.riiid.gradle" version "0.4.2" // release plugin
+    id "jp.classmethod.aws.iam" version "0.38" // aws plugin
+    id "com.gorylenko.gradle-git-properties" version "1.4.21" // generate git information
 }
 
 /**
@@ -219,4 +220,26 @@ cloudFormation {
     capabilityIam true
     useCapabilityIam Capability.CAPABILITY_NAMED_IAM
     templateFile project.file("./gh-stack.yaml")
+}
+
+springBoot {
+    buildInfo {
+        properties {
+            artifact = "${bootJar.archiveName}"
+            version = "${bootJar.version}"
+            group = "${group}"
+            name = "${name}"
+        }
+    }
+}
+
+/**
+ * Copies build related info to IntelliJ output directory so /info works correctly.
+ * This is not required when running gradle outside of IntelliJ.
+ */
+task copyBuildInfo(type: Copy) {
+    dependsOn bootBuildInfo
+    
+    from "${buildDir}/resources/main/git.properties", "${buildDir}/resources/main/META-INF"
+    into "out/production/resources/"
 }
