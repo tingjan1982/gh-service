@@ -3,23 +3,16 @@ package io.geekhub.service.interview.service
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.repository.QuestionRepository
+import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.user.model.User
 import io.geekhub.service.user.repository.UserRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@SpringBootTest
-@ExtendWith(SpringExtension::class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ActiveProfiles("test")
+@IntegrationTest
 internal class InterviewServiceImplIntegrationTest {
 
     @Autowired

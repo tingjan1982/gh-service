@@ -31,9 +31,7 @@ class UserServiceImpl(
 
     override fun createUser(userRequest: UserRequest): User {
 
-        if (this.userDetailsManager.userExists(userRequest.username)) {
-            throw EntityExistsException("Username ${userRequest.username} already exists in the system")
-        }
+        this.checkUserRequest(userRequest)
 
         val userBuilder = SpringSecurityUser.builder()
                 .passwordEncoder(this.passwordEncoder::encode)
@@ -44,9 +42,19 @@ class UserServiceImpl(
         this.userDetailsManager.createUser(userBuilder.build())
         logger.info("Created user credentials for ${userRequest.username}")
 
-        val userToCreate = userRequest.toEntity()
+        return userRequest.toEntity().let {
+            this.createUser(it)
+        }
+    }
 
-        return this.createUser(userToCreate)
+    private fun checkUserRequest(userRequest: UserRequest) {
+        if (this.userDetailsManager.userExists(userRequest.username)) {
+            throw EntityExistsException("Username ${userRequest.username} already exists in the system")
+        }
+
+        this.repository.findByEmail(userRequest.email).ifPresent {
+            throw EntityExistsException("Email ${userRequest.email} already exists in the system")
+        }
     }
 
     override fun createUser(user: User): User {
@@ -54,7 +62,6 @@ class UserServiceImpl(
             logger.info("Created user: $user")
         }
     }
-
 
     override fun getUser(id: String): User {
         return this.repository.getOne(id)
@@ -84,11 +91,11 @@ class UserServiceImpl(
     override fun addSavedQuestion(id: String, questions: List<String>): User {
 
         return this.getUser(id).apply {
-            questions.forEach({
+            questions.forEach {
                 questionService.getQuestion(it)?.let { question ->
                     this.savedQuestions[it] = question
                 }
-            })
+            }
         }
     }
 }

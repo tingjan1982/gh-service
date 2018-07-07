@@ -5,21 +5,14 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEqualTo
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.service.QuestionService
+import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.user.model.User
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@SpringBootTest
-@ExtendWith(SpringExtension::class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ActiveProfiles("test")
+@IntegrationTest
 internal class UserServiceImplIntegrationTest {
 
     @Autowired
