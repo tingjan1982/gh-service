@@ -7,10 +7,15 @@ import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.user.model.User
+import io.geekhub.service.user.web.bean.UpdateUserRequest
+import io.geekhub.service.user.web.bean.UserRequest
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 
 @IntegrationTest
 internal class UserServiceImplIntegrationTest {
@@ -21,11 +26,18 @@ internal class UserServiceImplIntegrationTest {
     @Autowired
     private lateinit var questionService: QuestionService
 
+    @Autowired
+    private lateinit var authenticationManager: AuthenticationManager
+
     private lateinit var createdUser: User
 
-    @BeforeEach
+    @BeforeAll
     fun prepare() {
-        this.createdUser = this.userService.createUser(User(username = "joelin", firstName = "Joe", lastName = "Lin", email = "tingjan1982@gmail.com"))
+        this.createdUser = this.userService.createUser(UserRequest(username = "joelin",
+                firstName = "Joe",
+                lastName = "Lin",
+                email = "tingjan1982@gmail.com",
+                password = "password"))
 
     }
 
@@ -37,11 +49,19 @@ internal class UserServiceImplIntegrationTest {
 
     @Test
     fun updateUser() {
-        this.createdUser.lastName = "Changed"
 
-        this.userService.updateUser(createdUser).let {
-            assert(it.lastName).isEqualTo("Changed")
+        this.userService.updateUser(this.createdUser.id.toString(), UpdateUserRequest(
+                firstName = "changed",
+                lastName = "changed",
+                password = "changeit"
+        )).let {
+            assert(it.firstName).isEqualTo("changed")
+            assert(it.lastName).isEqualTo("changed")
             assert(it.lastModifiedDate.get()).isNotEqualTo(it.createdDate.get())
+        }
+
+        authenticationManager.authenticate(UsernamePasswordAuthenticationToken(this.createdUser.username, "changeit")).let {
+            assertTrue(it.isAuthenticated)
         }
     }
 

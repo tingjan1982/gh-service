@@ -2,6 +2,7 @@ package io.geekhub.service.user.web
 
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.user.service.UserService
+import io.geekhub.service.user.web.bean.UpdateUserRequest
 import io.geekhub.service.user.web.bean.UserRequest
 import io.geekhub.service.user.web.bean.UserResponse
 import org.springframework.web.bind.annotation.*
@@ -26,7 +27,7 @@ class UserController(val userService: UserService) {
     }
 
     @PostMapping("/{id}")
-    fun updateUser(@PathVariable id: String, @RequestBody userRequest: UserRequest): UserResponse {
+    fun updateUser(@PathVariable id: String, @Valid @RequestBody userRequest: UpdateUserRequest): UserResponse {
 
         val updatedUser = this.userService.updateUser(id, userRequest)
         return updatedUser.toDTO()
