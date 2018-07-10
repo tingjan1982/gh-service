@@ -24,14 +24,14 @@ xml to groovy translator - https://logback.qos.ch/translator/asGroovy.html
         <appender-ref ref="JSON"/>
     </logger>
     <!-- turn this on to debug to troubleshoot Hibernate related issues. -->
-    <logger name="logging.level.org.hibernate" level="info" additivity="false">
+    <logger name="org.hibernate" level="info" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
-    <logger name="logging.level.org.hibernate.SQL" level="debug" additivity="false">
+    <logger name="org.hibernate.SQL" level="debug" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
     <!-- turn this on to debug to troubleshoot Spring Security related issues. -->
-    <logger name="org.springframework.security" level="info" additivity="false">
+    <logger name="org.springframework.security" level="devbug" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
     <root level="info">

@@ -87,7 +87,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
         http.cors()
                 .and().authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/users").permitAll()
-                .antMatchers("/actuator/**").permitAll()
+                //.antMatchers("/actuator/**").permitAll()
                 .antMatchers("/csrf-token").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and().httpBasic()
@@ -118,14 +118,11 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
 
     override fun configure(auth: AuthenticationManagerBuilder) {
         val passwordEncoder = this.passwordEncoder()
-        auth.inMemoryAuthentication().passwordEncoder(passwordEncoder)
-                .withUser("admin").password(passwordEncoder.encode("admin")).roles("ADMIN")
-
         auth.userDetailsService(this.userDetailsManager())
 
         auth.jdbcAuthentication()
                 .dataSource(dataSource)
-                //.withUser("admin").password(passwordEncoder.encode("admin")).roles("ADMIN")
+                .withUser("admin").password(passwordEncoder.encode("admin")).roles("ADMIN")
     }
 
     @Bean

@@ -57,9 +57,9 @@ class ApiExceptionResolver : ResponseEntityExceptionHandler() {
         val friendlyException = FriendlyMethodArgumentNotValidException(ex)
         val apiError = this.constructApiError(HttpStatus.UNPROCESSABLE_ENTITY, friendlyException, request.getParameter("debug") != null)
 
-        friendlyException.fieldErrors.forEach({
+        friendlyException.fieldErrors.forEach {
             apiError.subErrors.add(ApiError.ApiSubError(it.objectName, it.field, it.rejectedValue.toString(), it.defaultMessage.toString()))
-        })
+        }
 
         return this.handleExceptionInternal(ex, apiError, headers, status, request)
     }
