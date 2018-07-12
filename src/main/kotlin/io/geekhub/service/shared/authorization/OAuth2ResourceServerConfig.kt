@@ -25,14 +25,22 @@ class OAuth2ResourceServerConfig : ResourceServerConfigurerAdapter() {
                 .stateless(false)
     }
 
+    /**
+     * Stateless is more secure as it doesn't authenticate based on existing http session
+     * that could reside in client side.
+     */
     override fun configure(http: HttpSecurity) {
 
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // which is the default anyway
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .cors()
                 .and().authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/users").permitAll()
                 .antMatchers("/actuator/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/questions", "/questions/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/questions", "/questions/**").access("#oauth2.hasScope('write') and hasAnyRole('USER', 'ADMIN')")
+                .antMatchers(HttpMethod.GET, "/users/**").access("#oauth2.hasScope('read')")
+                .antMatchers(HttpMethod.POST, "/users/**").access("#oauth2.hasScope('write') and hasAnyRole('USER', 'ADMIN')")
+
                 .anyRequest().authenticated()
     }
 

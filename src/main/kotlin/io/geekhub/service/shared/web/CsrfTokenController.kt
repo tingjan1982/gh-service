@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletRequest
 /**
  * This controller should only ever be accessed by admin user as it exposes
  * csrf token for testing purpose
+ *
+ * Reference: https://docs.spring.io/spring-security/site/docs/5.0.6.RELEASE/reference/htmlsingle/#mvc-csrf-resolver
  */
 @RestController
 @RequestMapping("/csrf-token")

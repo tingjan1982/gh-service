@@ -21,6 +21,7 @@ import javax.sql.DataSource
 /**
  * Spring OAuth2 reference: https://projects.spring.io/spring-security-oauth/docs/oauth2.html
  * Example: https://github.com/spring-projects/spring-security-oauth/tree/master/samples/oauth2/sparklr/src/main/java/org/springframework/security/oauth/examples/sparklr/config
+ *
  * Reference:
  * http://www.baeldung.com/spring-security-oauth-jwt
  * https://medium.com/@nydiarra/secure-a-spring-boot-rest-api-with-json-web-token-reference-to-angular-integration-e57a25806c50
@@ -58,7 +59,7 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
                 .withClient("roclient")
                 .secret("secret")
                 .resourceIds(OAuthSettings.resourceId)
-                .authorizedGrantTypes("client_credentials", "password", "refresh_token")
+                .authorizedGrantTypes("client_credentials")
                 .scopes("read")
                 .accessTokenValiditySeconds(3600)
                 .refreshTokenValiditySeconds(3600)
@@ -66,10 +67,18 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
                 .withClient("shortlivedclient")
                 .secret("secret")
                 .resourceIds(OAuthSettings.resourceId)
-                .authorizedGrantTypes("client_credentials", "password", "refresh_token")
+                .authorizedGrantTypes("client_credentials")
                 .scopes("read")
                 .accessTokenValiditySeconds(10)
                 .refreshTokenValiditySeconds(10)
+                .and()
+                .withClient("ghfront")
+                .secret("secret")
+                .resourceIds(OAuthSettings.resourceId)
+                .authorizedGrantTypes("password", "refresh_token")
+                .scopes("read", "write")
+                .accessTokenValiditySeconds(3600)
+                .refreshTokenValiditySeconds(3600)
     }
 
     @Bean

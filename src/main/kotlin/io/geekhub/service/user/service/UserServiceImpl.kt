@@ -24,9 +24,8 @@ class UserServiceImpl(
         val passwordEncoder: PasswordEncoder
 ) : UserService {
 
-    private val logger: Logger = LoggerFactory.getLogger(UserServiceImpl::class.java)
-
     companion object {
+        private val logger: Logger = LoggerFactory.getLogger(UserServiceImpl::class.java)
         const val USER_ROLE = "USER"
     }
 
