@@ -1,5 +1,7 @@
 package io.geekhub.service.shared.authorization
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
@@ -12,12 +14,11 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer
-import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService
+import org.springframework.security.oauth2.provider.ClientAlreadyExistsException
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices
 import org.springframework.security.oauth2.provider.token.TokenStore
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore
-import javax.annotation.PreDestroy
 import javax.sql.DataSource
 
 /**
@@ -31,6 +32,10 @@ import javax.sql.DataSource
 @Configuration
 @EnableAuthorizationServer
 class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(OAuth2AuthorizationServerConfig::class.java)
+    }
 
     @Autowired
     private lateinit var authenticationManager: AuthenticationManager
@@ -56,40 +61,35 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
     @Throws(Exception::class)
     override fun configure(clients: ClientDetailsServiceConfigurer) {
 
-        clients.jdbc(this.dataSource)
-                .passwordEncoder(this.passwordEncoder)
-                .withClient("roclient")
-                .secret("secret")
-                .resourceIds(OAuthSettings.resourceId)
-                .authorizedGrantTypes("client_credentials")
-                .scopes("read")
-                .accessTokenValiditySeconds(3600)
-                .refreshTokenValiditySeconds(3600)
-                .and()
-                .withClient("shortlivedclient")
-                .secret("secret")
-                .resourceIds(OAuthSettings.resourceId)
-                .authorizedGrantTypes("client_credentials")
-                .scopes("read")
-                .accessTokenValiditySeconds(10)
-                .refreshTokenValiditySeconds(10)
-                .and()
-                .withClient("ghfront")
-                .secret("secret")
-                .resourceIds(OAuthSettings.resourceId)
-                .authorizedGrantTypes("password", "refresh_token")
-                .scopes("read", "write")
-                .accessTokenValiditySeconds(3600)
-                .refreshTokenValiditySeconds(3600)
-    }
+        try {
+            clients.jdbc(this.dataSource)
+                    .passwordEncoder(this.passwordEncoder)
+                    .withClient("roclient")
+                    .secret("secret")
+                    .resourceIds(OAuthSettings.resourceId)
+                    .authorizedGrantTypes("client_credentials")
+                    .scopes("read")
+                    .accessTokenValiditySeconds(3600)
+                    .refreshTokenValiditySeconds(3600)
+                    .and()
+                    .withClient("shortlivedclient")
+                    .secret("secret")
+                    .resourceIds(OAuthSettings.resourceId)
+                    .authorizedGrantTypes("client_credentials")
+                    .scopes("read")
+                    .accessTokenValiditySeconds(10)
+                    .refreshTokenValiditySeconds(10)
+                    .and()
+                    .withClient("ghfront")
+                    .secret("secret")
+                    .resourceIds(OAuthSettings.resourceId)
+                    .authorizedGrantTypes("password", "refresh_token")
+                    .scopes("read", "write")
+                    .accessTokenValiditySeconds(3600)
+                    .refreshTokenValiditySeconds(3600)
 
-    @PreDestroy
-    fun deleteDefaultClientDetails() {
-
-        JdbcClientDetailsService(this.dataSource).let {
-            it.removeClientDetails("roclient")
-            it.removeClientDetails("shortlivedclient")
-            it.removeClientDetails("ghfront")
+        } catch (ex: ClientAlreadyExistsException) {
+            logger.warn("Client details are already created, skipping creation.")
         }
     }
 
