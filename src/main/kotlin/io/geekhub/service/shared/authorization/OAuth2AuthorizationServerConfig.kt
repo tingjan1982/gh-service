@@ -61,37 +61,41 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
     @Throws(Exception::class)
     override fun configure(clients: ClientDetailsServiceConfigurer) {
 
+        val clientDetailsServiceBuilder = clients.jdbc(this.dataSource)
+                .passwordEncoder(this.passwordEncoder)
+
         logger.info("Checking to see if client details exist")
         JdbcClientDetailsService(this.dataSource).let {
 
-            if (it.listClientDetails().isEmpty()) {
-                logger.info("Creating client details")
+            it.listClientDetails().let {
+                if (it.isEmpty()) {
+                    logger.info("Creating client details {}", it)
 
-                clients.jdbc(this.dataSource)
-                        .passwordEncoder(this.passwordEncoder)
-                        .withClient("roclient")
-                        .secret("secret")
-                        .resourceIds(OAuthSettings.resourceId)
-                        .authorizedGrantTypes("client_credentials")
-                        .scopes("read")
-                        .accessTokenValiditySeconds(3600)
-                        .refreshTokenValiditySeconds(3600)
-                        .and()
-                        .withClient("shortlivedclient")
-                        .secret("secret")
-                        .resourceIds(OAuthSettings.resourceId)
-                        .authorizedGrantTypes("client_credentials")
-                        .scopes("read")
-                        .accessTokenValiditySeconds(10)
-                        .refreshTokenValiditySeconds(10)
-                        .and()
-                        .withClient("ghfront")
-                        .secret("secret")
-                        .resourceIds(OAuthSettings.resourceId)
-                        .authorizedGrantTypes("password", "refresh_token")
-                        .scopes("read", "write")
-                        .accessTokenValiditySeconds(3600)
-                        .refreshTokenValiditySeconds(3600)
+                    clientDetailsServiceBuilder
+                            .withClient("roclient")
+                            .secret("secret")
+                            .resourceIds(OAuthSettings.resourceId)
+                            .authorizedGrantTypes("client_credentials")
+                            .scopes("read")
+                            .accessTokenValiditySeconds(3600)
+                            .refreshTokenValiditySeconds(3600)
+                            .and()
+                            .withClient("shortlivedclient")
+                            .secret("secret")
+                            .resourceIds(OAuthSettings.resourceId)
+                            .authorizedGrantTypes("client_credentials")
+                            .scopes("read")
+                            .accessTokenValiditySeconds(10)
+                            .refreshTokenValiditySeconds(10)
+                            .and()
+                            .withClient("ghfront")
+                            .secret("secret")
+                            .resourceIds(OAuthSettings.resourceId)
+                            .authorizedGrantTypes("password", "refresh_token")
+                            .scopes("read", "write")
+                            .accessTokenValiditySeconds(3600)
+                            .refreshTokenValiditySeconds(3600)
+                }
             }
         }
     }
