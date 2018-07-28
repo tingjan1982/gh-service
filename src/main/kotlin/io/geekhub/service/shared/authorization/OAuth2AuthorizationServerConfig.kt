@@ -10,10 +10,13 @@ import org.springframework.context.annotation.Primary
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.oauth2.config.annotation.builders.JdbcClientDetailsServiceBuilder
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer
+import org.springframework.security.oauth2.provider.ClientAlreadyExistsException
+import org.springframework.security.oauth2.provider.ClientDetailsService
 import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices
 import org.springframework.security.oauth2.provider.token.TokenStore
@@ -61,43 +64,34 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
     @Throws(Exception::class)
     override fun configure(clients: ClientDetailsServiceConfigurer) {
 
-        val clientDetailsServiceBuilder = clients.jdbc(this.dataSource)
-                .passwordEncoder(this.passwordEncoder)
+        val builder = TolerantClientDetailsServiceBuilder(this.dataSource, this.passwordEncoder)
+                .dataSource(this.dataSource).passwordEncoder(this.passwordEncoder)
+                .withClient("roclient")
+                .secret("secret")
+                .resourceIds(OAuthSettings.resourceId)
+                .authorizedGrantTypes("client_credentials")
+                .scopes("read")
+                .accessTokenValiditySeconds(3600)
+                .refreshTokenValiditySeconds(3600)
+                .and()
+                .withClient("shortlivedclient")
+                .secret("secret")
+                .resourceIds(OAuthSettings.resourceId)
+                .authorizedGrantTypes("client_credentials")
+                .scopes("read")
+                .accessTokenValiditySeconds(10)
+                .refreshTokenValiditySeconds(10)
+                .and()
+                .withClient("ghfront")
+                .secret("secret")
+                .resourceIds(OAuthSettings.resourceId)
+                .authorizedGrantTypes("password", "refresh_token")
+                .scopes("read", "write")
+                .accessTokenValiditySeconds(3600)
+                .refreshTokenValiditySeconds(3600)
+                .and()
 
-        logger.info("Checking to see if client details exist")
-        JdbcClientDetailsService(this.dataSource).let {
-
-            it.listClientDetails().let {
-                if (it.isEmpty()) {
-                    logger.info("Creating client details {}", it)
-
-                    clientDetailsServiceBuilder
-                            .withClient("roclient")
-                            .secret("secret")
-                            .resourceIds(OAuthSettings.resourceId)
-                            .authorizedGrantTypes("client_credentials")
-                            .scopes("read")
-                            .accessTokenValiditySeconds(3600)
-                            .refreshTokenValiditySeconds(3600)
-                            .and()
-                            .withClient("shortlivedclient")
-                            .secret("secret")
-                            .resourceIds(OAuthSettings.resourceId)
-                            .authorizedGrantTypes("client_credentials")
-                            .scopes("read")
-                            .accessTokenValiditySeconds(10)
-                            .refreshTokenValiditySeconds(10)
-                            .and()
-                            .withClient("ghfront")
-                            .secret("secret")
-                            .resourceIds(OAuthSettings.resourceId)
-                            .authorizedGrantTypes("password", "refresh_token")
-                            .scopes("read", "write")
-                            .accessTokenValiditySeconds(3600)
-                            .refreshTokenValiditySeconds(3600)
-                }
-            }
-        }
+        clients.setBuilder(builder)
     }
 
     @Bean
@@ -119,5 +113,19 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
         defaultTokenServices.setTokenStore(tokenStore())
         defaultTokenServices.setSupportRefreshToken(true)
         return defaultTokenServices
+    }
+
+    private class TolerantClientDetailsServiceBuilder(val dataSource: DataSource, val passwordEncoder: PasswordEncoder) : JdbcClientDetailsServiceBuilder() {
+
+        override fun performBuild(): ClientDetailsService {
+            try {
+                return super.performBuild()
+            } catch (ex: ClientAlreadyExistsException) {
+                JdbcClientDetailsService(this.dataSource).let {
+                    it.setPasswordEncoder(this.passwordEncoder)
+                    return it
+                }
+            }
+        }
     }
 }
