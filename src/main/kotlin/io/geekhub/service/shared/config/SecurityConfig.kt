@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.core.env.Environment
 import org.springframework.core.io.ClassPathResource
-import org.springframework.http.HttpMethod
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
@@ -86,10 +85,8 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
 
         http.cors()
                 .and().authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/users").permitAll()
-                //.antMatchers("/actuator/**").permitAll()
                 .antMatchers("/csrf-token").hasRole("ADMIN")
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
                 .and().httpBasic()
     }
 
