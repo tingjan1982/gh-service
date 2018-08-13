@@ -4,7 +4,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
+import org.springframework.core.Ordered
 import org.springframework.core.env.Environment
 import org.springframework.core.io.ClassPathResource
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
@@ -20,8 +22,8 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.csrf.CsrfTokenRepository
 import org.springframework.web.cors.CorsConfiguration
-import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.web.filter.CorsFilter
 import javax.annotation.PreDestroy
 import javax.sql.DataSource
 
@@ -91,24 +93,53 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
     }
 
     /**
+     * This is the only way to make CORS work with Spring Security OAuth2 because the default
+     * configuration (tracked through @EnableAuthorizationServer @Import) does not enable CORS
+     * hence the built security filter chain does not include CorsFilter.
+     *
+     * Solution found here:
+     * https://github.com/spring-projects/spring-security-oauth/issues/938
+     * 
+     * CORS reference:
      * https://docs.spring.io/spring/docs/5.0.5.RELEASE/spring-framework-reference/web.html#mvc-cors
      */
     @Bean
-    fun corsConfigurationSource(): CorsConfigurationSource {
+    fun myCorsFilter(): FilterRegistrationBean<CorsFilter> {
+        val source = UrlBasedCorsConfigurationSource()
 
-        val configuration = CorsConfiguration().apply {
-            this.allowedOrigins = listOf("*")
-            this.allowedMethods = listOf("*")
-            this.allowedHeaders = listOf("*")
-            this.allowCredentials = true
-            this.maxAge = 3600
-        }
+        val configAutenticacao = CorsConfiguration()
+        configAutenticacao.allowCredentials = true
+        configAutenticacao.addAllowedOrigin("*")
+        configAutenticacao.addAllowedHeader("*")
+        configAutenticacao.addAllowedMethod("*")
+        configAutenticacao.setMaxAge(3600L)
+        source.registerCorsConfiguration("/**", configAutenticacao)
 
-        UrlBasedCorsConfigurationSource().let {
-            it.registerCorsConfiguration("/**", configuration)
-            return it
-        }
+        val bean = FilterRegistrationBean(CorsFilter(source))
+        bean.order = Ordered.HIGHEST_PRECEDENCE
+
+        return bean
     }
+
+//    /**
+
+//     */
+//    //@Bean
+//    fun corsConfigurationSource(): CorsConfigurationSource {
+//
+//        val configuration = CorsConfiguration().apply {
+//            this.allowedOrigins = listOf("*")
+//            this.allowedMethods = listOf("*")
+//            this.allowedHeaders = listOf("*")
+//            this.allowCredentials = true
+//            this.maxAge = 3600
+//        }
+//
+//        UrlBasedCorsConfigurationSource().let {
+//            it.registerCorsConfiguration("/**", configuration)
+//            return it
+//        }
+//    }
 
     @Bean
     fun csrfTokenRepository(): CsrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse()
