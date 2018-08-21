@@ -1,11 +1,16 @@
 package io.geekhub.service.user.web
 
 import io.geekhub.service.shared.extensions.toDTO
+import io.geekhub.service.user.model.User
 import io.geekhub.service.user.service.UserService
 import io.geekhub.service.user.web.bean.UpdateUserRequest
 import io.geekhub.service.user.web.bean.UserRequest
 import io.geekhub.service.user.web.bean.UserResponse
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.provider.OAuth2Authentication
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails
 import org.springframework.web.bind.annotation.*
+import javax.persistence.EntityNotFoundException
 import javax.validation.Valid
 
 @RestController
@@ -17,6 +22,19 @@ class UserController(val userService: UserService) {
 
         val createdUser = this.userService.createUser(userRequest)
         return createdUser.toDTO()
+    }
+
+    @GetMapping("/me")
+    fun getCurrentUser(): UserResponse {
+
+        val authentication = SecurityContextHolder.getContext().authentication as OAuth2Authentication
+
+        if (authentication.details is OAuth2AuthenticationDetails) {
+            val userDetails = authentication.details as OAuth2AuthenticationDetails
+            return (userDetails.decodedDetails as User).toDTO()
+        }
+
+        throw EntityNotFoundException()
     }
 
     @GetMapping("/{id}")

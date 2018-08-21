@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.JdbcUserDetailsManager
 import org.springframework.stereotype.Service
+import java.util.*
 import javax.persistence.EntityExistsException
 import javax.transaction.Transactional
 import org.springframework.security.core.userdetails.User as SpringSecurityUser
@@ -63,6 +64,10 @@ class UserServiceImpl(
 
     override fun getUser(id: String): User {
         return this.repository.getOne(id)
+    }
+
+    override fun getUserByUsername(username: String): Optional<User> {
+        return this.repository.findByUsername(username)
     }
 
     override fun checkUserExists(id: String): Boolean {

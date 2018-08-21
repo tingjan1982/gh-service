@@ -1,5 +1,6 @@
 package io.geekhub.service.shared.authorization
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -18,6 +19,10 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore
 @Configuration
 @EnableResourceServer
 class OAuth2ResourceServerConfig : ResourceServerConfigurerAdapter() {
+
+    @Autowired
+    private lateinit var customAccessTokenConverter: CustomAccessTokenConverter
+
 
     override fun configure(config: ResourceServerSecurityConfigurer) {
         config.tokenServices(tokenServices())
@@ -45,6 +50,14 @@ class OAuth2ResourceServerConfig : ResourceServerConfigurerAdapter() {
     }
 
     @Bean
+    @Primary
+    fun tokenServices(): DefaultTokenServices {
+        val defaultTokenServices = DefaultTokenServices()
+        defaultTokenServices.setTokenStore(tokenStore())
+        return defaultTokenServices
+    }
+
+    @Bean
     fun tokenStore(): TokenStore {
         return JwtTokenStore(accessTokenConverter())
     }
@@ -55,15 +68,8 @@ class OAuth2ResourceServerConfig : ResourceServerConfigurerAdapter() {
     @Bean
     fun accessTokenConverter(): JwtAccessTokenConverter {
         val converter = JwtAccessTokenConverter()
+        converter.accessTokenConverter = this.customAccessTokenConverter
         converter.setSigningKey(OAuthSettings.signingKey)
         return converter
-    }
-
-    @Bean
-    @Primary
-    fun tokenServices(): DefaultTokenServices {
-        val defaultTokenServices = DefaultTokenServices()
-        defaultTokenServices.setTokenStore(tokenStore())
-        return defaultTokenServices
     }
 }

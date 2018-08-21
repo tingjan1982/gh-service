@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.provider.ClientAlreadyExistsException
 import org.springframework.security.oauth2.provider.ClientDetailsService
 import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices
+import org.springframework.security.oauth2.provider.token.TokenEnhancerChain
 import org.springframework.security.oauth2.provider.token.TokenStore
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore
@@ -29,7 +30,7 @@ import javax.sql.DataSource
  * Example: https://github.com/spring-projects/spring-security-oauth/tree/master/samples/oauth2/sparklr/src/main/java/org/springframework/security/oauth/examples/sparklr/config
  *
  * Reference:
- * http://www.baeldung.com/spring-security-oauth-jwt
+ * Extra claims - http://www.baeldung.com/spring-security-oauth-jwt
  * https://medium.com/@nydiarra/secure-a-spring-boot-rest-api-with-json-web-token-reference-to-angular-integration-e57a25806c50
  */
 @Configuration
@@ -39,6 +40,9 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
     companion object {
         val logger: Logger = LoggerFactory.getLogger(OAuth2AuthorizationServerConfig::class.java)
     }
+
+    @Autowired
+    private lateinit var userIdTokenEnhancer: UserIdTokenEnhancer
 
     @Autowired
     private lateinit var authenticationManager: AuthenticationManager
@@ -53,13 +57,6 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
     @Autowired
     private lateinit var passwordEncoder: PasswordEncoder
 
-    @Throws(Exception::class)
-    override fun configure(endpoints: AuthorizationServerEndpointsConfigurer) {
-        endpoints.tokenStore(tokenStore())
-                .accessTokenConverter(accessTokenConverter())
-                .authenticationManager(this.authenticationManager)
-                .userDetailsService(this.userDetailsService)
-    }
 
     @Throws(Exception::class)
     override fun configure(clients: ClientDetailsServiceConfigurer) {
@@ -94,6 +91,27 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
         clients.setBuilder(builder)
     }
 
+    @Throws(Exception::class)
+    override fun configure(endpoints: AuthorizationServerEndpointsConfigurer) {
+
+        val tokenEnhancerChain = TokenEnhancerChain()
+        tokenEnhancerChain.setTokenEnhancers(listOf(this.userIdTokenEnhancer, this.accessTokenConverter()))
+
+        endpoints.tokenStore(tokenStore())
+                .tokenEnhancer(tokenEnhancerChain)
+                .authenticationManager(this.authenticationManager)
+                .userDetailsService(this.userDetailsService)
+    }
+
+    @Bean
+    @Primary
+    fun tokenServices(): DefaultTokenServices {
+        val defaultTokenServices = DefaultTokenServices()
+        defaultTokenServices.setTokenStore(tokenStore())
+        defaultTokenServices.setSupportRefreshToken(true)
+        return defaultTokenServices
+    }
+
     @Bean
     fun tokenStore(): TokenStore {
         return JwtTokenStore(accessTokenConverter())
@@ -106,15 +124,15 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
         return converter
     }
 
-    @Bean
-    @Primary
-    fun tokenServices(): DefaultTokenServices {
-        val defaultTokenServices = DefaultTokenServices()
-        defaultTokenServices.setTokenStore(tokenStore())
-        defaultTokenServices.setSupportRefreshToken(true)
-        return defaultTokenServices
-    }
+    
 
+    /**
+     * This class was introduced to circumvent an issue in multi-node environment
+     * due to the nature of lazily initialized JdbcClientDetailsService. The fact
+     * that multiple nodes sharing the same data store results in one node creating
+     * and persisting client details successfully, meanwhile the other node attempting to create the client details
+     * is returned with a ClientAlreadyExistsException.
+     */
     private class TolerantClientDetailsServiceBuilder(val dataSource: DataSource, val passwordEncoder: PasswordEncoder) : JdbcClientDetailsServiceBuilder() {
 
         override fun performBuild(): ClientDetailsService {
