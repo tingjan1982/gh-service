@@ -19,18 +19,21 @@ data class User(
         @GenericGenerator(name = "uuid", strategy = "uuid2")
         var userId: String? = null,
         val username: String,
-        var firstName: String,
-        var lastName: String,
-        var email: String) : BaseAuditableObject<User, String>() {
-
-    constructor(username: String): this(username = username, firstName = "", lastName = "", email = "")
+        var firstName: String = "",
+        var lastName: String = "",
+        var email: String = "") : BaseAuditableObject<User, String>() {
 
     var rank: Rank? = null
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     var interviews: MutableList<Interview> = mutableListOf()
 
-    @ElementCollection
+    /**
+     * todo: might need to revisit how to make this lazy and load on demand.
+     * scenario to reproduce is /users/me API call which throws
+     * LazyInitializationException if fetch mode is LAZY.
+     */
+    @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(name = "gh_user_saved_questions")
     @JoinColumn(name = "saved_question_id")
     @MapKey(name = "questionId")

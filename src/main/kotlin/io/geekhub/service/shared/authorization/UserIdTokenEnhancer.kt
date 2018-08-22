@@ -1,5 +1,6 @@
 package io.geekhub.service.shared.authorization
 
+import io.geekhub.service.shared.exception.UnexpectedAuthException
 import io.geekhub.service.user.service.UserService
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken
@@ -20,27 +21,18 @@ class UserIdTokenEnhancer(val userService: UserService) : TokenEnhancer {
         val additionalInfo = mutableMapOf<String, Any>()
         lateinit var userId: String
 
-        when {
-            authentication.principal is UserDetails -> {
-                val userDetails = authentication.principal as UserDetails
+        val userDetails = authentication.principal as? UserDetails ?: throw UnexpectedAuthException("enhance token with user id.")
 
-                if (userDetails.username == "admin") {
-                    userId = "0"
+        if (userDetails.username == "admin") {
+            userId = "0"
 
-                } else this.userService.getUserByUsername(userDetails.username).ifPresent {
-                    userId = it.userId.toString()
-                }
-            }
-
-            else -> {
-                userId = "UNRESOLVED"
-            }
+        } else this.userService.getUserByUsername(userDetails.username).ifPresent {
+            userId = it.userId.toString()
         }
-
 
         additionalInfo["userId"] = userId
 
-        (accessToken as DefaultOAuth2AccessToken).additionalInformation = additionalInfo
+        (accessToken as? DefaultOAuth2AccessToken)?.additionalInformation = additionalInfo
 
         return accessToken
     }
