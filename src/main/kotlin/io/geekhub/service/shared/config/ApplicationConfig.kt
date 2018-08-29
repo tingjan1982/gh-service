@@ -43,8 +43,7 @@ class ApplicationConfig {
     @Bean
     @Profile("test", "embedded")
     fun dataSource(): DataSource {
-        val builder = EmbeddedDatabaseBuilder()
-        return builder.setType(EmbeddedDatabaseType.HSQL).build()
+        return EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build()
     }
 
 //    @Bean

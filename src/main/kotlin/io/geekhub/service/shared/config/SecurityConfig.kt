@@ -45,11 +45,23 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
     lateinit var environment: Environment
 
     override fun afterPropertiesSet() {
-        val securitySchema = ClassPathResource("security-schema.ddl", SecurityConfig::class.java)
-        ResourceDatabasePopulator(securitySchema).execute(dataSource).let {
-            logger.info("Applied schema: ${securitySchema.path}")
-        }
+        ResourceDatabasePopulator(ClassPathResource("security-schema.ddl", SecurityConfig::class.java)).let {
+            when (this.determineDataSourceType()) {
+                SecurityConfig.DataSourceType.POSTGRESQL -> it.addScript(ClassPathResource("/createAclSchemaPostgres.sql"))
+                SecurityConfig.DataSourceType.EMBEDDED -> it.addScript(ClassPathResource("/createAclSchemaWithAclClassIdType.sql"))
+            }
 
+            it.execute(dataSource)
+        }
+    }
+
+    // todo: this should really check for the actual data source rather than environment profile.
+    fun determineDataSourceType(): DataSourceType {
+
+        return when {
+            this.environment.activeProfiles.any { it == "test" || it == "embedded" } -> DataSourceType.EMBEDDED
+            else -> DataSourceType.POSTGRESQL
+        }
     }
 
     @PreDestroy
@@ -57,8 +69,8 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
         logger.info("Cleanup security schema...")
 
         when {
-            this.environment.activeProfiles.any { it == "dev" || it == "test" } ||
-            this.environment.defaultProfiles.isNotEmpty() -> {
+            this.environment.activeProfiles.any { it == "dev" || it == "test" || it == "embedded" } ||
+                    this.environment.defaultProfiles.isNotEmpty() -> {
 
                 val securitySchema = ClassPathResource("security-schema-drop.ddl", SecurityConfig::class.java)
                 ResourceDatabasePopulator(securitySchema).execute(dataSource).let {
@@ -99,7 +111,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
      *
      * Solution found here:
      * https://github.com/spring-projects/spring-security-oauth/issues/938
-     * 
+     *
      * CORS reference:
      * https://docs.spring.io/spring/docs/5.0.5.RELEASE/spring-framework-reference/web.html#mvc-cors
      */
@@ -120,26 +132,6 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
 
         return bean
     }
-
-//    /**
-
-//     */
-//    //@Bean
-//    fun corsConfigurationSource(): CorsConfigurationSource {
-//
-//        val configuration = CorsConfiguration().apply {
-//            this.allowedOrigins = listOf("*")
-//            this.allowedMethods = listOf("*")
-//            this.allowedHeaders = listOf("*")
-//            this.allowCredentials = true
-//            this.maxAge = 3600
-//        }
-//
-//        UrlBasedCorsConfigurationSource().let {
-//            it.registerCorsConfiguration("/**", configuration)
-//            return it
-//        }
-//    }
 
     @Bean
     fun csrfTokenRepository(): CsrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse()
@@ -179,5 +171,9 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder()
+    }
+
+    enum class DataSourceType {
+        POSTGRESQL, EMBEDDED
     }
 }

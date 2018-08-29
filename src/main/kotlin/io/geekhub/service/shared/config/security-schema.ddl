@@ -25,3 +25,5 @@ create table if not exists oauth_client_details (
   additional_information VARCHAR(4096),
   autoapprove VARCHAR(256)
 );
+
+-- todo: for staging or higher profiles, need to consider tables that are kept around.

@@ -1,5 +1,6 @@
 package io.geekhub.service.user.service
 
+import io.geekhub.service.accesscontrol.service.AccessControlAdminService
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.user.model.User
@@ -22,7 +23,8 @@ class UserServiceImpl(
         val repository: UserRepository,
         val questionService: QuestionService,
         val userDetailsManager: JdbcUserDetailsManager,
-        val passwordEncoder: PasswordEncoder
+        val passwordEncoder: PasswordEncoder,
+        val accessControlService: AccessControlAdminService
 ) : UserService {
 
     companion object {
@@ -44,9 +46,10 @@ class UserServiceImpl(
         logger.info("Created user credentials for ${userRequest.username}")
 
         userRequest.toEntity().let {
-            this.repository.save(it).also {
-                logger.info("Created user: $it")
-            }
+            this.repository.save(it)
+            logger.info("Created user: $it")
+
+            this.accessControlService.createAccessControl(it.userId.toString(), User::class)
 
             return it
         }
