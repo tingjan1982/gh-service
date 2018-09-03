@@ -29,9 +29,9 @@ class DomainSecurityAspect(val accessControlAdminService: AccessControlAdminServ
     }
 
     @Around("serviceClassExpression()")
-    fun createAclForBusinessObject(pjp: ProceedingJoinPoint): Any {
+    fun createAclForBusinessObject(pjp: ProceedingJoinPoint): Any? {
 
-        return pjp.proceed().let {
+        return pjp.proceed()?.let {
             it::class.findAnnotation<Entity>()?.let { _ ->
                 if (isSupportedEntities(it::class)) {
                     logger.info("Creating ACL record for business object: $it")
