@@ -13,7 +13,7 @@ data class ApiError(
         val timestamp: LocalDateTime = LocalDateTime.now(),
         val message: String,
         val subErrors: MutableList<ApiSubError> = mutableListOf(),
-        var debugMessage: String?) {
+        var debugMessage: String? = null) {
 
 
     data class ApiSubError(

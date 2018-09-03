@@ -21,10 +21,10 @@ internal class AccessControlAdminServiceTest {
     @Transactional
     fun createAccessControl() {
 
-        accessControlAdminService.createAccessControl("abc-def", User::class).let {
+        accessControlAdminService.createAccessControl("abc-user-id", User::class, "abc-owner").let {
             assert(it.owner).isNotNull()
             assert(it.id).isNotNull()
-            assert(it.entries.size).isEqualTo(1)
+            assert(it.entries.size).isEqualTo(2)
         }
     }
 }

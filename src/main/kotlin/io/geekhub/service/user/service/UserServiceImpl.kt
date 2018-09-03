@@ -1,6 +1,5 @@
 package io.geekhub.service.user.service
 
-import io.geekhub.service.accesscontrol.service.AccessControlAdminService
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.user.model.User
@@ -9,6 +8,8 @@ import io.geekhub.service.user.web.bean.UpdateUserRequest
 import io.geekhub.service.user.web.bean.UserRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.JdbcUserDetailsManager
 import org.springframework.stereotype.Service
@@ -23,8 +24,7 @@ class UserServiceImpl(
         val repository: UserRepository,
         val questionService: QuestionService,
         val userDetailsManager: JdbcUserDetailsManager,
-        val passwordEncoder: PasswordEncoder,
-        val accessControlService: AccessControlAdminService
+        val passwordEncoder: PasswordEncoder
 ) : UserService {
 
     companion object {
@@ -32,6 +32,10 @@ class UserServiceImpl(
         const val USER_ROLE = "USER"
     }
 
+    /**
+     * Only admin user can call this method.
+     */
+    @Secured("ROLE_ADMIN")
     override fun createUser(userRequest: UserRequest): User {
 
         this.checkUserRequest(userRequest)
@@ -49,8 +53,6 @@ class UserServiceImpl(
             this.repository.save(it)
             logger.info("Created user: $it")
 
-            this.accessControlService.createAccessControl(it.userId.toString(), User::class)
-
             return it
         }
     }
@@ -65,6 +67,7 @@ class UserServiceImpl(
         }
     }
 
+    @PostAuthorize("hasPermission(returnObject, 'ADMINISTRATION')")
     override fun getUser(id: String): User {
         return this.repository.getOne(id)
     }

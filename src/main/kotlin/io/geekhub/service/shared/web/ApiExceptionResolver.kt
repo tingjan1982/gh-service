@@ -17,6 +17,8 @@ import javax.persistence.EntityNotFoundException
 import javax.servlet.http.HttpServletRequest
 import javax.validation.ConstraintViolationException
 
+typealias SpringAccessDeniedException = org.springframework.security.access.AccessDeniedException
+
 /**
  * RestControllerAdvice saves user from having to specify @ResponseBody,
  * similar to what RestController does.
@@ -30,6 +32,13 @@ class ApiExceptionResolver : ResponseEntityExceptionHandler() {
     fun handleEntityNotFound(request: HttpServletRequest, exception: Exception): ResponseEntity<ApiError> {
 
         return this.logError(HttpStatus.NOT_FOUND, exception, request)
+    }
+
+    @ExceptionHandler(SpringAccessDeniedException::class)
+    fun handleAccessDeniedException(request: HttpServletRequest, exception: SpringAccessDeniedException): ResponseEntity<ApiError> {
+
+        val errorMsg = "${exception.message} - your current credentials may not allow access to requested resource."
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiError(status = HttpStatus.FORBIDDEN.value(), message = errorMsg))
     }
 
     @ExceptionHandler(EntityExistsException::class, ConstraintViolationException::class)

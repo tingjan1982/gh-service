@@ -15,7 +15,9 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 @IntegrationTest
 internal class UserServiceImplIntegrationTest {
@@ -33,6 +35,10 @@ internal class UserServiceImplIntegrationTest {
 
     @BeforeAll
     fun prepare() {
+        SecurityContextHolder.getContext().authentication = TestingAuthenticationToken("admin", "admin", "ROLE_ADMIN").also {
+            it.isAuthenticated = true
+        }
+        
         this.createdUser = this.userService.createUser(UserRequest(username = "joelin",
                 firstName = "Joe",
                 lastName = "Lin",

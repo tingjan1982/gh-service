@@ -1,7 +1,7 @@
 package io.geekhub.service.shared.authorization
 
 import io.geekhub.service.user.model.User
-import io.geekhub.service.user.service.UserService
+import io.geekhub.service.user.repository.UserRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.security.oauth2.provider.OAuth2Authentication
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
  * Adds additional information to Authentication object's 'details' reference.
  */
 @Component
-class CustomAccessTokenConverter(val userService: UserService) : DefaultAccessTokenConverter() {
+class CustomAccessTokenConverter(val userRepository: UserRepository) : DefaultAccessTokenConverter() {
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(CustomAccessTokenConverter::class.java)
@@ -30,7 +30,7 @@ class CustomAccessTokenConverter(val userService: UserService) : DefaultAccessTo
                     User("0", "admin", "Admin", "Admin", "admin@geekhub.tw")
                 }
 
-                else -> this.userService.getUser(userId)
+                else -> this.userRepository.getOne(userId)
             }
         }
 

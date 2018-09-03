@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.ConversionService
 import org.springframework.core.convert.support.GenericConversionService
 import org.springframework.core.env.Environment
-import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler
 import org.springframework.security.acls.AclPermissionEvaluator
 import org.springframework.security.acls.domain.*
@@ -18,6 +17,7 @@ import org.springframework.security.acls.model.PermissionGrantingStrategy
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration
 import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler
 import org.springframework.util.ReflectionUtils
 import javax.sql.DataSource
 
@@ -26,13 +26,14 @@ import javax.sql.DataSource
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 class AclMethodSecurityConfig(val dataSource: DataSource, val environment: Environment) : GlobalMethodSecurityConfiguration() {
 
-    override fun createExpressionHandler(): MethodSecurityExpressionHandler {
-        return defaultMethodSecurityExpressionHandler()
-    }
-
+    /**
+     * Creates the OAuth2 flavor of the MethodSecurityExpressionHandler because when
+     * oauth2 is configured, OAuth2MethodSecurityConfiguration will
+     * change implementation to OAuth2 if it defects otherwise during post bean construction phase.
+     */
     @Bean
     fun defaultMethodSecurityExpressionHandler(): MethodSecurityExpressionHandler {
-        val expressionHandler = DefaultMethodSecurityExpressionHandler()
+        val expressionHandler = OAuth2MethodSecurityExpressionHandler()
         val permissionEvaluator = AclPermissionEvaluator(aclService())
         expressionHandler.setPermissionEvaluator(permissionEvaluator)
 
