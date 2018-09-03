@@ -47,7 +47,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
     override fun afterPropertiesSet() {
         ResourceDatabasePopulator(ClassPathResource("security-schema.ddl", SecurityConfig::class.java)).let {
             when (this.determineDataSourceType()) {
-                SecurityConfig.DataSourceType.POSTGRESQL -> it.addScript(ClassPathResource("/createAclSchemaPostgres.sql"))
+                SecurityConfig.DataSourceType.POSTGRESQL -> it.addScript(ClassPathResource("createAclSchemaPostgres.sql", SecurityConfig::class.java))
                 SecurityConfig.DataSourceType.EMBEDDED -> it.addScript(ClassPathResource("/createAclSchemaWithAclClassIdType.sql"))
             }
 
