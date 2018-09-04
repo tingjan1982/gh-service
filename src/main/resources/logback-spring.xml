@@ -24,7 +24,7 @@ xml to groovy translator - https://logback.qos.ch/translator/asGroovy.html
         </rollingPolicy>
     </appender>
     
-    <logger name="logging.level.io.geekhub.service" level="debug" additivity="false">
+    <logger name="io.geekhub.service" level="debug" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
         <appender-ref ref="JSON"/>

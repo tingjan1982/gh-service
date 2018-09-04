@@ -57,6 +57,8 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
     @Autowired
     private lateinit var passwordEncoder: PasswordEncoder
 
+    @Autowired
+    private lateinit var customAccessTokenConverter: CustomAccessTokenConverter
 
     @Throws(Exception::class)
     override fun configure(clients: ClientDetailsServiceConfigurer) {
@@ -120,6 +122,7 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
     @Bean
     fun accessTokenConverter(): JwtAccessTokenConverter {
         val converter = JwtAccessTokenConverter()
+        converter.accessTokenConverter = this.customAccessTokenConverter
         converter.setSigningKey(OAuthSettings.signingKey)
         return converter
     }

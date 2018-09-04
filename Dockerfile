@@ -23,7 +23,7 @@ ENV profile embedded
 # https://docs.docker.com/engine/reference/builder/#shell-form-entrypoint-example
 # additional info on exec: https://stackoverflow.com/questions/18351198/what-are-the-uses-of-the-exec-command-in-shell-scripts
 ENTRYPOINT eval $(AWS_ENV_PATH=/production/gh-service AWS_REGION=ap-northeast-1 /bin/aws-env) && \\
-exec java -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=${profile} -Ddatabase.host=${dbhost} -Ddatabase.password=${dbpassword} -jar /app.jar
+exec java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=58080 -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=${profile} -Ddatabase.host=${dbhost} -Ddatabase.password=${dbpassword} -jar /app.jar
 
 # exec form
 #ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=${profile}","-jar","/app.jar"]
