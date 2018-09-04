@@ -8,8 +8,9 @@ data class QuestionResponse(
         val category: String,
         val topic: String,
         val difficulty: Question.Difficulty,
-        val status: Question.QuestionStatus,
         val visibilityScope: Question.VisibilityScope,
         val contributedBy: String?,
-        val answer: String?
-)
+        val possibleAnswers: List<PossibleAnswerResponse> = listOf()
+) {
+    data class PossibleAnswerResponse(val answer: String, val correct: Boolean)
+}

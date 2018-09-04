@@ -1,10 +1,10 @@
 package io.geekhub.service.questions.service
 
+import assertk.assert
+import assertk.assertions.isNotNull
+import io.geekhub.service.questions.model.PossibleAnswer
 import io.geekhub.service.questions.model.Question
-import io.geekhub.service.questions.web.bean.AnswerRequest
 import io.geekhub.service.shared.annotation.IntegrationTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -16,26 +16,17 @@ internal class QuestionServiceImplIntegrationTest {
 
     @Test
     fun saveQuestion() {
-    }
 
-    @Test
-    fun getQuestion() {
-    }
+        val createdQuestion = Question(question = "Dummy question").apply {
+            this.addAnswer(PossibleAnswer(answer = "A", correct = true))
+            this.addAnswer(PossibleAnswer(answer = "B", correct = false))
+        }.let {
+            return@let this.questionService.saveQuestion(it)
+        }
 
-    @Test
-    fun createQuestionAnswer() {
-
-        val question = this.questionService.saveQuestion(Question(question = "Question"))
-        val questionId = question.questionId.toString()
-        assertNotNull(questionId)
-
-        this.questionService.createQuestionAnswer(questionId, AnswerRequest("correct", listOf("possible 1", "possible 2")))
-
-        this.questionService.getQuestion(questionId)?.let {
-            it.getAnswerDetails().let {
-                assertEquals("correct", it.correctAnswer)
-                assertEquals(2, it.possibleAnswers.size)
-            }
+        assert(createdQuestion.id).isNotNull()
+        createdQuestion.possibleAnswers.forEach {
+            assert(it.id).isNotNull()
         }
     }
 }

@@ -22,10 +22,10 @@ internal class QuestionSearchServiceIntegrationTest {
 
     @BeforeAll
     fun prepare() {
-        this.questionService.saveQuestion(Question("this is a simple question"))
-        this.questionService.saveQuestion(Question("simple"))
-        this.questionService.saveQuestion(Question("simplequestion"))
-        this.questionService.saveQuestion(Question("---simple---"))
+        this.questionService.saveQuestion(Question(question = "this is a simple question"))
+        this.questionService.saveQuestion(Question(question = "simple"))
+        this.questionService.saveQuestion(Question(question = "simple question"))
+        this.questionService.saveQuestion(Question(question = "---simple---"))
     }
 
     @Test

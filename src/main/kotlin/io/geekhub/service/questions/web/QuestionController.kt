@@ -1,17 +1,13 @@
 package io.geekhub.service.questions.web
 
-import io.geekhub.service.questions.model.Answer
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.service.QuestionSearchService
 import io.geekhub.service.questions.service.QuestionService
-import io.geekhub.service.questions.web.bean.AnswerRequest
 import io.geekhub.service.questions.web.bean.QuestionRequest
 import io.geekhub.service.questions.web.bean.QuestionResponse
 import io.geekhub.service.questions.web.bean.SearchRequest
-import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
-import io.geekhub.service.user.model.User
 import io.geekhub.service.user.service.UserService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -33,16 +29,12 @@ class QuestionController(val questionService: QuestionService, val questionSearc
     fun createQuestion(@Valid @RequestBody question: QuestionRequest): QuestionResponse {
         logger.info("Received creation request for: $question")
 
-        question.contributedBy?.let {
-            if (!userService.checkUserExists(it)) {
-                throw BusinessObjectNotFoundException(User::class, it)
-            }
+        val questionToCreate = question.toEntity()
+        question.possibleAnswers.forEach {
+            questionToCreate.addAnswer(it.toEntity())
         }
 
-        val questionToCreate = question.toEntity()
-        val createdQuestion = this.questionService.saveQuestion(questionToCreate)
-
-        return createdQuestion.toDTO()
+        return this.questionService.saveQuestion(questionToCreate).toDTO()
     }
 
     @GetMapping
@@ -63,29 +55,13 @@ class QuestionController(val questionService: QuestionService, val questionSearc
     }
 
 
-    @PostMapping("/{id}/answers")
-    fun createAnswer(@PathVariable id: String, @Valid @RequestBody answerRequest: AnswerRequest): QuestionResponse {
+    @PutMapping("/{id}/visibility")
+    fun changeStatus(@PathVariable id: String, visibility: HttpEntity<String>): QuestionResponse {
 
-        this.questionService.createQuestionAnswer(id, answerRequest)
+        visibility.body?.let {
+            return this.questionService.updateVisibility(id, Question.VisibilityScope.valueOf(it)).toDTO()
 
-        return this.questionService.loadQuestion(id).toDTO()
-    }
-
-    @GetMapping("/{id}/answers")
-    fun getAnswers(@PathVariable id: String): Answer {
-
-        this.questionService.loadQuestion(id).let {
-            return it.getAnswerDetails()
-        }
-    }
-
-    @PutMapping("/{id}/status")
-    fun changeStatus(@PathVariable id: String,  status: HttpEntity<String>): QuestionResponse {
-
-        status.body?.let {
-            return this.questionService.changeQuestionStatus(id, Question.QuestionStatus.valueOf(it)).toDTO()
-
-        } ?: throw IllegalArgumentException("Status is required")
+        } ?: throw IllegalArgumentException("Visibility is required")
 
     }
 }

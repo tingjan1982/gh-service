@@ -1,7 +1,6 @@
 package io.geekhub.service.questions.service
 
 import io.geekhub.service.questions.model.Question
-import io.geekhub.service.questions.web.bean.AnswerRequest
 
 interface QuestionService {
 
@@ -11,7 +10,5 @@ interface QuestionService {
 
     fun loadQuestion(id: String): Question
 
-    fun createQuestionAnswer(id: String, answer: AnswerRequest)
-
-    fun changeQuestionStatus(id: String, statusToChange: Question.QuestionStatus): Question
+    fun updateVisibility(id: String, visibilityToChange: Question.VisibilityScope): Question
 }

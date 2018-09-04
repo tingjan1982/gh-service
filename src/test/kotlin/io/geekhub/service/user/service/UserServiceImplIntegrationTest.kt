@@ -74,7 +74,7 @@ internal class UserServiceImplIntegrationTest {
     @Test
     fun createUserWithSavedQuestions() {
 
-        val createdQuestion = this.questionService.saveQuestion(Question("sample question"))
+        val createdQuestion = this.questionService.saveQuestion(Question(question = "sample question"))
 
         val user = this.userService.addSavedQuestion(this.createdUser.userId.toString(),
                 listOf(createdQuestion.questionId.toString()))

@@ -83,13 +83,14 @@ data class Interview(
         var score = 0.0
         val weightsMap = this.calculateQuestionsWeight()
 
-        score = questions.filter {
-            it.value.answer == it.key.getAnswer()
-        }.map {
-            weightsMap[it.key.id]
-        }.sumByDouble {
-            score + it!!
-        }
+        // todo: revisit interview score calculation
+//        score = questions.filter {
+//            it.value.answer == it.key.getAnswer()
+//        }.map {
+//            weightsMap[it.key.id]
+//        }.sumByDouble {
+//            score + it!!
+//        }
 
         return score
     }

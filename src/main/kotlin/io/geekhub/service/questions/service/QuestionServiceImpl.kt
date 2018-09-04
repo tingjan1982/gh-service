@@ -2,9 +2,7 @@ package io.geekhub.service.questions.service
 
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.repository.QuestionRepository
-import io.geekhub.service.questions.web.bean.AnswerRequest
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
-import io.geekhub.service.shared.extensions.toEntity
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -37,17 +35,11 @@ class QuestionServiceImpl(val questionRepository: QuestionRepository, val entity
         } ?: throw BusinessObjectNotFoundException(Question::class, id)
     }
 
-    override fun createQuestionAnswer(id: String, answer: AnswerRequest) {
-
-        logger.info("Pass in answer: $answer")
-        this.getQuestion(id)?.addAnswer(answer.toEntity()) ?: throw BusinessObjectNotFoundException(Question::class, id)
-    }
-
-    override fun changeQuestionStatus(id: String, statusToChange: Question.QuestionStatus): Question {
+    override fun updateVisibility(id: String, visibilityToChange: Question.VisibilityScope): Question {
 
         this.getQuestion(id)?.let {
-            logger.info("Updating question status from ${it.status} to $statusToChange")
-            it.status = statusToChange
+            logger.info("Updating question visibility from ${it.visibilityScope} to $visibilityToChange")
+            it.visibilityScope = visibilityToChange
 
             return it
 

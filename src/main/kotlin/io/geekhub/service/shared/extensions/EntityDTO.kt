@@ -1,8 +1,7 @@
 package io.geekhub.service.shared.extensions
 
-import io.geekhub.service.questions.model.Answer
+import io.geekhub.service.questions.model.PossibleAnswer
 import io.geekhub.service.questions.model.Question
-import io.geekhub.service.questions.web.bean.AnswerRequest
 import io.geekhub.service.questions.web.bean.QuestionRequest
 import io.geekhub.service.questions.web.bean.QuestionResponse
 import io.geekhub.service.user.model.User
@@ -30,10 +29,10 @@ fun QuestionRequest.toEntity() = Question(
         category = this.category,
         topic = this.topic,
         difficulty = this.difficulty,
-        status = this.status,
-        visibilityScope = this.visibilityScope,
-        contributedBy = this.contributedBy
+        visibilityScope = this.visibilityScope
 )
+
+fun QuestionRequest.PossibleAnswerRequest.toEntity() = PossibleAnswer(answer = this.answer, correct = this.correctAnswer)
 
 fun Question.toDTO() = QuestionResponse(
         this.questionId.toString(),
@@ -41,13 +40,9 @@ fun Question.toDTO() = QuestionResponse(
         this.category,
         this.topic,
         this.difficulty,
-        this.status,
         this.visibilityScope,
         this.contributedBy,
-        this.getAnswer()
+        this.possibleAnswers.map { it.toDTO() }.toList()
 )
 
-fun AnswerRequest.toEntity() = Answer(
-        correctAnswer = this.correctAnswer,
-        possibleAnswers = this.possibleAnswers?.toMutableList() ?: mutableListOf()
-)
+fun PossibleAnswer.toDTO() = QuestionResponse.PossibleAnswerResponse(this.answer, this.correct)

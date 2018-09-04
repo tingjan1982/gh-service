@@ -21,7 +21,12 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 import org.springframework.util.ReflectionUtils
 import javax.sql.DataSource
 
-
+/**
+ * Reference:
+ * https://www.baeldung.com/spring-security-acl
+ * https://docs.spring.io/spring-security/site/docs/5.0.7.RELEASE/reference/htmlsingle/#domain-acls
+ * https://www.baeldung.com/spring-security-method-security
+ */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 class AclMethodSecurityConfig(val dataSource: DataSource, val environment: Environment) : GlobalMethodSecurityConfiguration() {
@@ -49,6 +54,11 @@ class AclMethodSecurityConfig(val dataSource: DataSource, val environment: Envir
         }
     }
 
+    /**
+     * Needs to override identity queries for Postgres by getting the last generated id value in the current session.
+     * 
+     * http://www.sqlines.com/postgresql/datatypes/serial
+     */
     @Bean
     fun aclService(): JdbcMutableAclService {
         return JdbcMutableAclService(this.dataSource, lookupStrategy(), aclCache()).also {
