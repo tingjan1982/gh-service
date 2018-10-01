@@ -45,7 +45,7 @@ data class Question(
     @OneToMany(mappedBy = "question", fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     val possibleAnswers: MutableList<PossibleAnswer> = mutableListOf()
 
-    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "question", cascade = [CascadeType.ALL])
     @MapKey(name = "key")
     private val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf()
 
@@ -53,6 +53,16 @@ data class Question(
     fun addAnswer(answer: PossibleAnswer) {
         this.possibleAnswers.add(answer)
         answer.question = this
+    }
+
+    fun addAttribute(attribute: QuestionAttribute) {
+
+        attributes[attribute.key] = attribute
+        attribute.question = this
+    }
+
+    fun getAttribute(attributeKey: String): QuestionAttribute? {
+        return attributes[attributeKey]
     }
 
     override fun getId(): String? {

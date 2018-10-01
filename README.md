@@ -173,7 +173,7 @@ Pull Docker image:
 
 Run Docker container:
 
-`sudo docker run -it --name teamcity-server-instance -v /Users/jlin/teamcity/data:/data/teamcity_server/datadir -v /Users/jlin/teamcity/logs:/data/teamcity_server/logs -p 8111:8111 jetbrains/teamcity-server`
+`sudo docker run -it --name teamcity-server -v /Users/jlin/teamcity/data:/data/teamcity_server/datadir -v /Users/jlin/teamcity/logs:/data/teamcity_server/logs -p 8111:8111 jetbrains/teamcity-server`
 
 The command runs a server docker container, binds data directory, logs directory and port.
 

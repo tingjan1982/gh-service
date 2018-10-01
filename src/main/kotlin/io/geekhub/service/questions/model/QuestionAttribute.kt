@@ -13,9 +13,13 @@ data class QuestionAttribute(
 
         @ManyToOne
         @JoinColumn(name = "question_id")
-        val question: Question,
+        var question: Question? = null,
         val key: String,
-        val value: String) : BaseAuditableObject<QuestionAttribute, Long>() {
+        var value: String) : BaseAuditableObject<QuestionAttribute, Long>() {
+
+    companion object {
+        const val DESCRIPTION_KEY = "description"
+    }
 
     override fun getId(): Long? {
         return this.attributeId

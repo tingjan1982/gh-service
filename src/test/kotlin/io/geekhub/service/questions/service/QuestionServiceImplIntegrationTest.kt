@@ -4,6 +4,8 @@ import assertk.assert
 import assertk.assertions.isNotNull
 import io.geekhub.service.questions.model.PossibleAnswer
 import io.geekhub.service.questions.model.Question
+import io.geekhub.service.questions.model.QuestionAttribute
+import io.geekhub.service.questions.model.QuestionAttribute.Companion.DESCRIPTION_KEY
 import io.geekhub.service.shared.annotation.IntegrationTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,6 +29,19 @@ internal class QuestionServiceImplIntegrationTest {
         assert(createdQuestion.id).isNotNull()
         createdQuestion.possibleAnswers.forEach {
             assert(it.id).isNotNull()
+        }
+    }
+
+    /**
+     * https://medium.com/@elye.project/mastering-kotlin-standard-functions-run-with-let-also-and-apply-9cd334b0ef84
+     */
+    @Test
+    fun saveOrUpdateAttribute() {
+
+        this.questionService.saveQuestion(Question(question = "test")).let { 
+            questionService.saveOrUpdateAttribute(it.id.toString(), QuestionAttribute(key = DESCRIPTION_KEY, value = "something"))
+        }.let {
+            assert(it.getAttribute(DESCRIPTION_KEY)).isNotNull()
         }
     }
 }

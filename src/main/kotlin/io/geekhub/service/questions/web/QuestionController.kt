@@ -1,6 +1,8 @@
 package io.geekhub.service.questions.web
 
 import io.geekhub.service.questions.model.Question
+import io.geekhub.service.questions.model.QuestionAttribute
+import io.geekhub.service.questions.model.QuestionAttribute.Companion.DESCRIPTION_KEY
 import io.geekhub.service.questions.service.QuestionSearchService
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.questions.web.bean.QuestionRequest
@@ -54,6 +56,14 @@ class QuestionController(val questionService: QuestionService, val questionSearc
         return questionService.loadQuestion(id).toDTO()
     }
 
+    @PutMapping("/{id}/attributes/description")
+    fun saveQuestionAttribute(@PathVariable id: String, description: HttpEntity<String>): QuestionResponse {
+
+        return description.body?.let {
+            this.questionService.saveOrUpdateAttribute(id, QuestionAttribute(key = DESCRIPTION_KEY, value = it))
+            
+        }?.toDTO() ?: throw IllegalArgumentException("Description is required")
+    }
 
     @PutMapping("/{id}/visibility")
     fun changeStatus(@PathVariable id: String, visibility: HttpEntity<String>): QuestionResponse {
