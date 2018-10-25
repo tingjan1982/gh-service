@@ -39,6 +39,12 @@ data class User(
     @MapKey(name = "questionId")
     var savedQuestions: MutableMap<String, Question> = mutableMapOf()
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @JoinTable(name = "gh_user_liked_questions")
+    @JoinColumn(name = "liked_question_id")
+    @MapKey(name = "questionId")
+    var likedQuestions: MutableMap<String, Question> = mutableMapOf()
+
     override fun getId(): String? {
         return userId
     }

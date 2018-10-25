@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
+import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import springfox.documentation.builders.PathSelectors
 import springfox.documentation.builders.RequestHandlerSelectors
@@ -34,6 +35,7 @@ import javax.sql.DataSource
 @EnableJpaRepositories("io.geekhub.service")
 @EnableJpaAuditing
 @EnableTransactionManagement
+@EnableScheduling
 @EnableSwagger2
 class ApplicationConfig {
 

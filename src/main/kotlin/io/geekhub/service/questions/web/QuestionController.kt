@@ -5,23 +5,25 @@ import io.geekhub.service.questions.model.QuestionAttribute
 import io.geekhub.service.questions.model.QuestionAttribute.Companion.DESCRIPTION_KEY
 import io.geekhub.service.questions.service.QuestionSearchService
 import io.geekhub.service.questions.service.QuestionService
+import io.geekhub.service.questions.service.SocialLikeService
 import io.geekhub.service.questions.web.bean.QuestionRequest
 import io.geekhub.service.questions.web.bean.QuestionResponse
 import io.geekhub.service.questions.web.bean.SearchRequest
+import io.geekhub.service.shared.extensions.currentUser
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
-import io.geekhub.service.user.service.UserService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpEntity
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 @RestController
 @RequestMapping("/questions")
-class QuestionController(val questionService: QuestionService, val questionSearchService: QuestionSearchService, val userService: UserService) {
+class QuestionController(val questionService: QuestionService, val questionSearchService: QuestionSearchService, val socialLikeService: SocialLikeService) {
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(QuestionController::class.java)
@@ -73,5 +75,14 @@ class QuestionController(val questionService: QuestionService, val questionSearc
 
         } ?: throw IllegalArgumentException("Visibility is required")
 
+    }
+
+    @PutMapping("/{id}/like")
+    fun likeQuestion(@PathVariable id: String): QuestionResponse {
+
+        val currentUser = SecurityContextHolder.getContext().currentUser()
+        this.socialLikeService.likeQuestion(id, currentUser.userId.toString())
+
+        return this.questionService.loadQuestion(id).toDTO()
     }
 }

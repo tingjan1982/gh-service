@@ -19,6 +19,7 @@ data class QuestionAttribute(
 
     companion object {
         const val DESCRIPTION_KEY = "description"
+        const val TOTAL_LIKES_KEY = "total_likes"
     }
 
     override fun getId(): Long? {

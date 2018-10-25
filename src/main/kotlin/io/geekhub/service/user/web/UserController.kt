@@ -1,15 +1,12 @@
 package io.geekhub.service.user.web
 
-import io.geekhub.service.shared.exception.UnexpectedAuthException
+import io.geekhub.service.shared.extensions.currentUser
 import io.geekhub.service.shared.extensions.toDTO
-import io.geekhub.service.user.model.User
 import io.geekhub.service.user.service.UserService
 import io.geekhub.service.user.web.bean.UpdateUserRequest
 import io.geekhub.service.user.web.bean.UserRequest
 import io.geekhub.service.user.web.bean.UserResponse
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.oauth2.provider.OAuth2Authentication
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
@@ -27,12 +24,7 @@ class UserController(val userService: UserService) {
     @GetMapping("/me")
     fun getCurrentUser(): UserResponse {
 
-        val oauth2Authentication = SecurityContextHolder.getContext().authentication as OAuth2Authentication
-
-        val userDetails = oauth2Authentication.details as? OAuth2AuthenticationDetails
-                ?: throw UnexpectedAuthException("get current user information.")
-
-        return (userDetails.decodedDetails as User).toDTO()
+        return SecurityContextHolder.getContext().currentUser().toDTO()
     }
 
     @GetMapping("/{id}")

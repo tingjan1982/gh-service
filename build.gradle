@@ -6,7 +6,7 @@ import com.amazonaws.services.cloudformation.model.Capability
  */
 buildscript {
     ext {
-        kotlinVersion = '1.2.51'
+        kotlinVersion = '1.2.61'
         springBootVersion = '2.0.1.RELEASE'
         githubToken = System.getProperty("githubToken")
     }
@@ -22,7 +22,7 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
         classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
         classpath("org.junit.platform:junit-platform-gradle-plugin:1.1.0")
-        classpath('gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.19.2')
+        classpath('gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.20.1')
     }
 }
 

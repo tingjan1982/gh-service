@@ -59,4 +59,12 @@ class QuestionServiceImpl(val questionRepository: QuestionRepository, val entity
 
         } ?: throw BusinessObjectNotFoundException(Question::class, id)
     }
+
+    override fun getQuestionAttribute(id: String, key: String): QuestionAttribute? {
+
+        this.getQuestion(id)?.let {
+            return it.getAttribute(key)
+
+        } ?: throw BusinessObjectNotFoundException(Question::class, id)
+    }
 }
