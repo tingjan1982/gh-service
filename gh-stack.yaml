@@ -21,7 +21,7 @@ Parameters:
   DesiredCount:
     Description: How many instances of this task should we run across our cluster?
     Type: Number
-    Default: 2
+    Default: 1
   InstanceType:
     Description: EC2 instance type
     Type: String
@@ -44,7 +44,7 @@ Parameters:
 Mappings:
   AWSRegionToAMI:
     ap-northeast-1:
-      AMIID: ami-f3f8098c
+      AMIID: ami-084cb340923dc7101
 
 Resources:
 ##### VPC and Subnet section #####

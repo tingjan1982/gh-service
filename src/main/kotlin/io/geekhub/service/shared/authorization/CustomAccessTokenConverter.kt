@@ -21,7 +21,7 @@ class CustomAccessTokenConverter(val userRepository: UserRepository) : DefaultAc
     override fun extractAuthentication(map: MutableMap<String, *>): OAuth2Authentication {
         val authentication = super.extractAuthentication(map)
 
-        map["userId"]?.let { it ->
+        map["userId"]?.let {
             val userId = it as String
             logger.debug("Attempt to get user with id $userId")
 

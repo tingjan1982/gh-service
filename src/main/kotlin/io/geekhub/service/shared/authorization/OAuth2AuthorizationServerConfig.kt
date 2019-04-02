@@ -26,6 +26,8 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore
 import javax.sql.DataSource
 
 /**
+ * OAuth2 authorization server using Spring OAuth2 provided annotation (@EnableAuthorizationServer).
+ *
  * Spring OAuth2 reference: https://projects.spring.io/spring-security-oauth/docs/oauth2.html
  * Example: https://github.com/spring-projects/spring-security-oauth/tree/master/samples/oauth2/sparklr/src/main/java/org/springframework/security/oauth/examples/sparklr/config
  *
@@ -60,6 +62,10 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
     @Autowired
     private lateinit var customAccessTokenConverter: CustomAccessTokenConverter
 
+
+    /**
+     * Defines available clients and their security details like secret and grant types etc.
+     */
     @Throws(Exception::class)
     override fun configure(clients: ClientDetailsServiceConfigurer) {
 
@@ -105,6 +111,10 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
                 .userDetailsService(this.userDetailsService)
     }
 
+    /**
+     * A implementation of AuthorizationServerTokenServices which is responsible for creating access token and refresh token
+     * and binding with an authentication.
+     */
     @Bean
     @Primary
     fun tokenServices(): DefaultTokenServices {
@@ -114,11 +124,18 @@ class OAuth2AuthorizationServerConfig : AuthorizationServerConfigurerAdapter() {
         return defaultTokenServices
     }
 
+    /**
+     * TokenStore is used for persisting the tokens. In this scenario, a JwtTokenStore is used to encode and store authentication
+     * details in the access token itself, thus it doesn't need to persist the token.
+     */
     @Bean
     fun tokenStore(): TokenStore {
         return JwtTokenStore(accessTokenConverter())
     }
 
+    /**
+     * JwtAccessTokenConverter is used to decode JWT token to an OAuth authentication.
+     */
     @Bean
     fun accessTokenConverter(): JwtAccessTokenConverter {
         val converter = JwtAccessTokenConverter()
