@@ -1,7 +1,7 @@
 package io.geekhub.service.shared.extensions
 
-import io.geekhub.service.questions.model.PossibleAnswer
 import io.geekhub.service.questions.model.Question
+import io.geekhub.service.questions.model.Question.PossibleAnswer
 import io.geekhub.service.questions.web.bean.QuestionRequest
 import io.geekhub.service.questions.web.bean.QuestionResponse
 import io.geekhub.service.user.model.User
@@ -16,7 +16,7 @@ fun UserRequest.toEntity() = User(
 )
 
 fun User.toDTO() = UserResponse(
-        this.id.toString(),
+        this.userId.toString(),
         this.username,
         this.firstName,
         this.lastName,

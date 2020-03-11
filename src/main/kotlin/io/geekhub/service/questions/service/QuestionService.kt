@@ -1,7 +1,7 @@
 package io.geekhub.service.questions.service
 
 import io.geekhub.service.questions.model.Question
-import io.geekhub.service.questions.model.QuestionAttribute
+import io.geekhub.service.questions.model.Question.QuestionAttribute
 
 interface QuestionService {
 

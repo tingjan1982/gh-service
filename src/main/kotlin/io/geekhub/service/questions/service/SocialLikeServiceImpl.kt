@@ -1,7 +1,5 @@
 package io.geekhub.service.questions.service
 
-import io.geekhub.service.questions.model.QuestionAttribute
-import io.geekhub.service.questions.model.QuestionAttribute.Companion.TOTAL_LIKES_KEY
 import io.geekhub.service.user.service.UserService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -28,7 +26,7 @@ class SocialLikeServiceImpl(val questionService: QuestionService, val userServic
 
         questionService.getQuestion(questionId)?.let { q ->
             val user = userService.getUser(userId)
-            val qId = q.id.toString()
+            val qId = q.questionId.toString()
             user.likedQuestions[qId] = q
 
             val freshCount = AtomicInteger(0)
@@ -52,13 +50,13 @@ class SocialLikeServiceImpl(val questionService: QuestionService, val userServic
             val copiedLikeCounts = likeCounts.toMap()
             likeCounts.clear()
 
-            copiedLikeCounts.forEach { qid, count ->
-                questionService.getQuestionAttribute(qid, TOTAL_LIKES_KEY)?.let {
-                    val updatedTotal = it.value.toInt() + count.get()
-                    it.value = updatedTotal.toString()
-
-                } ?: questionService.saveOrUpdateAttribute(qid, QuestionAttribute(key = TOTAL_LIKES_KEY, value = count.get().toString()))
-            }
+//            copiedLikeCounts.forEach { qid, count ->
+//                questionService.getQuestionAttribute(qid, TOTAL_LIKES_KEY)?.let {
+//                    val updatedTotal = it.value.toInt() + count.get()
+//                    it.value = updatedTotal.toString()
+//
+//                } ?: questionService.saveOrUpdateAttribute(qid, QuestionAttribute(key = TOTAL_LIKES_KEY, value = count.get().toString()))
+//            }
         }
     }
 }

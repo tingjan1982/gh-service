@@ -1,7 +1,7 @@
 package io.geekhub.service.interview.model
 
-import io.geekhub.service.questions.model.PossibleAnswer
 import io.geekhub.service.questions.model.Question
+import io.geekhub.service.questions.model.Question.PossibleAnswer
 import io.geekhub.service.user.model.User
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test

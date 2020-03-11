@@ -11,6 +11,7 @@ xml to groovy translator - https://logback.qos.ch/translator/asGroovy.html
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
     <property name="CONSOLE_LOG_PATTERN" value="%X{requestContextIdKey}${CONSOLE_LOG_PATTERN}"/>
     <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring.log}"/>
+    <property name="LOG_FILE_MAX_HISTORY" value="5"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
     <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
 
@@ -26,8 +27,10 @@ xml to groovy translator - https://logback.qos.ch/translator/asGroovy.html
     
     <logger name="io.geekhub.service" level="debug" additivity="false">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-        <appender-ref ref="JSON"/>
+        <springProfile name="default,dev">
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="JSON"/>
+        </springProfile>
     </logger>
     <!-- turn this on to debug to troubleshoot Hibernate related issues. -->
     <logger name="org.hibernate" level="info" additivity="false">
@@ -42,7 +45,9 @@ xml to groovy translator - https://logback.qos.ch/translator/asGroovy.html
     </logger>
     <root level="info">
         <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILE" />
-        <appender-ref ref="JSON"/>
+        <springProfile name="default,dev">
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="JSON"/>
+        </springProfile>
     </root>
 </configuration>

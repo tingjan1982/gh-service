@@ -8,6 +8,7 @@ import io.geekhub.service.user.web.bean.UpdateUserRequest
 import io.geekhub.service.user.web.bean.UserRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.access.annotation.Secured
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -69,7 +70,7 @@ class UserServiceImpl(
 
     @PostAuthorize("hasPermission(returnObject, 'ADMINISTRATION')")
     override fun getUser(id: String): User {
-        return this.repository.getOne(id)
+        return this.repository.findByIdOrNull(id)!!
     }
 
     override fun getUserByUsername(username: String): Optional<User> {

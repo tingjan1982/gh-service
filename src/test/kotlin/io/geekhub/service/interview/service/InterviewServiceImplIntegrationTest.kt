@@ -1,6 +1,6 @@
 package io.geekhub.service.interview.service
 
-import io.geekhub.service.interview.model.Interview
+import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.annotation.IntegrationTest
@@ -46,7 +46,7 @@ internal class InterviewServiceImplIntegrationTest {
 
     @Test
     fun createInterview() {
-        val interviewOption = InterviewOption(username = "username", interviewMode = Interview.InterviewMode.REAL, questionCount = 5)
+        val interviewOption = InterviewOption(username = "username", interviewMode = InterviewSession.InterviewMode.REAL, questionCount = 5)
         val createdInterview = this.interviewService.createInterview(interviewOption)
 
         assertNotNull(createdInterview.id)
@@ -62,7 +62,7 @@ internal class InterviewServiceImplIntegrationTest {
             })
         }
 
-        val interview = this.interviewService.getInterview(createdInterview.interviewId.toString())
+        val interview = this.interviewService.getInterview(createdInterview.id.toString())
 
         assertEquals(interviewOption.questionCount, interview.questionsCount())
         interview.getQuestions().forEach({

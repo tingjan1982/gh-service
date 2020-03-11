@@ -1,21 +1,17 @@
 package io.geekhub.service.questions.model
 
-import io.geekhub.service.shared.model.BaseAuditableObject
-import org.hibernate.annotations.GenericGenerator
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import javax.persistence.*
+//import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import org.springframework.data.mongodb.core.mapping.Document
+import javax.persistence.Id
 
 /**
  * Represents the base question class.
  *
  * Reference on JPA hierarchical class options: https://www.thoughts-on-java.org/complete-guide-inheritance-strategies-jpa-hibernate/
  */
-@Entity(name = "gh_question")
-@EntityListeners(AuditingEntityListener::class)
+@Document
 data class Question(
         @Id
-        @GeneratedValue(generator = "uuid")
-        @GenericGenerator(name = "uuid", strategy = "uuid2")
         var questionId: String? = null,
         var question: String,
 
@@ -39,41 +35,45 @@ data class Question(
          * Use this to control who sees the question.
          */
         var visibilityScope: VisibilityScope = VisibilityScope.PUBLIC,
-        var contributedBy: String? = null) : BaseAuditableObject<Question, String>() {
+        var contributedBy: String? = null) {
 
-
-    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     val possibleAnswers: MutableList<PossibleAnswer> = mutableListOf()
 
-    @OneToMany(mappedBy = "question", cascade = [CascadeType.ALL])
-    @MapKey(name = "key")
     private val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf()
 
 
     fun addAnswer(answer: PossibleAnswer) {
         this.possibleAnswers.add(answer)
-        answer.question = this
     }
 
     fun addAttribute(attribute: QuestionAttribute) {
-
         attributes[attribute.key] = attribute
-        attribute.question = this
     }
 
     fun getAttribute(attributeKey: String): QuestionAttribute? {
         return attributes[attributeKey]
     }
-
-    override fun getId(): String? {
-        return this.questionId
-    }
-
+    
     enum class Difficulty {
         EASY, INTERMEDIATE, HARD
     }
 
     enum class VisibilityScope {
         PUBLIC, PRIVATE
+    }
+
+    data class PossibleAnswer(
+            val answer: String,
+            val correct: Boolean
+    )
+
+    data class QuestionAttribute(
+            val key: String,
+            var value: String) {
+
+        companion object {
+            const val DESCRIPTION_KEY = "description"
+            const val TOTAL_LIKES_KEY = "total_likes"
+        }
     }
 }

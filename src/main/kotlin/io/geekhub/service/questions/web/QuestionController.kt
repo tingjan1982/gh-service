@@ -1,8 +1,8 @@
 package io.geekhub.service.questions.web
 
 import io.geekhub.service.questions.model.Question
-import io.geekhub.service.questions.model.QuestionAttribute
-import io.geekhub.service.questions.model.QuestionAttribute.Companion.DESCRIPTION_KEY
+import io.geekhub.service.questions.model.Question.QuestionAttribute
+import io.geekhub.service.questions.model.Question.QuestionAttribute.Companion.DESCRIPTION_KEY
 import io.geekhub.service.questions.service.QuestionSearchService
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.questions.service.SocialLikeService

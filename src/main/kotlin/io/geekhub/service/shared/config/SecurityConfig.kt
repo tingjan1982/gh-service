@@ -60,7 +60,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
 
         return when {
             this.environment.activeProfiles.any { it == "test" || it == "embedded" } -> DataSourceType.EMBEDDED
-            else -> DataSourceType.POSTGRESQL
+            else -> DataSourceType.EMBEDDED
         }
     }
 

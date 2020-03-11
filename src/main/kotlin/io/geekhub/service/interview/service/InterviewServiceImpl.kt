@@ -34,10 +34,7 @@ class InterviewServiceImpl(val questionRepository: QuestionRepository,
             BusinessObjectNotFoundException(User::class, interviewOption.username)
         }
 
-        val interview = Interview(user = foundUser).apply {
-            this.interviewMode = interviewOption.interviewMode
-            this.selectedDuration = interviewOption.duration
-        }
+        val interview = Interview()
 
         this.populateQuestions(interviewOption, interview)
 
@@ -48,7 +45,7 @@ class InterviewServiceImpl(val questionRepository: QuestionRepository,
 
     private fun populateQuestions(interviewOption: InterviewOption, interview: Interview) {
 
-        val allQuestions = questionRepository.findAllQuestions()
+        val allQuestions = questionRepository.findAllBy()
         val numbers = mutableMapOf<Int, Int>()
 
         for (i in 1..interviewOption.questionCount) {

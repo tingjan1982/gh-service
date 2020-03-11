@@ -1,17 +1,12 @@
 package io.geekhub.service.shared.config
 
-import io.geekhub.service.shared.auditing.DefaultAuditorProvider
-import io.geekhub.service.user.model.User
+import io.geekhub.service.interview.repository.InterviewRepository
+import io.geekhub.service.questions.repository.QuestionRepository
+import io.geekhub.service.user.repository.UserRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
-import org.springframework.data.domain.AuditorAware
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
-import org.springframework.scheduling.annotation.EnableScheduling
-import org.springframework.transaction.annotation.EnableTransactionManagement
+import org.springframework.data.mongodb.config.EnableMongoAuditing
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 import springfox.documentation.builders.PathSelectors
 import springfox.documentation.builders.RequestHandlerSelectors
 import springfox.documentation.service.ApiInfo
@@ -20,7 +15,6 @@ import springfox.documentation.service.Contact
 import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spring.web.plugins.Docket
 import springfox.documentation.swagger2.annotations.EnableSwagger2
-import javax.sql.DataSource
 
 
 /**
@@ -32,34 +26,19 @@ import javax.sql.DataSource
  * https://springframework.guru/spring-boot-restful-api-documentation-with-swagger-2/
  */
 @Configuration
-@EnableJpaRepositories("io.geekhub.service")
-@EnableJpaAuditing
-@EnableTransactionManagement
-@EnableScheduling
+@EnableMongoRepositories(basePackageClasses = [QuestionRepository::class, InterviewRepository::class, UserRepository::class])
+@EnableMongoAuditing
+//@EnableScheduling
 @EnableSwagger2
 class ApplicationConfig {
 
     /**
-     * Embedded datasource will be activated when one of the specified profiles is activated.
-     */
-    @Bean
-    @Profile("test", "embedded")
-    fun dataSource(): DataSource {
-        return EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build()
-    }
-
-//    @Bean
-//    fun entityManagerFactory(): EntityManagerFactory {
-//
-//    }
-
-    /**
      * Reference: https://docs.spring.io/spring-data/jpa/docs/2.0.6.RELEASE/reference/html/#auditing
      */
-    @Bean
+    /*@Bean
     fun auditorProvider(): AuditorAware<User> {
         return DefaultAuditorProvider()
-    }
+    }*/
 
     @Bean
     fun api(): Docket {

@@ -1,36 +1,20 @@
 package io.geekhub.service.interview.model
 
 import io.geekhub.service.questions.model.Question
-import io.geekhub.service.shared.model.BaseAuditableObject
-import io.geekhub.service.user.model.User
-import org.hibernate.annotations.GenericGenerator
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.DBRef
+import org.springframework.data.mongodb.core.mapping.Document
 import java.util.*
-import javax.persistence.*
 
-@Entity(name = "gh_interview")
-@EntityListeners(AuditingEntityListener::class)
+@Document
 data class Interview(
         @Id
-        @GeneratedValue(generator = "uuid")
-        @GenericGenerator(name = "uuid", strategy = "uuid2")
-        var interviewId: String? = null,
-        @ManyToOne
-        var user: User): BaseAuditableObject<Interview, String>() {
+        var id: String? = null) {
 
     private val maxScore = 100
 
-    var interviewMode: InterviewMode = InterviewMode.MOCK
-
-    /**
-     * Default to -1 which indicates unlimited time.
-     */
-    var selectedDuration: Int = -1
-
-    @OneToMany(mappedBy = "id.interview", fetch = FetchType.EAGER, cascade = [(CascadeType.ALL)])
-    @MapKeyClass(Question::class)
-    @MapKeyJoinColumn(name = "question_id")
-    private val questions: MutableMap<Question, InterviewQuestionAnswer> = mutableMapOf()
+    @DBRef
+    private val questions: MutableList<Question> = mutableListOf()
 
     /**
      * This stores the computed score of this interview.
@@ -43,21 +27,12 @@ data class Interview(
 
 
     fun addQuestion(question: Question) {
-        questions[question] = InterviewQuestionAnswer(InterviewQuestionAnswer.PK(this, question))
-    }
-
-    fun addAnswerAttempt(question: Question, answer: String) {
-
-        questions[question]?.let {
-            it.answer = answer
-
-            // todo: change this to BusinessObjectNotFoundException.
-        } ?: throw EntityNotFoundException("Question {id=${question.id}} is not found in the interview {id=$interviewId")
+        questions.add(question)
     }
 
     fun getQuestions(): Map<String, Question> {
         return this.questions.map {
-            Pair(it.key.questionId.toString(), it.key)
+            Pair(it.questionId.toString(), it)
         }.toMap()
     }
 
@@ -100,15 +75,8 @@ data class Interview(
         val averageWeight = maxScore / this.questions.size
 
         return this.questions.map {
-            it.key.id.toString() to it.key.weight * averageWeight
+            it.questionId.toString() to it.weight * averageWeight
         }.toMap()
     }
 
-    override fun getId(): String? {
-        return this.interviewId
-    }
-
-    enum class InterviewMode {
-        MOCK, REAL
-    }
 }

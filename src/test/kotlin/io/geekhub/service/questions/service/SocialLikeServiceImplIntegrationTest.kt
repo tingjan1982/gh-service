@@ -49,7 +49,7 @@ internal class SocialLikeServiceImplIntegrationTest {
      * such as method security annotation.
      */
     @Test
-    @WithMockUser(roles = ["ADMIN"])
+    @WithMockUser(roles = ["ADMIN", "USER"])
     @WithUserDetails("test-user")
     fun likeQuestion() {
 
@@ -58,7 +58,7 @@ internal class SocialLikeServiceImplIntegrationTest {
             assert(it.likedQuestions.size).isEqualTo(1)
         }
 
-        socialLikeService.likeCounts.getOrDefault(question.questionId.toString(), AtomicInteger(0)).let {
+        SocialLikeServiceImpl.likeCounts.getOrDefault(question.questionId.toString(), AtomicInteger(0)).let {
             assert(it.get()).isEqualTo(1)
         }
 

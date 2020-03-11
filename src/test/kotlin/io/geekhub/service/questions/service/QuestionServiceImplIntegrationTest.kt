@@ -2,10 +2,10 @@ package io.geekhub.service.questions.service
 
 import assertk.assert
 import assertk.assertions.isNotNull
-import io.geekhub.service.questions.model.PossibleAnswer
 import io.geekhub.service.questions.model.Question
-import io.geekhub.service.questions.model.QuestionAttribute
-import io.geekhub.service.questions.model.QuestionAttribute.Companion.DESCRIPTION_KEY
+import io.geekhub.service.questions.model.Question.PossibleAnswer
+import io.geekhub.service.questions.model.Question.QuestionAttribute
+import io.geekhub.service.questions.model.Question.QuestionAttribute.Companion.DESCRIPTION_KEY
 import io.geekhub.service.shared.annotation.IntegrationTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,9 +27,7 @@ internal class QuestionServiceImplIntegrationTest {
         }
 
         assert(createdQuestion.id).isNotNull()
-        createdQuestion.possibleAnswers.forEach {
-            assert(it.id).isNotNull()
-        }
+        assert(createdQuestion.possibleAnswers.size == 2)
     }
 
     /**

@@ -1,10 +1,10 @@
 package io.geekhub.service.user.repository
 
 import io.geekhub.service.user.model.User
-import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.repository.PagingAndSortingRepository
 import java.util.*
 
-interface UserRepository : JpaRepository<User, String> {
+interface UserRepository : PagingAndSortingRepository<User, String> {
 
     fun findByUsername(username: String): Optional<User>
 

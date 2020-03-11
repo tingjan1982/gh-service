@@ -1,13 +1,12 @@
 package io.geekhub.service.questions.service
 
 import io.geekhub.service.questions.model.Question
-import io.geekhub.service.questions.model.QuestionAttribute
+import io.geekhub.service.questions.model.Question.QuestionAttribute
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
 import javax.transaction.Transactional
 
 /**
@@ -15,11 +14,11 @@ import javax.transaction.Transactional
  */
 @Service
 @Transactional
-class QuestionServiceImpl(val questionRepository: QuestionRepository, val entityManager: EntityManager) : QuestionService {
+class QuestionServiceImpl(val questionRepository: QuestionRepository) : QuestionService {
     companion object {
-
         val logger: Logger = LoggerFactory.getLogger(QuestionServiceImpl::class.java)
     }
+
     override fun saveQuestion(question: Question): Question {
         return questionRepository.save(question)
     }
@@ -30,8 +29,6 @@ class QuestionServiceImpl(val questionRepository: QuestionRepository, val entity
 
     override fun loadQuestion(id: String): Question {
         this.getQuestion(id)?.let {
-            entityManager.refresh(it)
-
             return it
         } ?: throw BusinessObjectNotFoundException(Question::class, id)
     }

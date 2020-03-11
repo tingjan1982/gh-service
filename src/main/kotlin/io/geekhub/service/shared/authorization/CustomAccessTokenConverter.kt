@@ -4,6 +4,7 @@ import io.geekhub.service.user.model.User
 import io.geekhub.service.user.repository.UserRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.oauth2.provider.OAuth2Authentication
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter
 import org.springframework.stereotype.Component
@@ -30,7 +31,7 @@ class CustomAccessTokenConverter(val userRepository: UserRepository) : DefaultAc
                     User("0", "admin", "Admin", "Admin", "admin@geekhub.tw")
                 }
 
-                else -> this.userRepository.getOne(userId)
+                else -> this.userRepository.findByIdOrNull(userId)
             }
         }
 
