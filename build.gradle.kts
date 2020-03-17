@@ -25,6 +25,8 @@ plugins {
 
 apply(plugin = "io.spring.dependency-management")
 
+version = "1.0.0"
+
 /**
  * https://stackoverflow.com/questions/41113268/how-to-set-up-kotlins-byte-code-version-in-gradle-project-to-java-8
  */
