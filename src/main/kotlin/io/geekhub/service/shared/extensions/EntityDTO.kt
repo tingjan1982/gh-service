@@ -27,22 +27,17 @@ fun User.toDTO() = UserResponse(
 fun QuestionRequest.toEntity() = Question(
         question = this.question,
         category = this.category,
-        topic = this.topic,
-        difficulty = this.difficulty,
-        visibilityScope = this.visibilityScope
+        topic = this.topic
 )
 
-fun QuestionRequest.PossibleAnswerRequest.toEntity() = PossibleAnswer(answer = this.answer, correct = this.correctAnswer)
+fun QuestionRequest.PossibleAnswerRequest.toEntity() = PossibleAnswer(answer = this.answer, correctAnswer = this.correctAnswer)
 
 fun Question.toDTO() = QuestionResponse(
         this.questionId.toString(),
         this.question,
         this.category,
         this.topic,
-        this.difficulty,
-        this.visibilityScope,
-        this.contributedBy,
         this.possibleAnswers.map { it.toDTO() }.toList()
 )
 
-fun PossibleAnswer.toDTO() = QuestionResponse.PossibleAnswerResponse(this.answer, this.correct)
+fun PossibleAnswer.toDTO() = QuestionResponse.PossibleAnswerResponse(this.answer, this.correctAnswer)

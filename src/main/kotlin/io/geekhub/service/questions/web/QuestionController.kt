@@ -1,6 +1,5 @@
 package io.geekhub.service.questions.web
 
-import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.model.Question.QuestionAttribute
 import io.geekhub.service.questions.model.Question.QuestionAttribute.Companion.DESCRIPTION_KEY
 import io.geekhub.service.questions.service.QuestionSearchService
@@ -41,21 +40,21 @@ class QuestionController(val questionService: QuestionService, val questionSearc
         return this.questionService.saveQuestion(questionToCreate).toDTO()
     }
 
+    @GetMapping("/{id}")
+    fun getQuestion(@PathVariable id: String): QuestionResponse {
+        logger.info("Attempt to lookup question by id: $id")
+
+        return questionService.getQuestion(id).toDTO()
+    }
+
     @GetMapping
     fun searchQuestions(@RequestParam(value = "text", required = false, defaultValue = "") text: String,
                         @RequestParam(value = "category", required = false, defaultValue = "") category: String,
                         @RequestParam(value = "topic", required = false, defaultValue = "") topic: String,
                         page: Pageable): Page<QuestionResponse> {
-        
+
             return this.questionSearchService.searchQuestions(SearchRequest(text, category, topic, page))
                 .map { it.toDTO() }
-    }
-
-    @GetMapping("/{id}")
-    fun getQuestion(@PathVariable id: String): QuestionResponse {
-        logger.info("Attempt to lookup question by id: $id")
-
-        return questionService.loadQuestion(id).toDTO()
     }
 
     @PutMapping("/{id}/attributes/description")
@@ -67,22 +66,12 @@ class QuestionController(val questionService: QuestionService, val questionSearc
         }?.toDTO() ?: throw IllegalArgumentException("Description is required")
     }
 
-    @PutMapping("/{id}/visibility")
-    fun changeStatus(@PathVariable id: String, visibility: HttpEntity<String>): QuestionResponse {
-
-        visibility.body?.let {
-            return this.questionService.updateVisibility(id, Question.VisibilityScope.valueOf(it)).toDTO()
-
-        } ?: throw IllegalArgumentException("Visibility is required")
-
-    }
-
     @PutMapping("/{id}/like")
     fun likeQuestion(@PathVariable id: String): QuestionResponse {
 
         val currentUser = SecurityContextHolder.getContext().currentUser()
         this.socialLikeService.likeQuestion(id, currentUser.userId.toString())
 
-        return this.questionService.loadQuestion(id).toDTO()
+        return this.questionService.getQuestion(id).toDTO()
     }
 }

@@ -20,8 +20,8 @@ internal class QuestionServiceImplIntegrationTest {
     fun saveQuestion() {
 
         val createdQuestion = Question(question = "Dummy question").apply {
-            this.addAnswer(PossibleAnswer(answer = "A", correct = true))
-            this.addAnswer(PossibleAnswer(answer = "B", correct = false))
+            this.addAnswer(PossibleAnswer(answer = "A", correctAnswer = true))
+            this.addAnswer(PossibleAnswer(answer = "B", correctAnswer = false))
         }.let {
             return@let this.questionService.saveQuestion(it)
         }

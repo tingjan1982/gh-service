@@ -74,9 +74,11 @@ data class Interview(
 
         val averageWeight = maxScore / this.questions.size
 
-        return this.questions.map {
-            it.questionId.toString() to it.weight * averageWeight
-        }.toMap()
+//        return this.questions.map {
+//            it.questionId.toString() to it.weight * averageWeight
+//        }.toMap()
+
+        return mapOf()
     }
 
 }

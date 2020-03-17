@@ -1,7 +1,10 @@
 /**
- * Describes the configurations need to incoroporate Spring Boot and Spring Data in Kotlin:
+ * Describes the configurations need to incorporate Spring Boot and Spring Data in Kotlin:
  *
  * https://spring.io/guides/tutorials/spring-boot-kotlin/
+ *
+ * Passing arguments to bootRun task:
+ * https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/html/
  */
 
 plugins {
@@ -12,7 +15,8 @@ plugins {
     // spring support
     id("org.springframework.boot") version "2.2.5.RELEASE"
     kotlin("plugin.spring") version "1.3.70"
-    kotlin("plugin.jpa") version "1.3.70"
+    kotlin("plugin.noarg") version "1.3.70"
+    kotlin("plugin.allopen") version "1.3.70"
 
     // build info
     id("com.gorylenko.gradle-git-properties") version "2.2.2"
@@ -78,6 +82,9 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
+
+    // embedded mongodb
+    testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo")
 }
 
 springBoot {

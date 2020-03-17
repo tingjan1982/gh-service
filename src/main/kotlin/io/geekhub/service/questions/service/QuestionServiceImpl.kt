@@ -23,30 +23,15 @@ class QuestionServiceImpl(val questionRepository: QuestionRepository) : Question
         return questionRepository.save(question)
     }
 
-    override fun getQuestion(id: String): Question? {
-        return questionRepository.findById(id).orElse(null)
-    }
-
-    override fun loadQuestion(id: String): Question {
-        this.getQuestion(id)?.let {
-            return it
-        } ?: throw BusinessObjectNotFoundException(Question::class, id)
-    }
-
-    override fun updateVisibility(id: String, visibilityToChange: Question.VisibilityScope): Question {
-
-        this.getQuestion(id)?.let {
-            logger.info("Updating question visibility from ${it.visibilityScope} to $visibilityToChange")
-            it.visibilityScope = visibilityToChange
-
-            return it
-
-        } ?: throw BusinessObjectNotFoundException(Question::class, id)
+    override fun getQuestion(id: String): Question {
+        return questionRepository.findById(id).orElseThrow {
+            throw BusinessObjectNotFoundException(Question::class, id)
+        }
     }
 
     override fun saveOrUpdateAttribute(id: String, questionAttribute: QuestionAttribute): Question {
 
-        this.getQuestion(id)?.let {
+        this.getQuestion(id).let {
             it.getAttribute(questionAttribute.key)?.let { attr ->
                 attr.value = questionAttribute.value
                 
@@ -54,14 +39,14 @@ class QuestionServiceImpl(val questionRepository: QuestionRepository) : Question
 
             return it
 
-        } ?: throw BusinessObjectNotFoundException(Question::class, id)
+        }
     }
 
     override fun getQuestionAttribute(id: String, key: String): QuestionAttribute? {
 
-        this.getQuestion(id)?.let {
+        this.getQuestion(id).let {
             return it.getAttribute(key)
 
-        } ?: throw BusinessObjectNotFoundException(Question::class, id)
+        }
     }
 }

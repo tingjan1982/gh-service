@@ -29,7 +29,7 @@ internal class InterviewTest {
 
         for (i in 1..10) {
             val question = Question(questionId = i.toString(), question = "Q $i", category = "Test", topic = "Test")
-            question.addAnswer(PossibleAnswer(answer = "$i", correct = true))
+            question.addAnswer(PossibleAnswer(answer = "$i", correctAnswer = true))
             interview.addQuestion(question)
 
             if (i % 2 == 0) {
@@ -52,7 +52,7 @@ internal class InterviewTest {
 
         for (i in 1..6) {
             val question = Question(questionId = i.toString(), question = "Q $i", category = "Test", topic = "Test")
-            question.addAnswer(PossibleAnswer(answer = "$i", correct = true))
+            question.addAnswer(PossibleAnswer(answer = "$i", correctAnswer = true))
             interview.addQuestion(question)
 
             if (i % 2 == 0) {

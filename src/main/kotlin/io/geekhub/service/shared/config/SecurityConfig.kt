@@ -4,6 +4,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.core.Ordered
@@ -18,6 +19,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
+import org.springframework.security.oauth2.core.OAuth2TokenValidator
+import org.springframework.security.oauth2.jwt.*
 import org.springframework.security.provisioning.JdbcUserDetailsManager
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.csrf.CsrfTokenRepository
@@ -43,6 +47,12 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
 
     @Autowired
     lateinit var environment: Environment
+
+    @Value("\${auth0.audience}")
+    lateinit var audience: String
+
+    @Value("\${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+    lateinit var issuer: String
 
     override fun afterPropertiesSet() {
         ResourceDatabasePopulator(ClassPathResource("security-schema.ddl", SecurityConfig::class.java)).let {
@@ -97,11 +107,30 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
             }
         }
 
-        http.cors()
+        http.oauth2ResourceServer().jwt()
+
+        http.cors().and().authorizeRequests()
+                .mvcMatchers("/**").permitAll()
+                .mvcMatchers("/questions").authenticated()
+                //.mvcMatchers("/api/private-scoped").hasAuthority("SCOPE_read:messages")
+                .and()
+                .oauth2ResourceServer().jwt();
+
+        /*http.cors()
                 .and().authorizeRequests()
                 .antMatchers("/csrf-token").hasRole("ADMIN")
                 .anyRequest().permitAll()
-                .and().httpBasic()
+                .and().httpBasic()*/
+    }
+
+    @Bean
+    fun jwtDecoder(): JwtDecoder? {
+        val jwtDecoder: NimbusJwtDecoder = JwtDecoders.fromOidcIssuerLocation(issuer) as NimbusJwtDecoder
+        val audienceValidator: OAuth2TokenValidator<Jwt> = AudienceValidator(audience)
+        val withIssuer: OAuth2TokenValidator<Jwt> = JwtValidators.createDefaultWithIssuer(issuer)
+        val withAudience: OAuth2TokenValidator<Jwt> = DelegatingOAuth2TokenValidator(withIssuer, audienceValidator)
+        jwtDecoder.setJwtValidator(withAudience)
+        return jwtDecoder
     }
 
     /**

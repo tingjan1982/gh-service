@@ -7,11 +7,7 @@ interface QuestionService {
 
     fun saveQuestion(question: Question): Question
 
-    fun getQuestion(id: String): Question?
-
-    fun loadQuestion(id: String): Question
-
-    fun updateVisibility(id: String, visibilityToChange: Question.VisibilityScope): Question
+    fun getQuestion(id: String): Question
 
     /**
      * Save or update attribute in Question and return fully loaded question.
