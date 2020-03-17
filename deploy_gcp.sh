@@ -4,7 +4,7 @@
 
 gcloud components install kubectl --quiet
 gcloud config set project gothic-dreamer-271402
-gcloud auth activate-service-account gh-travis-ci-service-account@gothic-dreamer-271402.iam.gserviceaccount.com --key-file helpful-range-236813-681ca732dc15.json
+gcloud auth activate-service-account gh-travis-ci-service-account@gothic-dreamer-271402.iam.gserviceaccount.com --key-file gothic-dreamer-271402-bfe27e1015cc.json
 gcloud config set compute/zone asia-east1-b
 
 # enable stackdriver monitoring: https://cloud.google.com/monitoring/kubernetes-engine/installing
@@ -38,8 +38,8 @@ gcloud config set compute/zone asia-east1-b
 #        path: application-gcp.properties
 
 gcloud container clusters get-credentials gh-cluster --zone asia-east1-b --project gothic-dreamer-271402
-kubectl set image deployment nextpos-web nextpos-web=docker.io/joelin/nextpos-service:latest
-kubectl set env deployment/nextpos-web PROFILE=gcp
-kubectl scale deployment nextpos-web --replicas=0
-kubectl scale deployment nextpos-web --replicas=1
-kubectl get services nextpos-web 
+kubectl create deployment gh-service --image=docker.io/joelin/gh-service:latest
+kubectl set env deployment/gh-service PROFILE=gcp
+kubectl scale deployment gh-service --replicas=0
+kubectl scale deployment gh-service --replicas=1
+kubectl get services gh-service

@@ -7,7 +7,7 @@ services:
 before_install:
   - docker pull amazoncorretto:11
   - docker pull google/cloud-sdk:alpine
-  #- openssl aes-256-cbc -K $encrypted_5f81bad43974_key -iv $encrypted_5f81bad43974_iv -in helpful-range-236813-681ca732dc15.json.enc -out gothic-dreamer-271402-bfe27e1015cc.json -d
+  - openssl aes-256-cbc -K $encrypted_bd9783f2cc1e_key -iv $encrypted_bd9783f2cc1e_iv -in gothic-dreamer-271402-bfe27e1015cc.json.enc -out gothic-dreamer-271402-bfe27e1015cc.json -d
 
 
 script:
