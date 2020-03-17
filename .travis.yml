@@ -15,7 +15,7 @@ script:
 
 
 after_script:
-  - docker build -t joelin/gh-service:latest --build-arg JAR_FILE=build/libs/gh-service-1.0.0-SNAPSHOT.jar --build-arg SERVICE_ACCOUNT_JSON=gothic-dreamer-271402-bfe27e1015cc.json .
+  - docker build -t joelin/gh-service:latest --build-arg JAR_FILE=build/libs/gh-service-1.0.0.jar --build-arg SERVICE_ACCOUNT_JSON=gothic-dreamer-271402-bfe27e1015cc.json .
   - echo $DOCKER_PASSWORD | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker push joelin/gh-service:latest
   #- docker run --rm -v $TRAVIS_BUILD_DIR:/source google/cloud-sdk:284.0.0-alpine /bin/sh -c "cd /source ; sh deploy_gcp.sh"
