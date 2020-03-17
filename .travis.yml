@@ -7,7 +7,7 @@ services:
 before_install:
   - docker pull amazoncorretto:11
   - docker pull google/cloud-sdk:alpine
-  #- openssl aes-256-cbc -K $encrypted_5f81bad43974_key -iv $encrypted_5f81bad43974_iv -in helpful-range-236813-681ca732dc15.json.enc -out helpful-range-236813-681ca732dc15.json -d
+  #- openssl aes-256-cbc -K $encrypted_5f81bad43974_key -iv $encrypted_5f81bad43974_iv -in helpful-range-236813-681ca732dc15.json.enc -out gothic-dreamer-271402-bfe27e1015cc.json -d
 
 
 script:
@@ -15,7 +15,7 @@ script:
 
 
 after_script:
-  #- docker build -t joelin/gh-service:latest --build-arg JAR_FILE=build/libs/gh-service-1.0.0-SNAPSHOT.jar --build-arg SERVICE_ACCOUNT_JSON=helpful-range-236813-681ca732dc15.json .
-  #- echo $DOCKER_PASSWORD | docker login -u "$DOCKER_USERNAME" --password-stdin
-  #- docker push joelin/gh-service:latest
+  - docker build -t joelin/gh-service:latest --build-arg JAR_FILE=build/libs/gh-service-1.0.0-SNAPSHOT.jar --build-arg SERVICE_ACCOUNT_JSON=gothic-dreamer-271402-bfe27e1015cc.json .
+  - echo $DOCKER_PASSWORD | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push joelin/gh-service:latest
   #- docker run --rm -v $TRAVIS_BUILD_DIR:/source google/cloud-sdk:284.0.0-alpine /bin/sh -c "cd /source ; sh deploy_gcp.sh"
