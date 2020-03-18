@@ -1,5 +1,6 @@
 package io.geekhub.service.questions.service
 
+import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.model.Question.QuestionAttribute
 import io.geekhub.service.questions.repository.QuestionRepository
@@ -27,6 +28,10 @@ class QuestionServiceImpl(val questionRepository: QuestionRepository) : Question
         return questionRepository.findById(id).orElseThrow {
             throw BusinessObjectNotFoundException(Question::class, id)
         }
+    }
+
+    override fun getQuestions(clientAccount: ClientAccount): List<Question> {
+        return questionRepository.findAllBy()
     }
 
     override fun saveOrUpdateAttribute(id: String, questionAttribute: QuestionAttribute): Question {

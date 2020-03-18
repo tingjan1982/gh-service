@@ -1,5 +1,7 @@
 package io.geekhub.service.questions.web
 
+import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.service.ClientAccountService
 import io.geekhub.service.questions.model.Question.QuestionAttribute
 import io.geekhub.service.questions.model.Question.QuestionAttribute.Companion.DESCRIPTION_KEY
 import io.geekhub.service.questions.service.QuestionSearchService
@@ -7,37 +9,67 @@ import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.questions.service.SocialLikeService
 import io.geekhub.service.questions.web.bean.QuestionRequest
 import io.geekhub.service.questions.web.bean.QuestionResponse
-import io.geekhub.service.questions.web.bean.SearchRequest
 import io.geekhub.service.shared.extensions.currentUser
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
+import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpEntity
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 @RestController
 @RequestMapping("/questions")
-class QuestionController(val questionService: QuestionService, val questionSearchService: QuestionSearchService, val socialLikeService: SocialLikeService) {
+class QuestionController(val questionService: QuestionService,
+                         val clientAccountService: ClientAccountService,
+                         val specializationService: SpecializationService,
+                         val questionSearchService: QuestionSearchService,
+                         val socialLikeService: SocialLikeService) {
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(QuestionController::class.java)
     }
 
     @PostMapping
-    fun createQuestion(@Valid @RequestBody question: QuestionRequest): QuestionResponse {
-        logger.info("Received creation request for: $question")
+    fun createQuestion(@Valid @RequestBody questionRequest: QuestionRequest): QuestionResponse {
+        logger.info("Received creation request for: $questionRequest")
 
-        val questionToCreate = question.toEntity()
-        question.possibleAnswers.forEach {
+        val clientAccount = resolveClientAccount()
+        val specialization = questionRequest.specializationId?.let {
+            specializationService.getSpecialization(it)
+        }
+
+        val questionToCreate = questionRequest.toEntity(clientAccount, specialization)
+        questionRequest.possibleAnswers.forEach {
             questionToCreate.addAnswer(it.toEntity())
         }
 
         return this.questionService.saveQuestion(questionToCreate).toDTO()
+    }
+
+    private fun resolveClientAccount(): ClientAccount {
+
+        val authentication: Authentication = SecurityContextHolder.getContext().authentication
+
+        val principal = authentication.principal
+        if (principal is Jwt) {
+            val id = principal.claims["sub"] as String
+
+            clientAccountService.getClientAccount(id)?.let {
+                return it
+            }
+
+            val email = principal.claims["https://api.geekhub.tw/email"] as String
+            ClientAccount(id, ClientAccount.AccountType.INDIVIDUAL, email, email).let {
+                return clientAccountService.saveClientAccount(it)
+            }
+        }
+
+        throw RuntimeException("Authentication object is not jwt")
     }
 
     @GetMapping("/{id}")
@@ -48,12 +80,8 @@ class QuestionController(val questionService: QuestionService, val questionSearc
     }
 
     @GetMapping
-    fun searchQuestions(@RequestParam(value = "text", required = false, defaultValue = "") text: String,
-                        @RequestParam(value = "category", required = false, defaultValue = "") category: String,
-                        @RequestParam(value = "topic", required = false, defaultValue = "") topic: String,
-                        page: Pageable): Page<QuestionResponse> {
-
-            return this.questionSearchService.searchQuestions(SearchRequest(text, category, topic, page))
+    fun listQuestions(): List<QuestionResponse> {
+        return this.questionService.getQuestions(resolveClientAccount())
                 .map { it.toDTO() }
     }
 
@@ -62,7 +90,7 @@ class QuestionController(val questionService: QuestionService, val questionSearc
 
         return description.body?.let {
             this.questionService.saveOrUpdateAttribute(id, QuestionAttribute(key = DESCRIPTION_KEY, value = it))
-            
+
         }?.toDTO() ?: throw IllegalArgumentException("Description is required")
     }
 

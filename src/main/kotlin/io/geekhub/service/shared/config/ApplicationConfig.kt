@@ -1,7 +1,9 @@
 package io.geekhub.service.shared.config
 
+import io.geekhub.service.account.repository.ClientAccountRepository
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.questions.repository.QuestionRepository
+import io.geekhub.service.specialization.repository.SpecializationRepository
 import io.geekhub.service.user.repository.UserRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -26,7 +28,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
  * https://springframework.guru/spring-boot-restful-api-documentation-with-swagger-2/
  */
 @Configuration
-@EnableMongoRepositories(basePackageClasses = [QuestionRepository::class, InterviewRepository::class, UserRepository::class])
+@EnableMongoRepositories(basePackageClasses = [QuestionRepository::class, ClientAccountRepository::class, SpecializationRepository::class, InterviewRepository::class, UserRepository::class])
 @EnableMongoAuditing
 //@EnableScheduling
 @EnableSwagger2

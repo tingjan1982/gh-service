@@ -1,32 +1,24 @@
 package io.geekhub.service.questions.model
 
 //import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.specialization.repository.Specialization
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 
-/**
- * Represents the base question class.
- *
- * Reference on JPA hierarchical class options: https://www.thoughts-on-java.org/complete-guide-inheritance-strategies-jpa-hibernate/
- */
 @Document
 data class Question(
         @Id
         var questionId: String? = null,
         var question: String,
-        /**
-         * The field of profession this question belongs to.
-         */
-        var category: String,
-
-        /**
-         * Specific sub-domains this question relates to.
-         */
-        var topic: String) {
-
-    val possibleAnswers: MutableList<PossibleAnswer> = mutableListOf()
-
-    val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf()
+        @DBRef
+        var clientAccount: ClientAccount,
+        @DBRef
+        var specialization: Specialization?,
+        var jobTitle: String?,
+        val possibleAnswers: MutableList<PossibleAnswer> = mutableListOf(),
+        val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf()) {
 
 
     fun addAnswer(answer: PossibleAnswer) {

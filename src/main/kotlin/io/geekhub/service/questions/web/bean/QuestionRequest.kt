@@ -11,8 +11,8 @@ import javax.validation.constraints.NotEmpty
  */
 data class QuestionRequest(
         @field:NotEmpty val question: String,
-        @field:NotEmpty val category: String,
-        @field:NotEmpty val topic: String,
+        val specializationId: String?,
+        val jobTitle: String?,
         val possibleAnswers: List<PossibleAnswerRequest> = listOf()
 ) {
     data class PossibleAnswerRequest(@field:NotEmpty val answer: String, @field:NotEmpty val correctAnswer: Boolean)
