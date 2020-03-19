@@ -14,4 +14,8 @@ class SpecializationServiceImpl(val repository: SpecializationRepository) : Spec
     override fun getSpecialization(id: String): Specialization {
         return repository.findById(id).orElseThrow()
     }
+
+    override fun getSpecializations(): List<Specialization> {
+        return repository.findAll().distinct()
+    }
 }

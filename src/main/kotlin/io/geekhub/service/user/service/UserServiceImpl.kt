@@ -12,7 +12,6 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.access.annotation.Secured
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.provisioning.JdbcUserDetailsManager
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.persistence.EntityExistsException
@@ -24,7 +23,6 @@ import org.springframework.security.core.userdetails.User as SpringSecurityUser
 class UserServiceImpl(
         val repository: UserRepository,
         val questionService: QuestionService,
-        val userDetailsManager: JdbcUserDetailsManager,
         val passwordEncoder: PasswordEncoder
 ) : UserService {
 
@@ -47,7 +45,6 @@ class UserServiceImpl(
                 .password(userRequest.password)
                 .roles(USER_ROLE)
 
-        this.userDetailsManager.createUser(userBuilder.build())
         logger.info("Created user credentials for ${userRequest.username}")
 
         userRequest.toEntity().let {
@@ -59,10 +56,6 @@ class UserServiceImpl(
     }
 
     private fun checkUserRequest(userRequest: UserRequest) {
-        if (this.userDetailsManager.userExists(userRequest.username)) {
-            throw EntityExistsException("Username ${userRequest.username} already exists in the system")
-        }
-
         this.repository.findByEmail(userRequest.email).ifPresent {
             throw EntityExistsException("Email ${userRequest.email} already exists in the system")
         }
@@ -94,7 +87,6 @@ class UserServiceImpl(
                     .password(userRequest.password)
                     .roles(USER_ROLE)
 
-            this.userDetailsManager.updateUser(userBuilder.build())
             logger.info("User ${it.username} updated password")
 
             it.apply {

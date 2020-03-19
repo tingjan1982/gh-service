@@ -2,93 +2,35 @@ package io.geekhub.service.shared.config
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.InitializingBean
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.core.Ordered
-import org.springframework.core.env.Environment
-import org.springframework.core.io.ClassPathResource
-import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
 import org.springframework.security.oauth2.core.OAuth2TokenValidator
 import org.springframework.security.oauth2.jwt.*
-import org.springframework.security.provisioning.JdbcUserDetailsManager
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository
-import org.springframework.security.web.csrf.CsrfTokenRepository
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
-import javax.annotation.PreDestroy
-import javax.sql.DataSource
 
 
 @EnableWebSecurity
-class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
+class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(SecurityConfig::class.java)
     }
-
-    @Autowired
-    lateinit var dataSource: DataSource
-
-    @Autowired
-    lateinit var ghServiceConfigProperties: GhServiceConfigProperties
-
-    @Autowired
-    lateinit var environment: Environment
 
     @Value("\${auth0.audience}")
     lateinit var audience: String
 
     @Value("\${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     lateinit var issuer: String
-
-    override fun afterPropertiesSet() {
-        ResourceDatabasePopulator(ClassPathResource("security-schema.ddl", SecurityConfig::class.java)).let {
-            when (this.determineDataSourceType()) {
-                SecurityConfig.DataSourceType.POSTGRESQL -> it.addScript(ClassPathResource("createAclSchemaPostgres.sql", SecurityConfig::class.java))
-                SecurityConfig.DataSourceType.EMBEDDED -> it.addScript(ClassPathResource("/createAclSchemaWithAclClassIdType.sql"))
-            }
-
-            it.execute(dataSource)
-        }
-    }
-
-    // todo: this should really check for the actual data source rather than environment profile.
-    fun determineDataSourceType(): DataSourceType {
-
-        return when {
-            this.environment.activeProfiles.any { it == "test" || it == "embedded" } -> DataSourceType.EMBEDDED
-            else -> DataSourceType.EMBEDDED
-        }
-    }
-
-    @PreDestroy
-    fun cleanUpSecuritySchema() {
-        logger.info("Cleanup security schema...")
-
-        when {
-            this.environment.activeProfiles.any { it == "dev" || it == "test" || it == "embedded" } ||
-                    this.environment.defaultProfiles.isNotEmpty() -> {
-
-                val securitySchema = ClassPathResource("security-schema-drop.ddl", SecurityConfig::class.java)
-                ResourceDatabasePopulator(securitySchema).execute(dataSource).let {
-                    logger.info("Applied schema: ${securitySchema.path}")
-                }
-            }
-        }
-    }
 
     /**
      * The URL patterns do not need to include the context path.
@@ -99,17 +41,10 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
      */
     override fun configure(http: HttpSecurity) {
 
-        this.ghServiceConfigProperties.apply {
-            if (csrfEnabled) {
-                http.csrf().csrfTokenRepository(csrfTokenRepository())
-            } else {
-                http.csrf().disable()
-            }
-        }
+        http.csrf().disable().cors().and()
+                .oauth2ResourceServer().jwt()
 
-        http.oauth2ResourceServer().jwt()
-
-        http.cors().and().authorizeRequests()
+        http.authorizeRequests()
                 .mvcMatchers("/**").permitAll()
                 .mvcMatchers("/questions").authenticated()
                 //.mvcMatchers("/api/private-scoped").hasAuthority("SCOPE_read:messages")
@@ -162,10 +97,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
         return bean
     }
 
-    @Bean
-    fun csrfTokenRepository(): CsrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse()
-
-    override fun configure(auth: AuthenticationManagerBuilder) {
+    /*override fun configure(auth: AuthenticationManagerBuilder) {
         val passwordEncoder = this.passwordEncoder()
         auth.userDetailsService(this.userDetailsManager())
 
@@ -181,28 +113,26 @@ class SecurityConfig : WebSecurityConfigurerAdapter(), InitializingBean {
         }
     }
 
+    */
     /**
      * Expose UserDetailsService instance as bean for other services to use.
-     */
+     *//*
     @Bean
     override fun userDetailsServiceBean(): UserDetailsService {
         return super.userDetailsServiceBean()
     }
 
+    */
     /**
      * Expose AuthenticationManager instance as bean for other services to use.
-     */
+     *//*
     @Bean
     override fun authenticationManagerBean(): AuthenticationManager {
         return super.authenticationManagerBean()
-    }
+    }*/
 
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder()
-    }
-
-    enum class DataSourceType {
-        POSTGRESQL, EMBEDDED
     }
 }

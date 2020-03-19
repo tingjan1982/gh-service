@@ -8,5 +8,5 @@ data class Specialization(
         @Id
         var id: String? = null,
         var name: String,
-        var profession: String
+        var profession: String?
 )

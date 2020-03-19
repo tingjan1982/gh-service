@@ -2,8 +2,6 @@ package io.geekhub.service.questions.web
 
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.service.ClientAccountService
-import io.geekhub.service.questions.model.Question.QuestionAttribute
-import io.geekhub.service.questions.model.Question.QuestionAttribute.Companion.DESCRIPTION_KEY
 import io.geekhub.service.questions.service.QuestionSearchService
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.questions.service.SocialLikeService
@@ -15,7 +13,6 @@ import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpEntity
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
@@ -85,13 +82,18 @@ class QuestionController(val questionService: QuestionService,
                 .map { it.toDTO() }
     }
 
-    @PutMapping("/{id}/attributes/description")
-    fun saveQuestionAttribute(@PathVariable id: String, description: HttpEntity<String>): QuestionResponse {
+    @PostMapping("/{id}")
+    fun updateQuestion(@PathVariable id: String, @Valid @RequestBody request: QuestionRequest): QuestionResponse {
 
-        return description.body?.let {
-            this.questionService.saveOrUpdateAttribute(id, QuestionAttribute(key = DESCRIPTION_KEY, value = it))
+        questionService.getQuestion(id).let {
+            it.question = request.question
+            it.possibleAnswers.clear()
+            request.possibleAnswers.forEach { ans ->
+                it.possibleAnswers.add(ans.toEntity())
+            }
 
-        }?.toDTO() ?: throw IllegalArgumentException("Description is required")
+            return questionService.saveQuestion(it).toDTO()
+        }
     }
 
     @PutMapping("/{id}/like")
