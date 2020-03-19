@@ -7,6 +7,8 @@ import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
@@ -30,8 +32,8 @@ class QuestionServiceImpl(val questionRepository: QuestionRepository) : Question
         }
     }
 
-    override fun getQuestions(clientAccount: ClientAccount): Iterable<Question> {
-        return questionRepository.findAll()
+    override fun getQuestions(clientAccount: ClientAccount, pageRequest: PageRequest): Page<Question> {
+        return questionRepository.findAll(pageRequest)
     }
 
     override fun deleteQuestion(id: String) {

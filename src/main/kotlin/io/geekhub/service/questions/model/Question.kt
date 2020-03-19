@@ -2,6 +2,7 @@ package io.geekhub.service.questions.model
 
 //import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.shared.model.BaseMongoObject
 import io.geekhub.service.specialization.repository.Specialization
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.DBRef
@@ -18,7 +19,7 @@ data class Question(
         var specialization: Specialization?,
         var jobTitle: String?,
         val possibleAnswers: MutableList<PossibleAnswer> = mutableListOf(),
-        val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf()) {
+        val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf()) : BaseMongoObject() {
 
 
     fun addAnswer(answer: PossibleAnswer) {

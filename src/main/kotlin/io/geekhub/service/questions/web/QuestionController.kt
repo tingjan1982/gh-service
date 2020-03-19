@@ -7,12 +7,14 @@ import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.questions.service.SocialLikeService
 import io.geekhub.service.questions.web.bean.QuestionRequest
 import io.geekhub.service.questions.web.bean.QuestionResponse
+import io.geekhub.service.questions.web.bean.QuestionsResponse
 import io.geekhub.service.shared.extensions.currentUser
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -78,9 +80,16 @@ class QuestionController(val questionService: QuestionService,
     }
 
     @GetMapping
-    fun listQuestions(): List<QuestionResponse> {
-        return this.questionService.getQuestions(resolveClientAccount())
-                .map { it.toDTO() }
+    fun listQuestions(@RequestParam(value = "currentPage", defaultValue = "-1") currentPage: Int,
+                      @RequestParam(value = "pageSize", defaultValue = "50") pageSize: Int,
+                      @RequestParam(value = "page", defaultValue = "0") page: Int,
+                      @RequestParam(value = "next", defaultValue = "true") next: Boolean): QuestionsResponse {
+
+        val pageToUse: Int = if (next) currentPage + 1 else page
+        val pageRequest = PageRequest.of(pageToUse, pageSize)
+        this.questionService.getQuestions(resolveClientAccount(), pageRequest).let {
+            return QuestionsResponse(it.numberOfElements, it.number, it.content)
+        }
     }
 
     @PostMapping("/{id}")

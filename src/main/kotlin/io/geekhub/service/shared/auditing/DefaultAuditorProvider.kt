@@ -1,12 +1,12 @@
 package io.geekhub.service.shared.auditing
 
-import io.geekhub.service.user.model.User
+import io.geekhub.service.account.repository.ClientAccount
 import org.springframework.data.domain.AuditorAware
 import java.util.*
 
-class DefaultAuditorProvider : AuditorAware<User> {
+class DefaultAuditorProvider : AuditorAware<ClientAccount> {
 
-    override fun getCurrentAuditor(): Optional<User> {
+    override fun getCurrentAuditor(): Optional<ClientAccount> {
 
         return Optional.empty()
     }
