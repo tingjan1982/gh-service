@@ -30,8 +30,12 @@ class QuestionServiceImpl(val questionRepository: QuestionRepository) : Question
         }
     }
 
-    override fun getQuestions(clientAccount: ClientAccount): List<Question> {
-        return questionRepository.findAllBy()
+    override fun getQuestions(clientAccount: ClientAccount): Iterable<Question> {
+        return questionRepository.findAll()
+    }
+
+    override fun deleteQuestion(id: String) {
+        questionRepository.deleteById(id)
     }
 
     override fun saveOrUpdateAttribute(id: String, questionAttribute: QuestionAttribute): Question {

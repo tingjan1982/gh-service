@@ -41,11 +41,11 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
      */
     override fun configure(http: HttpSecurity) {
 
-        http.csrf().disable().cors().and()
-                .oauth2ResourceServer().jwt()
+        http.csrf().disable().cors()
 
         http.authorizeRequests()
                 .mvcMatchers("/**").permitAll()
+                .mvcMatchers("/specializations").authenticated()
                 .mvcMatchers("/questions").authenticated()
                 //.mvcMatchers("/api/private-scoped").hasAuthority("SCOPE_read:messages")
                 .and()

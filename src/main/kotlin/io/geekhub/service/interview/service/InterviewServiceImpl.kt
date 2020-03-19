@@ -45,7 +45,7 @@ class InterviewServiceImpl(val questionRepository: QuestionRepository,
 
     private fun populateQuestions(interviewOption: InterviewOption, interview: Interview) {
 
-        val allQuestions = questionRepository.findAllBy()
+        val allQuestions = questionRepository.findAll().distinct()
         val numbers = mutableMapOf<Int, Int>()
 
         for (i in 1..interviewOption.questionCount) {

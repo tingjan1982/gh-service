@@ -10,7 +10,7 @@ interface QuestionService {
 
     fun getQuestion(id: String): Question
 
-    fun getQuestions(clientAccount: ClientAccount): List<Question>
+    fun getQuestions(clientAccount: ClientAccount): Iterable<Question>
 
     /**
      * Save or update attribute in Question and return fully loaded question.
@@ -18,4 +18,6 @@ interface QuestionService {
     fun saveOrUpdateAttribute(id: String, questionAttribute: QuestionAttribute): Question
 
     fun getQuestionAttribute(id: String, key: String): QuestionAttribute?
+
+    fun deleteQuestion(id: String)
 }

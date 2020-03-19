@@ -9,12 +9,6 @@ import org.springframework.data.repository.PagingAndSortingRepository
 interface QuestionRepository : PagingAndSortingRepository<Question, String> {
 
     /**
-     * Reference on the use of SpEL for resolving table name:
-     * https://docs.spring.io/spring-data/jpa/docs/2.0.7.RELEASE/reference/html/#jpa.query.spel-expressions
-     */
-    fun findAllBy(): List<Question>
-
-    /**
      * Searches questions by question, category and topic, with category and topic on exact match when they have values.
      */
     @Query("select q from #{#entityName} q where q.question like %:searchText% and " +

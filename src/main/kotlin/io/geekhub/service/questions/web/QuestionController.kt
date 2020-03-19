@@ -13,6 +13,7 @@ import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
@@ -94,6 +95,13 @@ class QuestionController(val questionService: QuestionService,
 
             return questionService.saveQuestion(it).toDTO()
         }
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    fun deleteQuestion(@PathVariable id: String) {
+
+        questionService.deleteQuestion(id)
     }
 
     @PutMapping("/{id}/like")
