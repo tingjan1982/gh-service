@@ -1,6 +1,5 @@
 package io.geekhub.service.shared.model
 
-import io.geekhub.service.account.repository.ClientAccount
 import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedBy
@@ -12,14 +11,14 @@ import javax.persistence.TemporalType
 abstract class BaseMongoObject {
 
     @CreatedBy
-    private lateinit var createdBy: ClientAccount
+    private lateinit var createdBy: String
 
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     private lateinit var createdDate: LocalDateTime
 
     @LastModifiedBy
-    private lateinit var lastModifiedBy: ClientAccount
+    private lateinit var lastModifiedBy: String
 
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate

@@ -1,6 +1,5 @@
 package io.geekhub.service.shared.config
 
-import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientAccountRepository
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.questions.repository.QuestionRepository
@@ -40,7 +39,7 @@ class ApplicationConfig {
      * Reference: https://docs.spring.io/spring-data/jpa/docs/2.0.6.RELEASE/reference/html/#auditing
      */
     @Bean
-    fun auditorProvider(): AuditorAware<ClientAccount> {
+    fun auditorProvider(): AuditorAware<String> {
         return DefaultAuditorProvider()
     }
 

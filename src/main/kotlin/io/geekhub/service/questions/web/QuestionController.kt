@@ -88,7 +88,7 @@ class QuestionController(val questionService: QuestionService,
         val pageToUse: Int = if (next) currentPage + 1 else page
         val pageRequest = PageRequest.of(pageToUse, pageSize)
         this.questionService.getQuestions(resolveClientAccount(), pageRequest).let {
-            return QuestionsResponse(it.numberOfElements, it.number, it.content)
+            return QuestionsResponse(it.totalElements, it.totalPages, it.size, it.number, it.content)
         }
     }
 

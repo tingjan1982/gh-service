@@ -2,8 +2,10 @@ package io.geekhub.service.shared.extensions
 
 import io.geekhub.service.shared.exception.UnexpectedAuthException
 import io.geekhub.service.user.model.User
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.provider.OAuth2Authentication
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails
 
@@ -14,4 +16,17 @@ fun SecurityContext.currentUser(): User {
             ?: throw UnexpectedAuthException("get current user information.")
 
     return (userDetails.decodedDetails as User)
+}
+
+fun currentClient(): String? {
+
+    val authentication: Authentication = SecurityContextHolder.getContext().authentication
+
+    val principal = authentication.principal
+    if (principal is Jwt) {
+        return principal.claims["https://api.geekhub.tw/email"] as String
+    }
+
+    return null
+
 }
