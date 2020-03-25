@@ -7,5 +7,7 @@ data class QuestionsResponse(
         val totalPage: Int,
         val size: Int,
         val page: Int,
-        val results: List<Question> = mutableListOf()
+        val results: List<Question> = mutableListOf(),
+        val next: String,
+        val prev: String
 )

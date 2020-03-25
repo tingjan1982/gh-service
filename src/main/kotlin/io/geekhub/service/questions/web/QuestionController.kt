@@ -11,10 +11,13 @@ import io.geekhub.service.questions.web.bean.QuestionsResponse
 import io.geekhub.service.shared.extensions.currentUser
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
+import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_KEY
 import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.web.ServerProperties
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -28,17 +31,19 @@ class QuestionController(val questionService: QuestionService,
                          val clientAccountService: ClientAccountService,
                          val specializationService: SpecializationService,
                          val questionSearchService: QuestionSearchService,
-                         val socialLikeService: SocialLikeService) {
+                         val socialLikeService: SocialLikeService,
+                         val serverProperties: ServerProperties) {
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(QuestionController::class.java)
     }
 
     @PostMapping
-    fun createQuestion(@Valid @RequestBody questionRequest: QuestionRequest): QuestionResponse {
+    fun createQuestion(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+                       @Valid @RequestBody questionRequest: QuestionRequest): QuestionResponse {
         logger.info("Received creation request for: $questionRequest")
 
-        val clientAccount = resolveClientAccount()
+        //val clientAccount = resolveClientAccount()
         val specialization = questionRequest.specializationId?.let {
             specializationService.getSpecialization(it)
         }
@@ -83,12 +88,21 @@ class QuestionController(val questionService: QuestionService,
     fun listQuestions(@RequestParam(value = "currentPage", defaultValue = "-1") currentPage: Int,
                       @RequestParam(value = "pageSize", defaultValue = "50") pageSize: Int,
                       @RequestParam(value = "page", defaultValue = "0") page: Int,
-                      @RequestParam(value = "next", defaultValue = "true") next: Boolean): QuestionsResponse {
+                      @RequestParam(value = "next", defaultValue = "true") next: Boolean,
+                      @RequestParam(value = "sort", defaultValue = "lastModifiedDate") sortField: String): QuestionsResponse {
 
         val pageToUse: Int = if (next) currentPage + 1 else page
-        val pageRequest = PageRequest.of(pageToUse, pageSize)
+        val pageRequest = PageRequest.of(pageToUse, pageSize, Sort.by(Sort.Order.desc(sortField)))
         this.questionService.getQuestions(resolveClientAccount(), pageRequest).let {
-            return QuestionsResponse(it.totalElements, it.totalPages, it.size, it.number, it.content)
+
+            val nextPage = if (it.hasNext()) pageToUse + 1 else -1
+            val prevPage = if (it.hasPrevious()) pageToUse - 1 else -1
+
+            val contextPath = serverProperties.servlet.contextPath
+            val nextUrl = "$contextPath/questions?page=${nextPage}&pageSize=${pageSize}"
+            val previousUrl = "$contextPath/questions?page=${prevPage}&pageSize=${pageSize}"
+
+            return QuestionsResponse(it.totalElements, it.totalPages, it.size, it.number, it.content, nextUrl, previousUrl)
         }
     }
 

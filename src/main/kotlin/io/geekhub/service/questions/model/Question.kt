@@ -13,11 +13,12 @@ data class Question(
         @Id
         var questionId: String? = null,
         var question: String,
+        var questionType: QuestionType = QuestionType.SHORT_ANSWER,
+        var jobTitle: String?,
         @DBRef
         var clientAccount: ClientAccount,
         @DBRef
-        var specialization: Specialization?,
-        var jobTitle: String?,
+        var specialization: Specialization? = null,
         val possibleAnswers: MutableList<PossibleAnswer> = mutableListOf(),
         val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf()) : BaseMongoObject() {
 
@@ -47,5 +48,9 @@ data class Question(
             const val DESCRIPTION_KEY = "description"
             const val TOTAL_LIKES_KEY = "total_likes"
         }
+    }
+
+    enum class QuestionType {
+        TRUE_FALSE, MULTI_CHOICE, MULTI_ANSWER, SHORT_ANSWER
     }
 }

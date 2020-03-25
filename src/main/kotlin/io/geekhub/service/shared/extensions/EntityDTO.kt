@@ -2,6 +2,10 @@ package io.geekhub.service.shared.extensions
 
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.web.model.ClientAccountResponse
+import io.geekhub.service.interview.model.Interview
+import io.geekhub.service.interview.web.model.InterviewRequest
+import io.geekhub.service.interview.web.model.InterviewResponse
+import io.geekhub.service.interview.web.model.InterviewsResponse
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.model.Question.PossibleAnswer
 import io.geekhub.service.questions.web.bean.QuestionRequest
@@ -46,6 +50,45 @@ fun Question.toDTO() = QuestionResponse(
 )
 
 fun PossibleAnswer.toDTO() = QuestionResponse.PossibleAnswerResponse(this.answer, this.correctAnswer)
+
+fun InterviewRequest.toEntity(account: ClientAccount, spec: Specialization, sections: MutableList<Interview.Section>) = Interview(
+        title = this.title,
+        description = this.description,
+        jobTitle = this.jobTitle,
+        clientAccount = account,
+        specialization = spec,
+        sections = sections
+)
+
+fun InterviewRequest.SectionRequest.toEntity() = Interview.Section(
+        title = this.title
+)
+
+fun Interview.toDTO() = InterviewResponse(
+        id = this.id.toString(),
+        title = this.title,
+        description = this.description,
+        jobTitle = this.jobTitle,
+        clientAccount = this.clientAccount.toDTO(),
+        specialization = this.specialization,
+        sections = this.sections.map { it.toDTO() }
+)
+
+fun Interview.toLightDTO() = InterviewsResponse.LightInterviewResponse(
+        id = this.id.toString(),
+        title = this.title,
+        description = this.description,
+        jobTitle = this.jobTitle,
+        clientAccount = this.clientAccount.toDTO(),
+        specialization = this.specialization
+)
+
+fun Interview.Section.toDTO() = InterviewResponse.SectionResponse(
+        title = this.title,
+        questions = this.questions
+)
+
+
 
 fun ClientAccount.toDTO() = ClientAccountResponse(
         this.id.toString(),
