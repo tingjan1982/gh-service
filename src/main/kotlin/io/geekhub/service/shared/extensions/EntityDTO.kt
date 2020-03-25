@@ -11,6 +11,8 @@ import io.geekhub.service.questions.model.Question.PossibleAnswer
 import io.geekhub.service.questions.web.bean.QuestionRequest
 import io.geekhub.service.questions.web.bean.QuestionResponse
 import io.geekhub.service.specialization.repository.Specialization
+import io.geekhub.service.specialization.web.model.SpecializationRequest
+import io.geekhub.service.specialization.web.model.SpecializationResponse
 import io.geekhub.service.user.model.User
 import io.geekhub.service.user.web.bean.UserRequest
 import io.geekhub.service.user.web.bean.UserResponse
@@ -44,7 +46,7 @@ fun Question.toDTO() = QuestionResponse(
         this.questionId.toString(),
         this.question,
         this.clientAccount.toDTO(),
-        this.specialization?.name,
+        this.specialization?.toDTO(),
         this.jobTitle,
         this.possibleAnswers.map { it.toDTO() }.toList()
 )
@@ -70,7 +72,7 @@ fun Interview.toDTO() = InterviewResponse(
         description = this.description,
         jobTitle = this.jobTitle,
         clientAccount = this.clientAccount.toDTO(),
-        specialization = this.specialization,
+        specialization = this.specialization.toDTO(),
         sections = this.sections.map { it.toDTO() }
 )
 
@@ -80,7 +82,7 @@ fun Interview.toLightDTO() = InterviewsResponse.LightInterviewResponse(
         description = this.description,
         jobTitle = this.jobTitle,
         clientAccount = this.clientAccount.toDTO(),
-        specialization = this.specialization
+        specialization = this.specialization.toDTO()
 )
 
 fun Interview.Section.toDTO() = InterviewResponse.SectionResponse(
@@ -88,10 +90,14 @@ fun Interview.Section.toDTO() = InterviewResponse.SectionResponse(
         questions = this.questions
 )
 
+fun ClientAccount.toDTO() = ClientAccountResponse(this.email)
 
-
-fun ClientAccount.toDTO() = ClientAccountResponse(
-        this.id.toString(),
-        this.clientName,
-        this.email
+fun SpecializationRequest.toEntity() = Specialization(
+        name = this.name
 )
+
+fun Specialization.toDTO() = SpecializationResponse(
+        this.id.toString(),
+        this.name
+)
+

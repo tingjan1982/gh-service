@@ -1,6 +1,7 @@
 package io.geekhub.service.specialization.web
 
-import io.geekhub.service.specialization.repository.Specialization
+import io.geekhub.service.shared.extensions.toDTO
+import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.specialization.service.SpecializationService
 import io.geekhub.service.specialization.web.model.SpecializationRequest
 import io.geekhub.service.specialization.web.model.SpecializationResponse
@@ -34,21 +35,9 @@ class SpecializationController(val specializationService: SpecializationService)
 
         specializationService.getSpecialization(id).let {
             it.name = request.name
-            it.profession = request.profession
 
             return specializationService.saveSpecialization(it).toDTO()
         }
     }
 }
-
-private fun Specialization.toDTO() = SpecializationResponse(
-        this.id.toString(),
-        this.name,
-        this.profession
-)
-
-private fun SpecializationRequest.toEntity() = Specialization(
-        name = this.name,
-        profession = this.profession
-)
 

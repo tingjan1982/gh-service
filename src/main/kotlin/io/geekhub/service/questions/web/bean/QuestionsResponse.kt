@@ -1,13 +1,9 @@
 package io.geekhub.service.questions.web.bean
 
-import io.geekhub.service.questions.model.Question
+import com.fasterxml.jackson.annotation.JsonIgnore
+import io.geekhub.service.shared.model.PageableResponse
+import org.springframework.data.domain.Page
 
-data class QuestionsResponse(
-        val total: Long,
-        val totalPage: Int,
-        val size: Int,
-        val page: Int,
-        val results: List<Question> = mutableListOf(),
-        val next: String,
-        val prev: String
-)
+data class QuestionsResponse(@JsonIgnore val page: Page<QuestionResponse>,
+                             @JsonIgnore val contextPath: String,
+                             @JsonIgnore val resourcePrefix: String) : PageableResponse<QuestionResponse>(page, contextPath, resourcePrefix)

@@ -86,23 +86,16 @@ class QuestionController(val questionService: QuestionService,
 
     @GetMapping
     fun listQuestions(@RequestParam(value = "currentPage", defaultValue = "-1") currentPage: Int,
-                      @RequestParam(value = "pageSize", defaultValue = "50") pageSize: Int,
-                      @RequestParam(value = "page", defaultValue = "0") page: Int,
                       @RequestParam(value = "next", defaultValue = "true") next: Boolean,
+                      @RequestParam(value = "page", defaultValue = "0") page: Int,
+                      @RequestParam(value = "pageSize", defaultValue = "50") pageSize: Int,
                       @RequestParam(value = "sort", defaultValue = "lastModifiedDate") sortField: String): QuestionsResponse {
 
         val pageToUse: Int = if (next) currentPage + 1 else page
         val pageRequest = PageRequest.of(pageToUse, pageSize, Sort.by(Sort.Order.desc(sortField)))
-        this.questionService.getQuestions(resolveClientAccount(), pageRequest).let {
-
-            val nextPage = if (it.hasNext()) pageToUse + 1 else -1
-            val prevPage = if (it.hasPrevious()) pageToUse - 1 else -1
-
+        this.questionService.getQuestions(resolveClientAccount(), pageRequest).let { result ->
             val contextPath = serverProperties.servlet.contextPath
-            val nextUrl = "$contextPath/questions?page=${nextPage}&pageSize=${pageSize}"
-            val previousUrl = "$contextPath/questions?page=${prevPage}&pageSize=${pageSize}"
-
-            return QuestionsResponse(it.totalElements, it.totalPages, it.size, it.number, it.content, nextUrl, previousUrl)
+            return QuestionsResponse(result.map { it.toDTO() }, contextPath, "questions")
         }
     }
 

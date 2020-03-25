@@ -12,6 +12,7 @@ import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.shared.extensions.toLightDTO
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_KEY
 import io.geekhub.service.specialization.service.SpecializationService
+import org.springframework.boot.autoconfigure.web.ServerProperties
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -21,7 +22,8 @@ import javax.validation.Valid
 @RequestMapping("/interviews")
 class InterviewController(val interviewService: InterviewService,
                           val questionService: QuestionService,
-                          val specializationService: SpecializationService) {
+                          val specializationService: SpecializationService,
+                          val serverProperties: ServerProperties) {
 
     @PostMapping
     fun createInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
@@ -82,16 +84,16 @@ class InterviewController(val interviewService: InterviewService,
     @GetMapping
     fun listInterviews(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
                        @RequestParam(value = "currentPage", defaultValue = "-1") currentPage: Int,
-                       @RequestParam(value = "pageSize", defaultValue = "50") pageSize: Int,
-                       @RequestParam(value = "page", defaultValue = "0") page: Int,
                        @RequestParam(value = "next", defaultValue = "true") next: Boolean,
+                       @RequestParam(value = "page", defaultValue = "0") page: Int,
+                       @RequestParam(value = "pageSize", defaultValue = "50") pageSize: Int,
                        @RequestParam(value = "sort", defaultValue = "lastModifiedDate") sortField: String): InterviewsResponse {
 
-        val pageRequest = PageRequest.of(page, pageSize)
+        val pageToUse: Int = if (next) currentPage + 1 else page
+        val pageRequest = PageRequest.of(pageToUse, pageSize)
         interviewService.getInterviews(clientAccount, pageRequest).let { result ->
-            result.map { it.toLightDTO() }.toList().let { interviews ->
-                return InterviewsResponse(interviews)
-            }
+            val contextPath = serverProperties.servlet.contextPath
+            return InterviewsResponse(result.map { it.toLightDTO() }, contextPath, "interviews")
         }
     }
 

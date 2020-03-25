@@ -2,6 +2,7 @@ package io.geekhub.service.interview.model
 
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.questions.model.Question
+import io.geekhub.service.shared.model.BaseMongoObject
 import io.geekhub.service.specialization.repository.Specialization
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.DBRef
@@ -22,7 +23,7 @@ data class Interview(
          * Left part of the pair represents the ordering key.
          */
         val sections: MutableList<Section> = mutableListOf()
-) {
+) : BaseMongoObject() {
 
     fun addSection(section: Section) {
         sections.add(section)

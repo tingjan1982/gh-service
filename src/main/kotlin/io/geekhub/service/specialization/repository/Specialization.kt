@@ -7,6 +7,5 @@ import org.springframework.data.mongodb.core.mapping.Document
 data class Specialization(
         @Id
         var id: String? = null,
-        var name: String,
-        var profession: String?
+        var name: String
 )
