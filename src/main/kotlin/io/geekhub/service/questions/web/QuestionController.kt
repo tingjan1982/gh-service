@@ -1,7 +1,6 @@
 package io.geekhub.service.questions.web
 
 import io.geekhub.service.account.repository.ClientAccount
-import io.geekhub.service.account.service.ClientAccountService
 import io.geekhub.service.questions.service.QuestionSearchService
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.questions.service.SocialLikeService
@@ -19,16 +18,13 @@ import org.springframework.boot.autoconfigure.web.ServerProperties
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 @RestController
 @RequestMapping("/questions")
 class QuestionController(val questionService: QuestionService,
-                         val clientAccountService: ClientAccountService,
                          val specializationService: SpecializationService,
                          val questionSearchService: QuestionSearchService,
                          val socialLikeService: SocialLikeService,
@@ -43,7 +39,6 @@ class QuestionController(val questionService: QuestionService,
                        @Valid @RequestBody questionRequest: QuestionRequest): QuestionResponse {
         logger.info("Received creation request for: $questionRequest")
 
-        //val clientAccount = resolveClientAccount()
         val specialization = questionRequest.specializationId?.let {
             specializationService.getSpecialization(it)
         }
@@ -56,27 +51,6 @@ class QuestionController(val questionService: QuestionService,
         return this.questionService.saveQuestion(questionToCreate).toDTO()
     }
 
-    private fun resolveClientAccount(): ClientAccount {
-
-        val authentication: Authentication = SecurityContextHolder.getContext().authentication
-
-        val principal = authentication.principal
-        if (principal is Jwt) {
-            val id = principal.claims["sub"] as String
-
-            clientAccountService.getClientAccount(id)?.let {
-                return it
-            }
-
-            val email = principal.claims["https://api.geekhub.tw/email"] as String
-            ClientAccount(id, ClientAccount.AccountType.INDIVIDUAL, email, email).let {
-                return clientAccountService.saveClientAccount(it)
-            }
-        }
-
-        throw RuntimeException("Authentication object is not jwt")
-    }
-
     @GetMapping("/{id}")
     fun getQuestion(@PathVariable id: String): QuestionResponse {
         logger.info("Attempt to lookup question by id: $id")
@@ -85,7 +59,8 @@ class QuestionController(val questionService: QuestionService,
     }
 
     @GetMapping
-    fun listQuestions(@RequestParam(value = "currentPage", defaultValue = "-1") currentPage: Int,
+    fun listQuestions(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+                      @RequestParam(value = "currentPage", defaultValue = "-1") currentPage: Int,
                       @RequestParam(value = "next", defaultValue = "true") next: Boolean,
                       @RequestParam(value = "page", defaultValue = "0") page: Int,
                       @RequestParam(value = "pageSize", defaultValue = "50") pageSize: Int,
@@ -93,7 +68,7 @@ class QuestionController(val questionService: QuestionService,
 
         val pageToUse: Int = if (next) currentPage + 1 else page
         val pageRequest = PageRequest.of(pageToUse, pageSize, Sort.by(Sort.Order.desc(sortField)))
-        this.questionService.getQuestions(resolveClientAccount(), pageRequest).let { result ->
+        this.questionService.getQuestions(clientAccount, pageRequest).let { result ->
             val contextPath = serverProperties.servlet.contextPath
             return QuestionsResponse(result.map { it.toDTO() }, contextPath, "questions")
         }

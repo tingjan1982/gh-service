@@ -41,9 +41,14 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService) : Once
                 clientAccountService.getClientAccount(id)?.let {
                     return it
                 }
+
+                val email = principal.claims["https://api.geekhub.tw/email"] as String
+                ClientAccount(id, ClientAccount.AccountType.INDIVIDUAL, email, email).let {
+                    return clientAccountService.saveClientAccount(it)
+                }
             }
         }
 
-        return null
+        throw RuntimeException("Authentication object is not jwt")
     }
 }
