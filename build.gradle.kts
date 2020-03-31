@@ -66,6 +66,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.security.oauth:spring-security-oauth2:2.2.5.RELEASE")
 
+    //implementation("org.apache.httpcomponents:httpclient")
+    
     // swagger 2
     implementation("io.springfox:springfox-swagger2:2.7.0")
     implementation("io.springfox:springfox-swagger-ui:2.7.0")

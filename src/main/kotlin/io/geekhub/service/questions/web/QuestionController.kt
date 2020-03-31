@@ -10,6 +10,7 @@ import io.geekhub.service.questions.web.bean.QuestionsResponse
 import io.geekhub.service.shared.extensions.currentUser
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
+import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_KEY
 import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
@@ -60,6 +61,8 @@ class QuestionController(val questionService: QuestionService,
 
     @GetMapping
     fun listQuestions(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+                      @RequestParam(value = "owner", defaultValue = "true") owner: Boolean,
+                      @RequestParam(value = "keyword", required = false) keyword: String?,
                       @RequestParam(value = "currentPage", defaultValue = "-1") currentPage: Int,
                       @RequestParam(value = "next", defaultValue = "true") next: Boolean,
                       @RequestParam(value = "page", defaultValue = "0") page: Int,
@@ -68,7 +71,9 @@ class QuestionController(val questionService: QuestionService,
 
         val pageToUse: Int = if (next) currentPage + 1 else page
         val pageRequest = PageRequest.of(pageToUse, pageSize, Sort.by(Sort.Order.desc(sortField)))
-        this.questionService.getQuestions(clientAccount, pageRequest).let { result ->
+        val searchCriteria = SearchCriteria(owner, clientAccount, keyword)
+
+        this.questionService.getQuestions(searchCriteria, pageRequest).let { result ->
             val contextPath = serverProperties.servlet.contextPath
             return QuestionsResponse(result.map { it.toDTO() }, contextPath, "questions")
         }

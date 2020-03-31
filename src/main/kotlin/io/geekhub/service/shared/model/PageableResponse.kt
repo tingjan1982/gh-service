@@ -9,7 +9,7 @@ open class PageableResponse<T>(page: Page<T>, contextPath: String, resourcePrefi
     var size: Int = page.size
     var currentPage: Int = page.number
     var results: List<T> = page.content
-    var next: String = "${contextPath}/${resourcePrefix}/page=${if (page.hasNext()) currentPage + 1 else -1}&pageSize=${size}"
-    var prev: String = "${contextPath}/${resourcePrefix}/page=${if (page.hasPrevious()) currentPage - 1 else -1}&pageSize=${size}"
+    var next: String = if (page.hasNext()) "${contextPath}/${resourcePrefix}?page=${currentPage + 1}&pageSize=${size}" else ""
+    var prev: String = if (page.hasPrevious()) "${contextPath}/${resourcePrefix}?page=${currentPage - 1}&pageSize=${size}" else ""
 
 }

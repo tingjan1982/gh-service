@@ -4,24 +4,24 @@ import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.annotation.LastModifiedDate
-import java.time.LocalDateTime
+import java.util.*
 import javax.persistence.Temporal
 import javax.persistence.TemporalType
 
 abstract class BaseMongoObject {
 
     @CreatedBy
-    private lateinit var createdBy: String
+    var createdBy: String? = null
 
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
-    private lateinit var createdDate: LocalDateTime
+    var createdDate: Date? = null
 
     @LastModifiedBy
-    private lateinit var lastModifiedBy: String
+    var lastModifiedBy: String? = null
 
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
-    private lateinit var lastModifiedDate: LocalDateTime
+    var lastModifiedDate: Date? = null
 
 }

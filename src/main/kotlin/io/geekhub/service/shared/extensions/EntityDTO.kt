@@ -45,10 +45,12 @@ fun QuestionRequest.PossibleAnswerRequest.toEntity() = PossibleAnswer(answer = t
 fun Question.toDTO() = QuestionResponse(
         this.questionId.toString(),
         this.question,
+        this.questionType,
         this.clientAccount.toDTO(),
         this.specialization?.toDTO(),
         this.jobTitle,
-        this.possibleAnswers.map { it.toDTO() }.toList()
+        this.possibleAnswers.map { it.toDTO() }.toList(),
+        this.lastModifiedDate
 )
 
 fun PossibleAnswer.toDTO() = QuestionResponse.PossibleAnswerResponse(this.answer, this.correctAnswer)

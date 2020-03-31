@@ -9,7 +9,10 @@ data class ClientAccount(
         var id: String? = null,
         var accountType: AccountType,
         var clientName: String,
-        var email: String) {
+        var email: String,
+        var avatar: String? = null,
+        val likedQuestions: List<String> = mutableListOf(),
+        val likedInterviews: List<String> = mutableListOf()) {
 
     enum class AccountType {
         CORPORATE, INDIVIDUAL

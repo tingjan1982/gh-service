@@ -5,6 +5,7 @@ import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.shared.model.BaseMongoObject
 import io.geekhub.service.specialization.repository.Specialization
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.TextIndexed
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 
@@ -12,8 +13,10 @@ import org.springframework.data.mongodb.core.mapping.Document
 data class Question(
         @Id
         var questionId: String? = null,
+        @TextIndexed
         var question: String,
         var questionType: QuestionType = QuestionType.SHORT_ANSWER,
+        @TextIndexed
         var jobTitle: String?,
         @DBRef
         var clientAccount: ClientAccount,
@@ -51,6 +54,6 @@ data class Question(
     }
 
     enum class QuestionType {
-        TRUE_FALSE, MULTI_CHOICE, MULTI_ANSWER, SHORT_ANSWER
+        MULTI_CHOICE, SHORT_ANSWER, CODING
     }
 }

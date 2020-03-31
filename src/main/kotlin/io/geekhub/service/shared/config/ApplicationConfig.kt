@@ -4,8 +4,10 @@ import io.geekhub.service.account.repository.ClientAccountRepository
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.auditing.DefaultAuditorProvider
+import io.geekhub.service.shared.web.filter.ClientAccountFilter
 import io.geekhub.service.specialization.repository.SpecializationRepository
 import io.geekhub.service.user.repository.UserRepository
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.domain.AuditorAware
@@ -33,7 +35,16 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
 @EnableMongoRepositories(basePackageClasses = [QuestionRepository::class, ClientAccountRepository::class, SpecializationRepository::class, InterviewRepository::class, UserRepository::class])
 @EnableMongoAuditing
 @EnableSwagger2
-class ApplicationConfig {
+class ApplicationConfig(val clientAccountFilter: ClientAccountFilter) {
+
+    @Bean
+    fun loggingFilter(): FilterRegistrationBean<ClientAccountFilter> {
+        val registrationBean = FilterRegistrationBean<ClientAccountFilter>();
+        registrationBean.filter = clientAccountFilter;
+        registrationBean.addUrlPatterns("/questions/*", "/interviews/*");
+
+        return registrationBean;
+    }
 
     /**
      * Reference: https://docs.spring.io/spring-data/jpa/docs/2.0.6.RELEASE/reference/html/#auditing
