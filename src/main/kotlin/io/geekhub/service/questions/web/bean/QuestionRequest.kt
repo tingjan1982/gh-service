@@ -1,5 +1,6 @@
 package io.geekhub.service.questions.web.bean
 
+import io.geekhub.service.questions.model.Question
 import javax.validation.constraints.NotEmpty
 
 /**
@@ -11,6 +12,7 @@ import javax.validation.constraints.NotEmpty
  */
 data class QuestionRequest(
         @field:NotEmpty val question: String,
+        val questionType: Question.QuestionType = Question.QuestionType.MULTI_CHOICE,
         val specializationId: String?,
         val jobTitle: String?,
         val possibleAnswers: List<PossibleAnswerRequest> = listOf()

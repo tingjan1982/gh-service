@@ -15,14 +15,14 @@ data class Question(
         var questionId: String? = null,
         @TextIndexed
         var question: String,
-        var questionType: QuestionType = QuestionType.SHORT_ANSWER,
+        var questionType: QuestionType,
         @TextIndexed
         var jobTitle: String?,
         @DBRef
         var clientAccount: ClientAccount,
         @DBRef
         var specialization: Specialization? = null,
-        val possibleAnswers: MutableList<PossibleAnswer> = mutableListOf(),
+        var possibleAnswers: MutableList<PossibleAnswer> = mutableListOf(),
         val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf()) : BaseMongoObject() {
 
 

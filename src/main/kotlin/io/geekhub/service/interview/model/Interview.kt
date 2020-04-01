@@ -22,22 +22,11 @@ data class Interview(
         /**
          * Left part of the pair represents the ordering key.
          */
-        val sections: MutableList<Section> = mutableListOf()
+        var sections: MutableList<Section> = mutableListOf()
 ) : BaseMongoObject() {
 
-    fun addSection(section: Section) {
-        sections.add(section)
-    }
-
     data class Section(val title: String,
-                       val questions: MutableList<QuestionSnapshot> = mutableListOf()) {
-
-        fun addQuestion(order: String, question: Question): Section {
-            questions.add(question.toQuestionSnapshot(order)).let {
-                return this
-            }
-        }
-    }
+                       var questions: MutableList<QuestionSnapshot> = mutableListOf())
 
     data class QuestionSnapshot(val id: String,
                                 val question: String,

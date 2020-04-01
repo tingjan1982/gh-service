@@ -35,9 +35,11 @@ fun User.toDTO() = UserResponse(
 
 fun QuestionRequest.toEntity(account: ClientAccount, spec: Specialization?) = Question(
         question = this.question,
+        questionType = this.questionType,
         clientAccount = account,
         specialization = spec,
-        jobTitle = this.jobTitle
+        jobTitle = this.jobTitle,
+        possibleAnswers = this.possibleAnswers.map { it.toEntity() }.toMutableList()
 )
 
 fun QuestionRequest.PossibleAnswerRequest.toEntity() = PossibleAnswer(answer = this.answer, correctAnswer = this.correctAnswer)
@@ -55,17 +57,25 @@ fun Question.toDTO() = QuestionResponse(
 
 fun PossibleAnswer.toDTO() = QuestionResponse.PossibleAnswerResponse(this.answer, this.correctAnswer)
 
-fun InterviewRequest.toEntity(account: ClientAccount, spec: Specialization, sections: MutableList<Interview.Section>) = Interview(
+fun InterviewRequest.toEntity(account: ClientAccount, spec: Specialization) = Interview(
         title = this.title,
         description = this.description,
         jobTitle = this.jobTitle,
         clientAccount = account,
-        specialization = spec,
-        sections = sections
+        specialization = spec
 )
 
 fun InterviewRequest.SectionRequest.toEntity() = Interview.Section(
         title = this.title
+)
+
+fun InterviewRequest.InterviewQuestionRequest.toEntity(interview: Interview) = Question(
+        question = this.question.toString(),
+        questionType = this.questionType,
+        clientAccount = interview.clientAccount,
+        specialization = interview.specialization,
+        jobTitle = interview.jobTitle,
+        possibleAnswers = this.possibleAnswers.map { it.toEntity() }.toMutableList()
 )
 
 fun Interview.toDTO() = InterviewResponse(

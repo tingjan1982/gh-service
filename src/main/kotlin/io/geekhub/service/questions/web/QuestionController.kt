@@ -1,7 +1,6 @@
 package io.geekhub.service.questions.web
 
 import io.geekhub.service.account.repository.ClientAccount
-import io.geekhub.service.questions.service.QuestionSearchService
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.questions.service.SocialLikeService
 import io.geekhub.service.questions.web.bean.QuestionRequest
@@ -27,7 +26,6 @@ import javax.validation.Valid
 @RequestMapping("/questions")
 class QuestionController(val questionService: QuestionService,
                          val specializationService: SpecializationService,
-                         val questionSearchService: QuestionSearchService,
                          val socialLikeService: SocialLikeService,
                          val serverProperties: ServerProperties) {
 
@@ -45,10 +43,7 @@ class QuestionController(val questionService: QuestionService,
         }
 
         val questionToCreate = questionRequest.toEntity(clientAccount, specialization)
-        questionRequest.possibleAnswers.forEach {
-            questionToCreate.addAnswer(it.toEntity())
-        }
-
+        
         return this.questionService.saveQuestion(questionToCreate).toDTO()
     }
 
@@ -85,9 +80,7 @@ class QuestionController(val questionService: QuestionService,
         questionService.getQuestion(id).let {
             it.question = request.question
             it.possibleAnswers.clear()
-            request.possibleAnswers.forEach { ans ->
-                it.possibleAnswers.add(ans.toEntity())
-            }
+            it.possibleAnswers = request.possibleAnswers.map { it.toEntity() }.toMutableList()
 
             return questionService.saveQuestion(it).toDTO()
         }

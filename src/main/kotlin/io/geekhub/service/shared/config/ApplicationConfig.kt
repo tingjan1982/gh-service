@@ -2,16 +2,24 @@ package io.geekhub.service.shared.config
 
 import io.geekhub.service.account.repository.ClientAccountRepository
 import io.geekhub.service.interview.repository.InterviewRepository
+import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.auditing.DefaultAuditorProvider
 import io.geekhub.service.shared.web.filter.ClientAccountFilter
 import io.geekhub.service.specialization.repository.SpecializationRepository
 import io.geekhub.service.user.repository.UserRepository
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.event.EventListener
 import org.springframework.data.domain.AuditorAware
 import org.springframework.data.mongodb.config.EnableMongoAuditing
+import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.index.IndexOperations
+import org.springframework.data.mongodb.core.index.IndexResolver
+import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexResolver
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 import springfox.documentation.builders.PathSelectors
 import springfox.documentation.builders.RequestHandlerSelectors
@@ -35,7 +43,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
 @EnableMongoRepositories(basePackageClasses = [QuestionRepository::class, ClientAccountRepository::class, SpecializationRepository::class, InterviewRepository::class, UserRepository::class])
 @EnableMongoAuditing
 @EnableSwagger2
-class ApplicationConfig(val clientAccountFilter: ClientAccountFilter) {
+class ApplicationConfig(val mongoTemplate: MongoTemplate, val mongoMappingContext: MongoMappingContext, val clientAccountFilter: ClientAccountFilter) {
 
     @Bean
     fun loggingFilter(): FilterRegistrationBean<ClientAccountFilter> {
@@ -44,6 +52,21 @@ class ApplicationConfig(val clientAccountFilter: ClientAccountFilter) {
         registrationBean.addUrlPatterns("/questions/*", "/interviews/*");
 
         return registrationBean;
+    }
+
+    /**
+     * Ensures MongoDB indexes are created after application is ready.
+     *
+     * @See MongoConfigurationSupport.autoIndexCreation()
+     */
+    @EventListener(ApplicationReadyEvent::class)
+    fun initIndicesAfterStartup() {
+
+        val indexOps: IndexOperations = mongoTemplate.indexOps(Question::class.java)
+        val resolver: IndexResolver = MongoPersistentEntityIndexResolver(mongoMappingContext)
+        resolver.resolveIndexFor(Question::class.java).forEach {
+            indexOps.ensureIndex(it)
+        }
     }
 
     /**

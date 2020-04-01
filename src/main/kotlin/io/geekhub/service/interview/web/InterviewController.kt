@@ -2,6 +2,7 @@ package io.geekhub.service.interview.web
 
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.interview.model.Interview
+import io.geekhub.service.interview.model.toQuestionSnapshot
 import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.interview.web.model.InterviewRequest
 import io.geekhub.service.interview.web.model.InterviewResponse
@@ -33,7 +34,9 @@ class InterviewController(val interviewService: InterviewService,
             specializationService.getSpecialization(it)
         }
 
-        request.toEntity(clientAccount, specialization, toSections(request.sections)).let {
+        request.toEntity(clientAccount, specialization).let {
+            it.sections = toSections(it, request.sections)
+
             interviewService.saveInterview(it).let { created ->
                 return created.toDTO()
             }
@@ -53,22 +56,29 @@ class InterviewController(val interviewService: InterviewService,
             }
 
             it.sections.clear()
-            toSections(request.sections).forEach { section ->
-                it.addSection(section)
-            }
+            it.sections = toSections(it, request.sections)
 
             return interviewService.saveInterview(it).toDTO()
         }
     }
 
-    fun toSections(sections: List<InterviewRequest.SectionRequest>): MutableList<Interview.Section> {
-        return sections.map {
-            it.toEntity().let { s ->
-                it.questions.forEachIndexed { index, qid ->
-                    s.addQuestion(index.toString(), questionService.getQuestion(qid))
-                }
+    fun toSections(interview: Interview, sections: List<InterviewRequest.SectionRequest>): MutableList<Interview.Section> {
 
-                return@map s
+        // s@ is used to get rid of the warning of return@map as it detect return label clash.
+        return sections.map s@ {
+            it.toEntity().let { s ->
+                val questionSnapshots = it.questions.map { ques ->
+                    return@map ques.id?.let { qid ->
+                        questionService.getQuestion(qid)
+                    } ?: questionService.saveQuestion(ques.toEntity(interview))
+
+                }.mapIndexed { index, question ->
+                    question.toQuestionSnapshot(index.toString())
+                }.toMutableList()
+
+                s.questions = questionSnapshots
+
+                return@let s
             }
         }.toMutableList()
     }
