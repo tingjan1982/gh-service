@@ -65,7 +65,7 @@ class InterviewController(val interviewService: InterviewService,
     fun toSections(interview: Interview, sections: List<InterviewRequest.SectionRequest>): MutableList<Interview.Section> {
 
         // s@ is used to get rid of the warning of return@map as it detect return label clash.
-        return sections.map s@ {
+        return sections.map s@{
             it.toEntity().let { s ->
                 val questionSnapshots = it.questions.map { ques ->
                     return@map ques.id?.let { qid ->

@@ -2,6 +2,7 @@ package io.geekhub.service.shared.config
 
 import io.geekhub.service.account.repository.ClientAccountRepository
 import io.geekhub.service.interview.repository.InterviewRepository
+import io.geekhub.service.interview.repository.InterviewSessionRepository
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.auditing.DefaultAuditorProvider
@@ -40,7 +41,13 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
  * https://springframework.guru/spring-boot-restful-api-documentation-with-swagger-2/
  */
 @Configuration
-@EnableMongoRepositories(basePackageClasses = [QuestionRepository::class, ClientAccountRepository::class, SpecializationRepository::class, InterviewRepository::class, UserRepository::class])
+@EnableMongoRepositories(basePackageClasses = [
+    QuestionRepository::class,
+    ClientAccountRepository::class,
+    SpecializationRepository::class,
+    InterviewRepository::class,
+    InterviewSessionRepository::class,
+    UserRepository::class])
 @EnableMongoAuditing
 @EnableSwagger2
 class ApplicationConfig(val mongoTemplate: MongoTemplate, val mongoMappingContext: MongoMappingContext, val clientAccountFilter: ClientAccountFilter) {
@@ -49,7 +56,7 @@ class ApplicationConfig(val mongoTemplate: MongoTemplate, val mongoMappingContex
     fun loggingFilter(): FilterRegistrationBean<ClientAccountFilter> {
         val registrationBean = FilterRegistrationBean<ClientAccountFilter>();
         registrationBean.filter = clientAccountFilter;
-        registrationBean.addUrlPatterns("/questions/*", "/interviews/*");
+        registrationBean.addUrlPatterns("/questions/*", "/interviews/*", "/interviewSessions/*");
 
         return registrationBean;
     }

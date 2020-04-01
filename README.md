@@ -250,4 +250,6 @@ https://stackoverflow.com/questions/46792438/build-gradle-project-inside-a-docke
 #### Dockerized AWS CLI
 https://hub.docker.com/r/mesosphere/aws-cli/
 
-Copyright (c) 2018 Joe Lin
+## General Reference
+
+https://www.kotlinresources.com/library/assertk/

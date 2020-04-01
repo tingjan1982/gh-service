@@ -58,6 +58,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
@@ -79,7 +80,7 @@ dependencies {
     // test dependency
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit5"))
-    testImplementation("com.willowtreeapps.assertk:assertk:0.10")
+    testImplementation("com.willowtreeapps.assertk:assertk:0.22")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")

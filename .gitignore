@@ -31,3 +31,4 @@ gh-service.log*
 ### private keys
 *.pem
 /gothic-dreamer-271402-bfe27e1015cc.json
+/application.properties

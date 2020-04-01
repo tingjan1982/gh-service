@@ -1,6 +1,7 @@
 package io.geekhub.service.questions.service
 
-import assertk.assert
+import assertk.assertThat
+import assertk.assertions.hasSize
 import assertk.assertions.isNotNull
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.model.Question.PossibleAnswer
@@ -25,6 +26,7 @@ internal class QuestionServiceImplIntegrationTest {
 
         val createdQuestion = Question(
                 question = "Dummy question",
+                questionType = Question.QuestionType.MULTI_CHOICE,
                 clientAccount = DummyObject.dummyClient(),
                 jobTitle = "Senior Engineer").apply {
             this.addAnswer(PossibleAnswer(answer = "A", correctAnswer = true))
@@ -33,11 +35,11 @@ internal class QuestionServiceImplIntegrationTest {
             return@let this.questionService.saveQuestion(it)
         }
 
-        assert(createdQuestion.questionId).isNotNull()
-        assert(createdQuestion.possibleAnswers.size == 2)
+        assertThat(createdQuestion.questionId).isNotNull()
+        assertThat(createdQuestion.possibleAnswers).hasSize(2)
 
         questionService.saveOrUpdateAttribute(createdQuestion.questionId.toString(), QuestionAttribute(key = DESCRIPTION_KEY, value = "something")).let {
-            assert(it.getAttribute(DESCRIPTION_KEY)).isNotNull()
+            assertThat(it.getAttribute(DESCRIPTION_KEY)).isNotNull()
         }
     }
 }

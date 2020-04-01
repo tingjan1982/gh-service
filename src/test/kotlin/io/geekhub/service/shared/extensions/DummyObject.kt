@@ -6,9 +6,9 @@ import io.geekhub.service.specialization.repository.Specialization
 object DummyObject {
 
     fun dummyClient() = ClientAccount(accountType = ClientAccount.AccountType.CORPORATE,
-            clientName = "Default",
-            email = "default@email.co"
+            clientName = "Default Client",
+            email = "default@geekhub.tw"
     )
 
-    fun dummySpecialization() = Specialization(name = "Front End Engineer", profession = "IT")
+    fun dummySpecialization() = Specialization(name = "Front End Engineer")
 }
