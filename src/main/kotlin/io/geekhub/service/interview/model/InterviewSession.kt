@@ -17,20 +17,21 @@ data class InterviewSession(
         @DBRef
         val clientAccount: ClientAccount,
         val userEmail: String,
+        val name: String? = null,
         val interviewMode: InterviewMode,
         val duration: Int = -1,
         var interviewSentDate: Date? = null,
         var interviewStartDate: Date? = null,
         var interviewEndDate: Date? = null,
         var score: Double = 0.0,
-        val answerAttempts: MutableList<InterviewQuestionAnswer> = mutableListOf(),
+        val answerAttempts: MutableMap<String, QuestionAnswerAttempt> = mutableMapOf(),
         val followupInterviews: MutableList<FollowUpInterview> = mutableListOf()
 
 ) : BaseMongoObject() {
 
-    data class InterviewQuestionAnswer(
-            val questionId: String,
-            val answer: String
+    data class QuestionAnswerAttempt(
+            val answerId: String? = null,
+            val answer: String? = null
     )
 
     data class FollowUpInterview(

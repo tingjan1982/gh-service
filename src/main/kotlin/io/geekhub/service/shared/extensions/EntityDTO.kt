@@ -55,7 +55,7 @@ fun Question.toDTO() = QuestionResponse(
         this.lastModifiedDate
 )
 
-fun PossibleAnswer.toDTO() = QuestionResponse.PossibleAnswerResponse(this.answer, this.correctAnswer)
+fun PossibleAnswer.toDTO() = QuestionResponse.PossibleAnswerResponse(this.answerId, this.answer, this.correctAnswer)
 
 fun InterviewRequest.toEntity(account: ClientAccount, spec: Specialization) = Interview(
         title = this.title,

@@ -9,14 +9,15 @@ data class InterviewSessionResponse(
         val interview: InterviewResponse,
         val clientAccount: ClientAccountResponse,
         val userEmail: String,
+        val name: String?,
         val interviewMode: InterviewSession.InterviewMode,
         val duration: Int,
         val interviewSentDate: Date?,
         val interviewStartDate: Date?,
         val interviewEndDate: Date?,
         val score: Double,
-        val answerAttempts: MutableList<InterviewSession.InterviewQuestionAnswer>,
-        val followupInterviews: MutableList<InterviewSession.FollowUpInterview>
+        val answerAttempts: Map<String, InterviewSession.QuestionAnswerAttempt>,
+        val followupInterviews: List<InterviewSession.FollowUpInterview>
 ) {
 
 }

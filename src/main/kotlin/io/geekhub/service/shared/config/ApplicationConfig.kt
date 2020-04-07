@@ -1,6 +1,7 @@
 package io.geekhub.service.shared.config
 
 import io.geekhub.service.account.repository.ClientAccountRepository
+import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.interview.repository.InterviewSessionRepository
 import io.geekhub.service.questions.model.Question
@@ -69,10 +70,15 @@ class ApplicationConfig(val mongoTemplate: MongoTemplate, val mongoMappingContex
     @EventListener(ApplicationReadyEvent::class)
     fun initIndicesAfterStartup() {
 
-        val indexOps: IndexOperations = mongoTemplate.indexOps(Question::class.java)
         val resolver: IndexResolver = MongoPersistentEntityIndexResolver(mongoMappingContext)
-        resolver.resolveIndexFor(Question::class.java).forEach {
-            indexOps.ensureIndex(it)
+
+        listOf(Question::class.java, Interview::class.java).forEach { domainType ->
+            val indexOps: IndexOperations = mongoTemplate.indexOps(domainType)
+
+            resolver.resolveIndexFor(domainType).forEach {
+                indexOps.ensureIndex(it)
+            }
+
         }
     }
 

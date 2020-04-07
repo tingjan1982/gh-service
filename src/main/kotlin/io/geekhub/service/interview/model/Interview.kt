@@ -5,6 +5,7 @@ import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.model.BaseMongoObject
 import io.geekhub.service.specialization.repository.Specialization
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.TextIndexed
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 
@@ -12,8 +13,11 @@ import org.springframework.data.mongodb.core.mapping.Document
 data class Interview(
         @Id
         var id: String? = null,
+        @TextIndexed
         var title: String,
+        @TextIndexed
         var description: String? = null,
+        @TextIndexed
         var jobTitle: String,
         @DBRef
         var clientAccount: ClientAccount,

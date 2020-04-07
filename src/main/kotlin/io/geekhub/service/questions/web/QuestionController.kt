@@ -77,12 +77,12 @@ class QuestionController(val questionService: QuestionService,
     @PostMapping("/{id}")
     fun updateQuestion(@PathVariable id: String, @Valid @RequestBody request: QuestionRequest): QuestionResponse {
 
-        questionService.getQuestion(id).let {
-            it.question = request.question
-            it.possibleAnswers.clear()
-            it.possibleAnswers = request.possibleAnswers.map { it.toEntity() }.toMutableList()
+        questionService.getQuestion(id).let { q ->
+            q.question = request.question
+            q.possibleAnswers.clear()
+            q.possibleAnswers = request.possibleAnswers.map { it.toEntity() }.toMutableList()
 
-            return questionService.saveQuestion(it).toDTO()
+            return questionService.saveQuestion(q).toDTO()
         }
     }
 

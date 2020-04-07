@@ -1,5 +1,6 @@
 package io.geekhub.service.shared.web
 
+import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.shared.exception.FriendlyMethodArgumentNotValidException
 import org.springframework.http.HttpHeaders
@@ -45,6 +46,12 @@ class ApiExceptionResolver : ResponseEntityExceptionHandler() {
     fun handlePersistenceRelatedExceptions(request: HttpServletRequest, exception: Exception): ResponseEntity<ApiError> {
 
         return this.logError(HttpStatus.BAD_REQUEST, exception, request)
+    }
+
+    @ExceptionHandler(BusinessException::class)
+    fun handleBusinessException(request: HttpServletRequest, exception: Exception): ResponseEntity<ApiError> {
+
+        return this.logError(HttpStatus.PRECONDITION_FAILED, exception, request)
     }
 
     /**

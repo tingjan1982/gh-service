@@ -4,6 +4,7 @@ package io.geekhub.service.questions.model
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.shared.model.BaseMongoObject
 import io.geekhub.service.specialization.repository.Specialization
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.TextIndexed
 import org.springframework.data.mongodb.core.mapping.DBRef
@@ -39,6 +40,7 @@ data class Question(
     }
 
     data class PossibleAnswer(
+            val answerId: String = ObjectId.get().toString(),
             val answer: String,
             val correctAnswer: Boolean
     )

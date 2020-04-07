@@ -5,12 +5,12 @@ import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.interview.service.InterviewSessionService
 import io.geekhub.service.interview.toDTO
 import io.geekhub.service.interview.toEntity
+import io.geekhub.service.interview.web.model.AnswerAttemptRequest
 import io.geekhub.service.interview.web.model.InterviewSessionRequest
 import io.geekhub.service.interview.web.model.InterviewSessionResponse
 import io.geekhub.service.notification.service.NotificationService
 import io.geekhub.service.shared.web.filter.ClientAccountFilter
 import org.springframework.web.bind.annotation.*
-import java.util.*
 import javax.validation.Valid
 
 @RestController
@@ -36,14 +36,39 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
     }
 
     @PostMapping("/{id}/send")
+    fun sendInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+                             @PathVariable id: String): InterviewSessionResponse {
+
+        interviewSessionService.getInterviewSession(id).let {
+            return interviewSessionService.sendInterviewSession(it).toDTO()
+        }
+    }
+
+    @PostMapping("/{id}/start")
     fun startInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
                               @PathVariable id: String): InterviewSessionResponse {
 
         interviewSessionService.getInterviewSession(id).let {
-            it.interviewSentDate = Date()
-            notificationService.sendNotification(it)
+            return interviewSessionService.startInterviewSession(it).toDTO()
+        }
+    }
 
-            return interviewSessionService.saveInterviewSession(it).toDTO()
+    @PostMapping("/{id}/answers")
+    fun postAnswerAttempt(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+                          @PathVariable id: String,
+                          @Valid @RequestBody request: AnswerAttemptRequest): InterviewSessionResponse {
+
+        interviewSessionService.getInterviewSession(id).let {
+            return interviewSessionService.addAnswerAttempt(it, request.questionId, request.toEntity()).toDTO()
+        }
+    }
+
+    @PostMapping("/{id}/submit")
+    fun submitInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+                               @PathVariable id: String): InterviewSessionResponse {
+
+        interviewSessionService.getInterviewSession(id).let {
+            return interviewSessionService.submitInterviewSession(it).toDTO()
         }
     }
 }
