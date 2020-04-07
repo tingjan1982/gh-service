@@ -4,7 +4,6 @@ import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.model.Question.QuestionAttribute
 import io.geekhub.service.shared.model.SearchCriteria
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 
 interface QuestionService {
 
@@ -12,7 +11,7 @@ interface QuestionService {
 
     fun getQuestion(id: String): Question
 
-    fun getQuestions(searchCriteria: SearchCriteria, pageRequest: PageRequest): Page<Question>
+    fun getQuestions(searchCriteria: SearchCriteria): Page<Question>
 
     /**
      * Save or update attribute in Question and return fully loaded question.

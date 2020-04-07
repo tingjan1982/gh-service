@@ -66,9 +66,10 @@ class QuestionController(val questionService: QuestionService,
 
         val pageToUse: Int = if (next) currentPage + 1 else page
         val pageRequest = PageRequest.of(pageToUse, pageSize, Sort.by(Sort.Order.desc(sortField)))
-        val searchCriteria = SearchCriteria(owner, clientAccount, keyword)
+        val decoratedKeyword = if (keyword.isNullOrEmpty()) null else keyword
+        val searchCriteria = SearchCriteria(owner, clientAccount, decoratedKeyword, pageRequest)
 
-        this.questionService.getQuestions(searchCriteria, pageRequest).let { result ->
+        this.questionService.getQuestions(searchCriteria).let { result ->
             val contextPath = serverProperties.servlet.contextPath
             return QuestionsResponse(result.map { it.toDTO() }, contextPath, "questions")
         }

@@ -1,9 +1,8 @@
 package io.geekhub.service.interview.service
 
-import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.interview.model.Interview
+import io.geekhub.service.shared.model.SearchCriteria
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 
 interface InterviewService {
 
@@ -13,5 +12,5 @@ interface InterviewService {
 
     fun deleteInterview(id: String)
 
-    fun getInterviews(clientAccount: ClientAccount, pageRequest: PageRequest): Page<Interview>
+    fun getInterviews(searchCriteria: SearchCriteria): Page<Interview>
 }

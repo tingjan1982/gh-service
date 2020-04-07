@@ -1,14 +1,18 @@
 package io.geekhub.service.interview.service
 
-import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
+import io.geekhub.service.shared.model.SearchCriteria
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.TextCriteria
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
@@ -17,7 +21,8 @@ import javax.transaction.Transactional
  */
 @Service
 @Transactional
-class InterviewServiceImpl(val questionRepository: QuestionRepository,
+class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
+                           val questionRepository: QuestionRepository,
                            val interviewRepository: InterviewRepository) : InterviewService {
 
     companion object {
@@ -66,8 +71,22 @@ class InterviewServiceImpl(val questionRepository: QuestionRepository,
         interviewRepository.deleteById(id)
     }
 
-    override fun getInterviews(clientAccount: ClientAccount, pageRequest: PageRequest): Page<Interview> {
-        return interviewRepository.findAllByClientAccount(clientAccount, pageRequest)
+    override fun getInterviews(searchCriteria: SearchCriteria): Page<Interview> {
+
+        Query().with(searchCriteria.pageRequest).let {
+            if (searchCriteria.filterByClientAccount) {
+                it.addCriteria(Criteria.where("clientAccount").`is`(searchCriteria.clientAccount))
+            }
+
+            searchCriteria.keyword?.let {keyword ->
+                it.addCriteria(TextCriteria.forDefaultLanguage().matching(keyword))
+            }
+
+            val count = mongoTemplate.count(Query.of(it).limit(-1).skip(-1), Interview::class.java)
+            val results = mongoTemplate.find(it, Interview::class.java)
+
+            return PageImpl(results, searchCriteria.pageRequest, count)
+        }
     }
 
 

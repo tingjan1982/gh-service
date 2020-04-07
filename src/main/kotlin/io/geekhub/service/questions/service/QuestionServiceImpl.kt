@@ -8,7 +8,10 @@ import io.geekhub.service.shared.model.SearchCriteria
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.TextCriteria
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
@@ -18,7 +21,7 @@ import javax.transaction.Transactional
  */
 @Service
 @Transactional
-class QuestionServiceImpl(val questionRepository: QuestionRepository) : QuestionService {
+class QuestionServiceImpl(val mongoTemplate: MongoTemplate, val questionRepository: QuestionRepository) : QuestionService {
     companion object {
         val logger: Logger = LoggerFactory.getLogger(QuestionServiceImpl::class.java)
     }
@@ -33,24 +36,29 @@ class QuestionServiceImpl(val questionRepository: QuestionRepository) : Question
         }
     }
 
-    override fun getQuestions(searchCriteria: SearchCriteria, pageRequest: PageRequest): Page<Question> {
+    /**
+     * See SimpleMongoRepository and PageableExecutableUtils.
+     *
+     * Reference:
+     * https://stackoverflow.com/questions/29030542/pagination-with-mongotemplate
+     * https://stackoverflow.com/questions/30801801/spring-data-mongodb-text-search-for-phrase-or-words-in-phrase
+     */
+    override fun getQuestions(searchCriteria: SearchCriteria): Page<Question> {
 
-        return searchCriteria.keyword?.let {
-            val textCriteria = TextCriteria.forDefaultLanguage().matching(it)
-
+        Query().with(searchCriteria.pageRequest).let {
             if (searchCriteria.filterByClientAccount) {
-                questionRepository.findAllByClientAccount(searchCriteria.clientAccount, textCriteria, pageRequest)
-            } else {
-                questionRepository.findAllBy(textCriteria, pageRequest)
+                it.addCriteria(Criteria.where("clientAccount").`is`(searchCriteria.clientAccount))
             }
-        } ?: if (searchCriteria.filterByClientAccount) {
-            questionRepository.findAllByClientAccount(searchCriteria.clientAccount, pageRequest)
-        } else {
-            questionRepository.findAll(pageRequest)
-        }
 
-        //val query = TextQuery.queryText(it).with(pageRequest).addCriteria(Criteria.where("clientAccount").`is`(searchCriteria.clientAccount))
-        //return questionRepository.findAll(pageRequest)
+            searchCriteria.keyword?.let {keyword ->
+                it.addCriteria(TextCriteria.forDefaultLanguage().matching(keyword))
+            }
+
+            val count = mongoTemplate.count(Query.of(it).limit(-1).skip(-1), Question::class.java)
+            val results = mongoTemplate.find(it, Question::class.java)
+
+            return PageImpl(results, searchCriteria.pageRequest, count)
+        }
     }
 
     override fun deleteQuestion(id: String) {
