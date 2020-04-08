@@ -15,8 +15,6 @@ import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_KEY
 import io.geekhub.service.specialization.service.SpecializationService
 import org.springframework.boot.autoconfigure.web.ServerProperties
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -95,21 +93,9 @@ class InterviewController(val interviewService: InterviewService,
 
     @GetMapping
     fun listInterviews(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
-                       @RequestParam(value = "owner", defaultValue = "true") owner: Boolean,
-                       @RequestParam(value = "keyword", required = false) keyword: String?,
-                       @RequestParam(value = "currentPage", defaultValue = "-1") currentPage: Int,
-                       @RequestParam(value = "next", defaultValue = "true") next: Boolean,
-                       @RequestParam(value = "page", defaultValue = "0") page: Int,
-                       @RequestParam(value = "pageSize", defaultValue = "50") pageSize: Int,
-                       @RequestParam(value = "sort", defaultValue = "lastModifiedDate") sortField: String): InterviewsResponse {
+                       @RequestParam map: Map<String, String>): InterviewsResponse {
 
-        // todo: refactor duplicate code.
-        val pageToUse: Int = if (next) currentPage + 1 else page
-        val pageRequest = PageRequest.of(pageToUse, pageSize, Sort.by(Sort.Order.desc(sortField)))
-        val decoratedKeyword = if (keyword.isNullOrEmpty()) null else keyword
-        val searchCriteria = SearchCriteria(owner, clientAccount, decoratedKeyword, pageRequest)
-
-        interviewService.getInterviews(searchCriteria).let { result ->
+        interviewService.getInterviews(SearchCriteria.fromRequestParameters(clientAccount, map)).let { result ->
             val contextPath = serverProperties.servlet.contextPath
             return InterviewsResponse(result.map { it.toLightDTO() }, contextPath, "interviews")
         }

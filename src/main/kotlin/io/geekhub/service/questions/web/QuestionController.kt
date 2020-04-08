@@ -15,8 +15,6 @@ import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.web.ServerProperties
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
@@ -56,20 +54,9 @@ class QuestionController(val questionService: QuestionService,
 
     @GetMapping
     fun listQuestions(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
-                      @RequestParam(value = "owner", defaultValue = "true") owner: Boolean,
-                      @RequestParam(value = "keyword", required = false) keyword: String?,
-                      @RequestParam(value = "currentPage", defaultValue = "-1") currentPage: Int,
-                      @RequestParam(value = "next", defaultValue = "true") next: Boolean,
-                      @RequestParam(value = "page", defaultValue = "0") page: Int,
-                      @RequestParam(value = "pageSize", defaultValue = "50") pageSize: Int,
-                      @RequestParam(value = "sort", defaultValue = "lastModifiedDate") sortField: String): QuestionsResponse {
+                      @RequestParam map: Map<String, String>): QuestionsResponse {
 
-        val pageToUse: Int = if (next) currentPage + 1 else page
-        val pageRequest = PageRequest.of(pageToUse, pageSize, Sort.by(Sort.Order.desc(sortField)))
-        val decoratedKeyword = if (keyword.isNullOrEmpty()) null else keyword
-        val searchCriteria = SearchCriteria(owner, clientAccount, decoratedKeyword, pageRequest)
-
-        this.questionService.getQuestions(searchCriteria).let { result ->
+        this.questionService.getQuestions(SearchCriteria.fromRequestParameters(clientAccount, map)).let { result ->
             val contextPath = serverProperties.servlet.contextPath
             return QuestionsResponse(result.map { it.toDTO() }, contextPath, "questions")
         }

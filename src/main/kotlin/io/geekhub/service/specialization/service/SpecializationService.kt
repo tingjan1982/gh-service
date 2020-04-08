@@ -8,5 +8,7 @@ interface SpecializationService {
 
     fun getSpecialization(id: String): Specialization
 
+    fun lookupSpecialization(id: String): Specialization?
+
     fun getSpecializations(): List<Specialization>
 }

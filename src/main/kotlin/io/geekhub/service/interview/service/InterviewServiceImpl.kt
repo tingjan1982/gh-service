@@ -5,6 +5,7 @@ import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.shared.model.SearchCriteria
+import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -23,7 +24,8 @@ import javax.transaction.Transactional
 @Transactional
 class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
                            val questionRepository: QuestionRepository,
-                           val interviewRepository: InterviewRepository) : InterviewService {
+                           val interviewRepository: InterviewRepository,
+                           val specializationService: SpecializationService) : InterviewService {
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(InterviewServiceImpl::class.java)
@@ -74,12 +76,19 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
     override fun getInterviews(searchCriteria: SearchCriteria): Page<Interview> {
 
         Query().with(searchCriteria.pageRequest).let {
+            // todo: refactor
             if (searchCriteria.filterByClientAccount) {
                 it.addCriteria(Criteria.where("clientAccount").`is`(searchCriteria.clientAccount))
             }
 
             searchCriteria.keyword?.let {keyword ->
                 it.addCriteria(TextCriteria.forDefaultLanguage().matching(keyword))
+            }
+
+            searchCriteria.specialization?.let { id ->
+                specializationService.lookupSpecialization(id)?.let {specialization ->
+                    it.addCriteria(Criteria.where("specialization").`is`(specialization))
+                }
             }
 
             val count = mongoTemplate.count(Query.of(it).limit(-1).skip(-1), Interview::class.java)
