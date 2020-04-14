@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 
 data class SearchCriteria(
+        val interviewId: String?,
         val filterByClientAccount: Boolean,
         val clientAccount: ClientAccount,
         val keyword: String?,
@@ -14,7 +15,8 @@ data class SearchCriteria(
     companion object {
         fun fromRequestParameters(clientAccount: ClientAccount, map: Map<String, String>): SearchCriteria {
 
-            val owner = map["owner"]?.toBoolean() ?: true
+            val interviewId = if (map["interviewId"].isNullOrEmpty()) null else map["interviewId"]
+            val owner = map["owner"]?.toBoolean() ?: false
             val keyword = if (map["keyword"].isNullOrEmpty()) null else map["keyword"]
             val specialization = map["specialization"]
             val page = map["page"]?.toInt() ?: 0
@@ -24,7 +26,7 @@ data class SearchCriteria(
             val pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Order.desc(sortField)))
             val decoratedKeyword = if (keyword.isNullOrEmpty()) null else keyword
 
-            return SearchCriteria(owner, clientAccount, decoratedKeyword, specialization, pageRequest)
+            return SearchCriteria(interviewId, owner, clientAccount, decoratedKeyword, specialization, pageRequest)
         }
     }
 }

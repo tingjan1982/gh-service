@@ -5,11 +5,14 @@ import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.interview.service.InterviewSessionService
 import io.geekhub.service.interview.toDTO
 import io.geekhub.service.interview.toEntity
+import io.geekhub.service.interview.toLightDTO
 import io.geekhub.service.interview.web.model.AnswerAttemptRequest
 import io.geekhub.service.interview.web.model.InterviewSessionRequest
 import io.geekhub.service.interview.web.model.InterviewSessionResponse
-import io.geekhub.service.notification.service.NotificationService
+import io.geekhub.service.interview.web.model.InterviewSessionsResponse
+import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.web.filter.ClientAccountFilter
+import org.springframework.boot.autoconfigure.web.ServerProperties
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
@@ -17,15 +20,15 @@ import javax.validation.Valid
 @RequestMapping("/interviewSessions")
 class InterviewSessionController(val interviewSessionService: InterviewSessionService,
                                  val interviewService: InterviewService,
-                                 val notificationService: NotificationService) {
+                                 val serverProperties: ServerProperties) {
 
 
     @PostMapping
     fun createInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
                                @Valid @RequestBody request: InterviewSessionRequest): InterviewSessionResponse {
 
-        interviewService.getInterview(request.interviewId).let {
-            return interviewSessionService.saveInterviewSession(request.toEntity(it)).toDTO()
+        interviewService.getPublishedInterviewByInterview(request.interviewId).let {
+            return interviewSessionService.saveInterviewSession(request.toEntity(it, clientAccount)).toDTO()
         }
     }
 
@@ -33,6 +36,16 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
     fun getInterviewSession(@PathVariable id: String): InterviewSessionResponse {
 
         return interviewSessionService.getInterviewSession(id).toDTO()
+    }
+
+    @GetMapping
+    fun listInterviewSessions(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+                              params: Map<String, String>): InterviewSessionsResponse {
+
+        interviewSessionService.getInterviewSessions(SearchCriteria.fromRequestParameters(clientAccount, params)).let { results ->
+            val contextPath = serverProperties.servlet.contextPath
+            return InterviewSessionsResponse(results.map { it.toLightDTO() }, contextPath, "interviewSessions")
+        }
     }
 
     @PostMapping("/{id}/send")

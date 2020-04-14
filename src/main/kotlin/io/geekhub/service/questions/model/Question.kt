@@ -3,6 +3,7 @@ package io.geekhub.service.questions.model
 //import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.shared.model.BaseMongoObject
+import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.specialization.repository.Specialization
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
@@ -23,6 +24,7 @@ data class Question(
         var clientAccount: ClientAccount,
         @DBRef
         var specialization: Specialization? = null,
+        var visibility: Visibility = Visibility.PUBLIC,
         var possibleAnswers: MutableList<PossibleAnswer> = mutableListOf(),
         val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf()) : BaseMongoObject() {
 

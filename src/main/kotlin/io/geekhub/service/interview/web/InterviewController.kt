@@ -4,10 +4,13 @@ import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.toQuestionSnapshot
 import io.geekhub.service.interview.service.InterviewService
+import io.geekhub.service.interview.toDTO
 import io.geekhub.service.interview.web.model.InterviewRequest
 import io.geekhub.service.interview.web.model.InterviewResponse
 import io.geekhub.service.interview.web.model.InterviewsResponse
+import io.geekhub.service.interview.web.model.PublishedInterviewResponse
 import io.geekhub.service.questions.service.QuestionService
+import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.shared.extensions.toLightDTO
@@ -43,6 +46,37 @@ class InterviewController(val interviewService: InterviewService,
         }
     }
 
+    @GetMapping("/{id}")
+    fun getInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+                     @PathVariable id: String,
+                     @RequestParam(value = "published", required = false) published: Boolean): InterviewResponse {
+
+        interviewService.getInterview(id).let {
+            if (published && it.latestPublishedInterviewId == null) {
+                throw BusinessException("This interview has not been published yet: ${it.id}")
+            }
+
+            if (published) {
+                interviewService.getPublishedInterviewByPublishedId(it.latestPublishedInterviewId).referencedInterview
+            } else {
+                it
+            }.let { resolved ->
+                val showAnswer = resolved.clientAccount.id == clientAccount.id
+                return resolved.toDTO(showAnswer)
+            }
+        }
+    }
+
+    @GetMapping
+    fun listInterviews(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+                       @RequestParam map: Map<String, String>): InterviewsResponse {
+
+        interviewService.getInterviews(SearchCriteria.fromRequestParameters(clientAccount, map)).let { result ->
+            val contextPath = serverProperties.servlet.contextPath
+            return InterviewsResponse(result.map { it.toLightDTO() }, contextPath, "interviews")
+        }
+    }
+
     @PostMapping("/{id}")
     fun updateInterview(@PathVariable id: String,
                         @Valid @RequestBody request: InterviewRequest): InterviewResponse {
@@ -55,10 +89,20 @@ class InterviewController(val interviewService: InterviewService,
                 it.specialization = specialization
             }
 
+            it.visibility = request.visibility
+
             it.sections.clear()
             it.sections = toSections(it, request.sections)
 
             return interviewService.saveInterview(it).toDTO()
+        }
+    }
+
+    @PostMapping("/{id}/publish")
+    fun publishInterview(@PathVariable id: String): PublishedInterviewResponse {
+
+        interviewService.publishInterview(id).let {
+            return it.toDTO()
         }
     }
 
@@ -83,23 +127,6 @@ class InterviewController(val interviewService: InterviewService,
         }.toMutableList()
     }
 
-    @GetMapping("/{id}")
-    fun getInterview(@PathVariable id: String): InterviewResponse {
-
-        interviewService.getInterview(id).let {
-            return it.toDTO()
-        }
-    }
-
-    @GetMapping
-    fun listInterviews(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
-                       @RequestParam map: Map<String, String>): InterviewsResponse {
-
-        interviewService.getInterviews(SearchCriteria.fromRequestParameters(clientAccount, map)).let { result ->
-            val contextPath = serverProperties.servlet.contextPath
-            return InterviewsResponse(result.map { it.toLightDTO() }, contextPath, "interviews")
-        }
-    }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)

@@ -5,6 +5,12 @@ import io.geekhub.service.interview.repository.InterviewSessionRepository
 import io.geekhub.service.notification.service.NotificationService
 import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
+import io.geekhub.service.shared.model.SearchCriteria
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
@@ -14,7 +20,9 @@ import javax.transaction.Transactional
 
 @Service
 @Transactional
-class InterviewSessionServiceImpl(val notificationService: NotificationService, val interviewSessionRepository: InterviewSessionRepository) : InterviewSessionService {
+class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessionRepository,
+                                  val mongoTemplate: MongoTemplate,
+                                  val notificationService: NotificationService) : InterviewSessionService {
 
     override fun saveInterviewSession(interviewSession: InterviewSession): InterviewSession {
         return interviewSessionRepository.save(interviewSession)
@@ -72,6 +80,24 @@ class InterviewSessionServiceImpl(val notificationService: NotificationService, 
     override fun getInterviewSession(id: String): InterviewSession {
         return interviewSessionRepository.findById(id).orElseThrow {
             throw BusinessObjectNotFoundException(InterviewSession::class, id)
+        }
+    }
+
+    override fun getInterviewSessions(searchCriteria: SearchCriteria): Page<InterviewSession> {
+
+        Query().with(searchCriteria.pageRequest).let {
+            if (searchCriteria.filterByClientAccount) {
+                it.addCriteria(Criteria.where("clientAccount").`is`(searchCriteria.clientAccount))
+            }
+
+            searchCriteria.interviewId?.let { id ->
+                it.addCriteria(Criteria.where("id").`is`(id))
+            }
+
+            val count = mongoTemplate.count(Query.of(it).limit(-1).skip(-1), InterviewSession::class.java)
+            val results = mongoTemplate.find(it, InterviewSession::class.java)
+
+            return PageImpl(results, searchCriteria.pageRequest, count)
         }
     }
 }

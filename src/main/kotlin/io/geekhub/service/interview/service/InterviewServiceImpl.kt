@@ -1,8 +1,11 @@
 package io.geekhub.service.interview.service
 
 import io.geekhub.service.interview.model.Interview
+import io.geekhub.service.interview.model.PublishedInterview
 import io.geekhub.service.interview.repository.InterviewRepository
+import io.geekhub.service.interview.repository.PublishedInterviewRepository
 import io.geekhub.service.questions.repository.QuestionRepository
+import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.specialization.service.SpecializationService
@@ -25,6 +28,7 @@ import javax.transaction.Transactional
 class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
                            val questionRepository: QuestionRepository,
                            val interviewRepository: InterviewRepository,
+                           val publishedInterviewRepository: PublishedInterviewRepository,
                            val specializationService: SpecializationService) : InterviewService {
 
     companion object {
@@ -69,8 +73,40 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
         return interviewRepository.findById(id).orElseThrow { BusinessObjectNotFoundException(Interview::class, id) }
     }
 
+    override fun publishInterview(id: String): PublishedInterview {
+
+        getInterview(id).let {
+            publishedInterviewRepository.save(PublishedInterview(referencedInterview = it)).let { published ->
+                it.latestPublishedInterviewId = published.id
+
+                interviewRepository.save(it)
+                return published
+            }
+        }
+    }
+
+    override fun getPublishedInterviewByInterview(interviewId: String): PublishedInterview {
+
+        getInterview(interviewId).let {
+            return getPublishedInterviewByPublishedId(it.latestPublishedInterviewId)
+        }
+    }
+
+    override fun getPublishedInterviewByPublishedId(publishedInterviewId: String?): PublishedInterview {
+
+        publishedInterviewId?.let { publishedId ->
+            return publishedInterviewRepository.findById(publishedId).orElseThrow {
+                throw BusinessObjectNotFoundException(PublishedInterview::class, publishedId)
+            }
+        } ?: throw BusinessException("This interview has not been published")
+    }
+
     override fun deleteInterview(id: String) {
-        interviewRepository.deleteById(id)
+
+        interviewRepository.findById(id).ifPresent {
+            it.deleted = true
+            interviewRepository.save(it)
+        }
     }
 
     override fun getInterviews(searchCriteria: SearchCriteria): Page<Interview> {
@@ -81,12 +117,12 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
                 it.addCriteria(Criteria.where("clientAccount").`is`(searchCriteria.clientAccount))
             }
 
-            searchCriteria.keyword?.let {keyword ->
+            searchCriteria.keyword?.let { keyword ->
                 it.addCriteria(TextCriteria.forDefaultLanguage().matching(keyword))
             }
 
             searchCriteria.specialization?.let { id ->
-                specializationService.lookupSpecialization(id)?.let {specialization ->
+                specializationService.lookupSpecialization(id)?.let { specialization ->
                     it.addCriteria(Criteria.where("specialization").`is`(specialization))
                 }
             }

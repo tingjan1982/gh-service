@@ -24,4 +24,6 @@ abstract class BaseMongoObject {
     @LastModifiedDate
     var lastModifiedDate: Date? = null
 
+    var deleted: Boolean = false
+
 }

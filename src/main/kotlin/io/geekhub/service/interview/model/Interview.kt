@@ -3,6 +3,7 @@ package io.geekhub.service.interview.model
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.model.BaseMongoObject
+import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.specialization.repository.Specialization
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.TextIndexed
@@ -23,10 +24,9 @@ data class Interview(
         var clientAccount: ClientAccount,
         @DBRef
         var specialization: Specialization,
-        /**
-         * Left part of the pair represents the ordering key.
-         */
-        var sections: MutableList<Section> = mutableListOf()
+        var visibility: Visibility = Visibility.PUBLIC,
+        var sections: MutableList<Section> = mutableListOf(),
+        var latestPublishedInterviewId: String? = null
 ) : BaseMongoObject() {
 
     data class Section(val title: String,

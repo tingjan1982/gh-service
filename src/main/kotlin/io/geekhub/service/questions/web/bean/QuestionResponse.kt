@@ -15,5 +15,5 @@ data class QuestionResponse(
         val possibleAnswers: List<PossibleAnswerResponse> = listOf(),
         val modifiedDate: Date?
 ) {
-    data class PossibleAnswerResponse(val answerId: String, val answer: String, val correct: Boolean)
+    data class PossibleAnswerResponse(val answerId: String, val answer: String, val correctAnswer: Boolean?)
 }

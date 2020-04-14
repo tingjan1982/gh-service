@@ -13,7 +13,7 @@ data class InterviewSession(
         @Id
         var id: String? = null,
         @DBRef
-        val interview: Interview,
+        val publishedInterview: PublishedInterview,
         @DBRef
         val clientAccount: ClientAccount,
         val userEmail: String,

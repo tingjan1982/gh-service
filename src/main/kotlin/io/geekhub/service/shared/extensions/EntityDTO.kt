@@ -51,18 +51,19 @@ fun Question.toDTO() = QuestionResponse(
         this.clientAccount.toDTO(),
         this.specialization?.toDTO(),
         this.jobTitle,
-        this.possibleAnswers.map { it.toDTO() }.toList(),
+        this.possibleAnswers.map { it.toDTO(true) }.toList(),
         this.lastModifiedDate
 )
 
-fun PossibleAnswer.toDTO() = QuestionResponse.PossibleAnswerResponse(this.answerId, this.answer, this.correctAnswer)
+fun PossibleAnswer.toDTO(showAnswer: Boolean) = QuestionResponse.PossibleAnswerResponse(this.answerId, this.answer, if (showAnswer) this.correctAnswer else null)
 
 fun InterviewRequest.toEntity(account: ClientAccount, spec: Specialization) = Interview(
         title = this.title,
         description = this.description,
         jobTitle = this.jobTitle,
         clientAccount = account,
-        specialization = spec
+        specialization = spec,
+        visibility = this.visibility
 )
 
 fun InterviewRequest.SectionRequest.toEntity() = Interview.Section(
@@ -78,14 +79,15 @@ fun InterviewRequest.InterviewQuestionRequest.toEntity(interview: Interview) = Q
         possibleAnswers = this.possibleAnswers.map { it.toEntity() }.toMutableList()
 )
 
-fun Interview.toDTO() = InterviewResponse(
+fun Interview.toDTO(showAnswer: Boolean = true) = InterviewResponse(
         id = this.id.toString(),
         title = this.title,
         description = this.description,
         jobTitle = this.jobTitle,
         clientAccount = this.clientAccount.toDTO(),
         specialization = this.specialization.toDTO(),
-        sections = this.sections.map { it.toDTO() }
+        sections = this.sections.map { it.toDTO(showAnswer) },
+        latestPublishedInterviewId = this.latestPublishedInterviewId
 )
 
 fun Interview.toLightDTO() = InterviewsResponse.LightInterviewResponse(
@@ -94,12 +96,21 @@ fun Interview.toLightDTO() = InterviewsResponse.LightInterviewResponse(
         description = this.description,
         jobTitle = this.jobTitle,
         clientAccount = this.clientAccount.toDTO(),
-        specialization = this.specialization.toDTO()
+        specialization = this.specialization.toDTO(),
+        published = this.latestPublishedInterviewId != null
 )
 
-fun Interview.Section.toDTO() = InterviewResponse.SectionResponse(
+fun Interview.Section.toDTO(showAnswer: Boolean) = InterviewResponse.SectionResponse(
         title = this.title,
-        questions = this.questions
+        questions = this.questions.map { it.toDTO(showAnswer) }.toList()
+)
+
+fun Interview.QuestionSnapshot.toDTO(showAnswer: Boolean) = InterviewResponse.QuestionSnapshotResponse(
+        id = this.id,
+        question = this.question,
+        questionType = this.questionType,
+        possibleAnswers = this.possibleAnswers.map { it.toDTO(showAnswer) },
+        order = this.order
 )
 
 fun ClientAccount.toDTO() = ClientAccountResponse(this.email)

@@ -18,6 +18,4 @@ data class InterviewSessionResponse(
         val score: Double,
         val answerAttempts: Map<String, InterviewSession.QuestionAnswerAttempt>,
         val followupInterviews: List<InterviewSession.FollowUpInterview>
-) {
-
-}
+)

@@ -1,7 +1,8 @@
 package io.geekhub.service.interview.web.model
 
 import io.geekhub.service.account.web.model.ClientAccountResponse
-import io.geekhub.service.interview.model.Interview
+import io.geekhub.service.questions.model.Question
+import io.geekhub.service.questions.web.bean.QuestionResponse
 import io.geekhub.service.specialization.web.model.SpecializationResponse
 
 data class InterviewResponse(
@@ -11,11 +12,18 @@ data class InterviewResponse(
         val jobTitle: String,
         val clientAccount: ClientAccountResponse,
         val specialization: SpecializationResponse,
-        val sections: List<SectionResponse>
+        val sections: List<SectionResponse>,
+        val latestPublishedInterviewId: String?
 ) {
 
     data class SectionResponse(
             val title: String,
-            val questions: List<Interview.QuestionSnapshot>
-    )
+            val questions: List<QuestionSnapshotResponse>)
+
+    data class QuestionSnapshotResponse(
+            val id: String,
+            val question: String,
+            val questionType: Question.QuestionType,
+            val possibleAnswers: List<QuestionResponse.PossibleAnswerResponse>,
+            val order: String)
 }
