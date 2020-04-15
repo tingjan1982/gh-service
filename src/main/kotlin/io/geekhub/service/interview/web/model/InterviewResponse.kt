@@ -3,6 +3,7 @@ package io.geekhub.service.interview.web.model
 import io.geekhub.service.account.web.model.ClientAccountResponse
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.web.bean.QuestionResponse
+import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.specialization.web.model.SpecializationResponse
 
 data class InterviewResponse(
@@ -13,6 +14,7 @@ data class InterviewResponse(
         val clientAccount: ClientAccountResponse,
         val specialization: SpecializationResponse,
         val sections: List<SectionResponse>,
+        val visibility: Visibility,
         val latestPublishedInterviewId: String?
 ) {
 

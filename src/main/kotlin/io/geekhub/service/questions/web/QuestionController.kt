@@ -67,6 +67,15 @@ class QuestionController(val questionService: QuestionService,
 
         questionService.getQuestion(id).let { q ->
             q.question = request.question
+            request.questionType?.let {
+                q.questionType = it
+            }
+            request.specializationId?.let {
+                q.specialization = specializationService.getSpecialization(it)
+            }
+            q.jobTitle = request.jobTitle
+            q.visibility = request.visibility
+
             q.possibleAnswers.clear()
             q.possibleAnswers = request.possibleAnswers.map { it.toEntity() }.toMutableList()
 

@@ -35,7 +35,7 @@ fun User.toDTO() = UserResponse(
 
 fun QuestionRequest.toEntity(account: ClientAccount, spec: Specialization?) = Question(
         question = this.question,
-        questionType = this.questionType,
+        questionType = this.questionType ?: Question.QuestionType.MULTI_CHOICE,
         clientAccount = account,
         specialization = spec,
         jobTitle = this.jobTitle,
@@ -52,6 +52,7 @@ fun Question.toDTO() = QuestionResponse(
         this.specialization?.toDTO(),
         this.jobTitle,
         this.possibleAnswers.map { it.toDTO(true) }.toList(),
+        this.visibility,
         this.lastModifiedDate
 )
 
@@ -87,6 +88,7 @@ fun Interview.toDTO(showAnswer: Boolean = true) = InterviewResponse(
         clientAccount = this.clientAccount.toDTO(),
         specialization = this.specialization.toDTO(),
         sections = this.sections.map { it.toDTO(showAnswer) },
+        visibility = this.visibility,
         latestPublishedInterviewId = this.latestPublishedInterviewId
 )
 
@@ -97,6 +99,7 @@ fun Interview.toLightDTO() = InterviewsResponse.LightInterviewResponse(
         jobTitle = this.jobTitle,
         clientAccount = this.clientAccount.toDTO(),
         specialization = this.specialization.toDTO(),
+        visibility = this.visibility,
         published = this.latestPublishedInterviewId != null
 )
 

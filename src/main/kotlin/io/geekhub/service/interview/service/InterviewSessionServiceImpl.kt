@@ -22,6 +22,7 @@ import javax.transaction.Transactional
 @Transactional
 class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessionRepository,
                                   val mongoTemplate: MongoTemplate,
+                                  val interviewService: InterviewService,
                                   val notificationService: NotificationService) : InterviewSessionService {
 
     override fun saveInterviewSession(interviewSession: InterviewSession): InterviewSession {
@@ -91,7 +92,9 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
             }
 
             searchCriteria.interviewId?.let { id ->
-                it.addCriteria(Criteria.where("id").`is`(id))
+                interviewService.getPublishedInterviewByInterview(id).apply {
+                    it.addCriteria(Criteria.where("publishedInterview").`is`(this))
+                }
             }
 
             val count = mongoTemplate.count(Query.of(it).limit(-1).skip(-1), InterviewSession::class.java)

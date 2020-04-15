@@ -40,7 +40,7 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
 
     @GetMapping
     fun listInterviewSessions(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
-                              params: Map<String, String>): InterviewSessionsResponse {
+                              @RequestParam params: Map<String, String>): InterviewSessionsResponse {
 
         interviewSessionService.getInterviewSessions(SearchCriteria.fromRequestParameters(clientAccount, params)).let { results ->
             val contextPath = serverProperties.servlet.contextPath

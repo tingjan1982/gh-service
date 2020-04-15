@@ -1,8 +1,12 @@
 package io.geekhub.service.shared.model
 
 import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.specialization.service.SpecializationService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.TextCriteria
 
 data class SearchCriteria(
         val interviewId: String?,
@@ -27,6 +31,29 @@ data class SearchCriteria(
             val decoratedKeyword = if (keyword.isNullOrEmpty()) null else keyword
 
             return SearchCriteria(interviewId, owner, clientAccount, decoratedKeyword, specialization, pageRequest)
+        }
+    }
+
+    fun toQuery(specializationService: SpecializationService): Query {
+
+        Query().with(pageRequest).let {
+            if (filterByClientAccount) {
+                it.addCriteria(Criteria.where("clientAccount").`is`(clientAccount))
+            } else {
+                it.addCriteria(Criteria.where("visibility").`in`(Visibility.PUBLIC, null))
+            }
+
+            keyword?.let { keyword ->
+                it.addCriteria(TextCriteria.forDefaultLanguage().matching(keyword))
+            }
+
+            specialization?.let { id ->
+                specializationService.lookupSpecialization(id)?.let { specialization ->
+                    it.addCriteria(Criteria.where("specialization").`is`(specialization))
+                }
+            }
+
+            return it
         }
     }
 }
