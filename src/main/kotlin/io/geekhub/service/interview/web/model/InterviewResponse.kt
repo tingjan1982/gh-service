@@ -19,6 +19,7 @@ data class InterviewResponse(
 ) {
 
     data class SectionResponse(
+            val id: String,
             val title: String,
             val questions: List<QuestionSnapshotResponse>)
 

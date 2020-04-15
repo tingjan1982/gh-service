@@ -6,6 +6,7 @@ import io.geekhub.service.shared.model.BaseMongoObject
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
+import java.math.BigDecimal
 import java.util.*
 
 @Document
@@ -23,15 +24,30 @@ data class InterviewSession(
         var interviewSentDate: Date? = null,
         var interviewStartDate: Date? = null,
         var interviewEndDate: Date? = null,
-        var score: Double = 0.0,
-        val answerAttempts: MutableMap<String, QuestionAnswerAttempt> = mutableMapOf(),
+        var totalScore: BigDecimal = BigDecimal.ZERO,
+        var answerAttemptSections: MutableMap<String, AnswerAttemptSection> = mutableMapOf(),
         val followupInterviews: MutableList<FollowUpInterview> = mutableListOf()
 
 ) : BaseMongoObject() {
 
+    data class AnswerAttemptSection(
+            val id: String,
+            val answerStats: Map<Question.QuestionType, AnswerStats>,
+            val answerAttempts: MutableMap<String, QuestionAnswerAttempt> = mutableMapOf()) {
+
+        data class AnswerStats(
+                var questionTotal: Int = 0,
+                var answered: Int = 0,
+                var correct: Int = 0
+        )
+    }
+
     data class QuestionAnswerAttempt(
-            val answerId: String? = null,
-            val answer: String? = null
+            val sectionId: String,
+            val questionSnapshotId: String,
+            var answerId: List<String>? = null,
+            var answer: String? = null,
+            var correct: Boolean? = null
     )
 
     data class FollowUpInterview(

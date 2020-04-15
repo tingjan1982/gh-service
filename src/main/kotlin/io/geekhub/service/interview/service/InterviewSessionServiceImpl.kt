@@ -3,15 +3,20 @@ package io.geekhub.service.interview.service
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.repository.InterviewSessionRepository
 import io.geekhub.service.notification.service.NotificationService
+import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.shared.model.SearchCriteria
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -25,6 +30,10 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
                                   val interviewService: InterviewService,
                                   val notificationService: NotificationService) : InterviewSessionService {
 
+    companion object {
+        val LOGGER: Logger = LoggerFactory.getLogger(InterviewSessionServiceImpl::class.java)
+    }
+    
     override fun saveInterviewSession(interviewSession: InterviewSession): InterviewSession {
         return interviewSessionRepository.save(interviewSession)
     }
@@ -48,12 +57,29 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
         return saveInterviewSession(interviewSession)
     }
 
-    override fun addAnswerAttempt(interviewSession: InterviewSession, questionId: String, answerAttempt: InterviewSession.QuestionAnswerAttempt): InterviewSession {
+    override fun addAnswerAttempt(interviewSession: InterviewSession, answerAttempt: InterviewSession.QuestionAnswerAttempt): InterviewSession {
 
         checkInterviewSessionTime(interviewSession)
-        interviewSession.answerAttempts[questionId] = answerAttempt
+
+        interviewSession.answerAttemptSections.getOrPut(answerAttempt.sectionId, { initializeAnswerAttemptSection(interviewSession, answerAttempt) }).let {
+            it.answerAttempts[answerAttempt.questionSnapshotId] = answerAttempt
+        }
 
         return saveInterviewSession(interviewSession)
+    }
+
+    private fun initializeAnswerAttemptSection(interviewSession: InterviewSession, answerAttempt: InterviewSession.QuestionAnswerAttempt): InterviewSession.AnswerAttemptSection {
+
+        LOGGER.info("Initialize AnswerAttemptSection for section: ${answerAttempt.sectionId}")
+        interviewSession.publishedInterview.referencedInterview.sections
+                .find { it.id == answerAttempt.sectionId }?.let {
+                    val answerStats = it.questions.groupBy({ q -> q.questionType }, { qsnapshot -> qsnapshot })
+                            .map { entry -> Pair(entry.key, InterviewSession.AnswerAttemptSection.AnswerStats(questionTotal = entry.value.size)) }
+                            .toMap()
+
+                    return InterviewSession.AnswerAttemptSection(id = answerAttempt.sectionId, answerStats = answerStats)
+
+                } ?: throw BusinessException("Provided section id is not found :${answerAttempt.sectionId}")
     }
 
     private fun checkInterviewSessionTime(interviewSession: InterviewSession) {
@@ -73,7 +99,38 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
 
     override fun submitInterviewSession(interviewSession: InterviewSession): InterviewSession {
 
+        checkInterviewSessionTime(interviewSession)
         interviewSession.interviewEndDate = Date()
+
+        val correctAnswers = interviewSession.publishedInterview.referencedInterview.sections
+                .flatMap { it.questions }
+                .filter { it.questionType == Question.QuestionType.MULTI_CHOICE }
+                .map { Pair(it.id, it.possibleAnswers.filter { ans -> ans.correctAnswer }.map { ans -> ans.answerId }.toList()) }
+                .toMap()
+
+        val totalMultipleChoice = correctAnswers.size
+        var answeredCorrectly = 0
+
+        interviewSession.answerAttemptSections.forEach {
+            LOGGER.info("Scoring answers for section: ${it.key}")
+
+            val answerAttemptSection = it.value
+            answerAttemptSection.answerStats[Question.QuestionType.MULTI_CHOICE]?.let { multiChoiceStats ->
+                multiChoiceStats.answered = answerAttemptSection.answerAttempts.size
+
+                answerAttemptSection.answerAttempts.forEach { ans ->
+                            correctAnswers[ans.key]?.let { correctAnswerIds ->
+                                val answerAttempt = ans.value
+                                answerAttempt.correct = correctAnswerIds.containsAll(answerAttempt.answerId.orEmpty())
+                                multiChoiceStats.correct++
+
+                                answeredCorrectly++
+                            }
+                        }
+            } ?: println("No multi choice questions for this interview session: ${interviewSession.id}")
+        }
+
+        interviewSession.totalScore = BigDecimal(answeredCorrectly).divide(BigDecimal(totalMultipleChoice), 2, RoundingMode.CEILING)
 
         return saveInterviewSession(interviewSession)
     }

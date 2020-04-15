@@ -5,6 +5,7 @@ import io.geekhub.service.account.web.model.ClientAccountResponse
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.shared.model.PageableResponse
 import org.springframework.data.domain.Page
+import java.math.BigDecimal
 import java.util.*
 
 data class InterviewSessionsResponse(@JsonIgnore val page: Page<LightInterviewSessionResponse>,
@@ -22,6 +23,6 @@ data class InterviewSessionsResponse(@JsonIgnore val page: Page<LightInterviewSe
             val interviewSentDate: Date?,
             val interviewStartDate: Date?,
             val interviewEndDate: Date?,
-            val score: Double)
+            val score: BigDecimal)
 
 }

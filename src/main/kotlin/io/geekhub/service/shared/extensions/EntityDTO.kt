@@ -104,6 +104,7 @@ fun Interview.toLightDTO() = InterviewsResponse.LightInterviewResponse(
 )
 
 fun Interview.Section.toDTO(showAnswer: Boolean) = InterviewResponse.SectionResponse(
+        id = this.id,
         title = this.title,
         questions = this.questions.map { it.toDTO(showAnswer) }.toList()
 )

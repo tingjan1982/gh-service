@@ -9,6 +9,7 @@ import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.specialization.service.SpecializationService
+import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -48,10 +49,13 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
     override fun publishInterview(id: String): PublishedInterview {
 
         getInterview(id).let {
-            publishedInterviewRepository.save(PublishedInterview(referencedInterview = it)).let { published ->
-                it.latestPublishedInterviewId = published.id
+            // this was done so referencedInterview would also have latestPublishedInterviewId.
+            val publishedId = ObjectId().toString()
+            it.latestPublishedInterviewId = publishedId
 
+            publishedInterviewRepository.save(PublishedInterview(id = publishedId, referencedInterview = it)).also { published ->
                 interviewRepository.save(it)
+
                 return published
             }
         }

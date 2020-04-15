@@ -12,7 +12,7 @@ interface InterviewSessionService {
 
     fun startInterviewSession(interviewSession: InterviewSession): InterviewSession
 
-    fun addAnswerAttempt(interviewSession: InterviewSession, questionId: String, answerAttempt: InterviewSession.QuestionAnswerAttempt): InterviewSession
+    fun addAnswerAttempt(interviewSession: InterviewSession, answerAttempt: InterviewSession.QuestionAnswerAttempt): InterviewSession
 
     fun submitInterviewSession(interviewSession: InterviewSession): InterviewSession
 

@@ -6,5 +6,5 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 @Document
 data class PublishedInterview(
-        @Id var id: String? = null,
+        @Id var id: String,
         val referencedInterview: Interview) : BaseMongoObject()

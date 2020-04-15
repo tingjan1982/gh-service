@@ -2,6 +2,7 @@ package io.geekhub.service.interview.web.model
 
 import io.geekhub.service.account.web.model.ClientAccountResponse
 import io.geekhub.service.interview.model.InterviewSession
+import java.math.BigDecimal
 import java.util.*
 
 data class InterviewSessionResponse(
@@ -15,7 +16,7 @@ data class InterviewSessionResponse(
         val interviewSentDate: Date?,
         val interviewStartDate: Date?,
         val interviewEndDate: Date?,
-        val score: Double,
-        val answerAttempts: Map<String, InterviewSession.QuestionAnswerAttempt>,
+        val score: BigDecimal,
+        val answerAttemptSections: Map<String, InterviewSession.AnswerAttemptSection>,
         val followupInterviews: List<InterviewSession.FollowUpInterview>
 )

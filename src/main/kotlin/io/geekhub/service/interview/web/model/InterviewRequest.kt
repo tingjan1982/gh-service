@@ -18,6 +18,7 @@ data class InterviewRequest(
     )
 
     data class InterviewQuestionRequest(
+            var questionId: String?,
             var id: String?,
             var question: String?,
             val questionType: Question.QuestionType = Question.QuestionType.MULTI_CHOICE,

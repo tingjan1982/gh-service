@@ -72,7 +72,7 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
                           @Valid @RequestBody request: AnswerAttemptRequest): InterviewSessionResponse {
 
         interviewSessionService.getInterviewSession(id).let {
-            return interviewSessionService.addAnswerAttempt(it, request.questionId, request.toEntity()).toDTO()
+            return interviewSessionService.addAnswerAttempt(it, request.toEntity()).toDTO()
         }
     }
 

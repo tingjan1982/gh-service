@@ -32,8 +32,8 @@ fun InterviewSession.toDTO() = InterviewSessionResponse(
         this.interviewSentDate,
         this.interviewStartDate,
         this.interviewEndDate,
-        this.score,
-        this.answerAttempts,
+        this.totalScore,
+        this.answerAttemptSections,
         this.followupInterviews
 )
 
@@ -48,10 +48,12 @@ fun InterviewSession.toLightDTO() = InterviewSessionsResponse.LightInterviewSess
         this.interviewSentDate,
         this.interviewStartDate,
         this.interviewEndDate,
-        this.score
+        this.totalScore
 )
 
 fun AnswerAttemptRequest.toEntity() = InterviewSession.QuestionAnswerAttempt(
-        answerId = answerId,
-        answer = answer
+        sectionId = this.sectionId,
+        questionSnapshotId = this.questionSnapshotId,
+        answerId = this.answerId,
+        answer = this.answer
 )
