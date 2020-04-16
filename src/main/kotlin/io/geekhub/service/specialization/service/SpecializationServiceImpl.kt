@@ -1,12 +1,17 @@
 package io.geekhub.service.specialization.service
 
+import io.geekhub.service.interview.repository.InterviewRepository
+import io.geekhub.service.questions.repository.QuestionRepository
+import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.specialization.repository.Specialization
 import io.geekhub.service.specialization.repository.SpecializationRepository
 import org.springframework.stereotype.Service
 
 @Service
-class SpecializationServiceImpl(val repository: SpecializationRepository) : SpecializationService {
+class SpecializationServiceImpl(val repository: SpecializationRepository,
+                                val interviewRepository: InterviewRepository,
+                                val questionRepository: QuestionRepository) : SpecializationService {
 
     override fun saveSpecialization(specialization: Specialization): Specialization {
         return repository.save(specialization)
@@ -24,5 +29,17 @@ class SpecializationServiceImpl(val repository: SpecializationRepository) : Spec
 
     override fun getSpecializations(): List<Specialization> {
         return repository.findAll().distinct()
+    }
+
+    override fun deleteSpecialization(id: String) {
+
+        this.getSpecialization(id).let {
+            if (interviewRepository.countBySpecialization(it) > 0 || questionRepository.countBySpecialization(it) > 0) {
+                throw BusinessException("Specialization is used by at least one question or interview: $id")
+            }
+
+            repository.delete(it)
+        }
+
     }
 }

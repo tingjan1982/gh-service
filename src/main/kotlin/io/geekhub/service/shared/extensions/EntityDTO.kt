@@ -39,6 +39,7 @@ fun QuestionRequest.toEntity(account: ClientAccount, spec: Specialization?) = Qu
         clientAccount = account,
         specialization = spec,
         jobTitle = this.jobTitle,
+        visibility = this.visibility,
         possibleAnswers = this.possibleAnswers.map { it.toEntity() }.toMutableList()
 )
 
@@ -53,6 +54,7 @@ fun Question.toDTO() = QuestionResponse(
         this.jobTitle,
         this.possibleAnswers.map { it.toDTO(true) }.toList(),
         this.visibility,
+        this.deleted,
         this.lastModifiedDate
 )
 
@@ -72,11 +74,18 @@ fun InterviewRequest.SectionRequest.toEntity() = Interview.Section(
 )
 
 fun InterviewRequest.InterviewQuestionRequest.toEntity(interview: Interview) = Question(
-        question = this.question.toString(),
+        question = this.question,
         questionType = this.questionType,
         clientAccount = interview.clientAccount,
         specialization = interview.specialization,
         jobTitle = interview.jobTitle,
+        visibility = interview.visibility,
+        possibleAnswers = this.possibleAnswers.map { it.toEntity() }.toMutableList()
+)
+
+fun InterviewRequest.InterviewQuestionRequest.toSnapshot() = Interview.QuestionSnapshot(
+        question = this.question,
+        questionType = this.questionType,
         possibleAnswers = this.possibleAnswers.map { it.toEntity() }.toMutableList()
 )
 
@@ -89,7 +98,9 @@ fun Interview.toDTO(showAnswer: Boolean = true) = InterviewResponse(
         specialization = this.specialization.toDTO(),
         sections = this.sections.map { it.toDTO(showAnswer) },
         visibility = this.visibility,
-        latestPublishedInterviewId = this.latestPublishedInterviewId
+        latestPublishedInterviewId = this.latestPublishedInterviewId,
+        deleted = this.deleted,
+        lastModifiedDate = this.lastModifiedDate
 )
 
 fun Interview.toLightDTO() = InterviewsResponse.LightInterviewResponse(
@@ -113,8 +124,7 @@ fun Interview.QuestionSnapshot.toDTO(showAnswer: Boolean) = InterviewResponse.Qu
         id = this.id,
         question = this.question,
         questionType = this.questionType,
-        possibleAnswers = this.possibleAnswers.map { it.toDTO(showAnswer) },
-        order = this.order
+        possibleAnswers = this.possibleAnswers.map { it.toDTO(showAnswer) }
 )
 
 fun ClientAccount.toDTO() = ClientAccountResponse(this.email)

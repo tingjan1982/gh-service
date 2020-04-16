@@ -34,18 +34,9 @@ data class Interview(
                        val title: String,
                        var questions: MutableList<QuestionSnapshot> = mutableListOf())
 
-    data class QuestionSnapshot(val id: String,
+    data class QuestionSnapshot(val id: String = ObjectId().toString(),
                                 val question: String,
                                 val questionType: Question.QuestionType,
-                                val possibleAnswers: List<Question.PossibleAnswer>,
-                                val order: String = "0"
+                                val possibleAnswers: List<Question.PossibleAnswer>
     )
 }
-
-fun Question.toQuestionSnapshot(order: String = "0") = Interview.QuestionSnapshot(
-        id = this.questionId.toString(),
-        question = this.question,
-        questionType = this.questionType,
-        possibleAnswers = this.possibleAnswers,
-        order = order
-)

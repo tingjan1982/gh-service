@@ -1,5 +1,6 @@
 package io.geekhub.service.interview.service
 
+import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.repository.InterviewSessionRepository
 import io.geekhub.service.notification.service.NotificationService
@@ -33,7 +34,7 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(InterviewSessionServiceImpl::class.java)
     }
-    
+
     override fun saveInterviewSession(interviewSession: InterviewSession): InterviewSession {
         return interviewSessionRepository.save(interviewSession)
     }
@@ -60,12 +61,25 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
     override fun addAnswerAttempt(interviewSession: InterviewSession, answerAttempt: InterviewSession.QuestionAnswerAttempt): InterviewSession {
 
         checkInterviewSessionTime(interviewSession)
+        validateQuestionAnswerAttempt(interviewSession, answerAttempt)
 
         interviewSession.answerAttemptSections.getOrPut(answerAttempt.sectionId, { initializeAnswerAttemptSection(interviewSession, answerAttempt) }).let {
             it.answerAttempts[answerAttempt.questionSnapshotId] = answerAttempt
         }
 
+
         return saveInterviewSession(interviewSession)
+    }
+
+    private fun validateQuestionAnswerAttempt(interviewSession: InterviewSession, answerAttempt: InterviewSession.QuestionAnswerAttempt) {
+
+        interviewSession.publishedInterview.referencedInterview.sections.find { it.id == answerAttempt.sectionId }?.let {
+            if (!it.questions.any { q -> q.id == answerAttempt.questionSnapshotId }) {
+                throw BusinessObjectNotFoundException(Interview.QuestionSnapshot::class, answerAttempt.questionSnapshotId)
+            }
+
+        } ?: throw BusinessObjectNotFoundException(Interview.Section::class, answerAttempt.sectionId)
+
     }
 
     private fun initializeAnswerAttemptSection(interviewSession: InterviewSession, answerAttempt: InterviewSession.QuestionAnswerAttempt): InterviewSession.AnswerAttemptSection {
@@ -119,14 +133,14 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
                 multiChoiceStats.answered = answerAttemptSection.answerAttempts.size
 
                 answerAttemptSection.answerAttempts.forEach { ans ->
-                            correctAnswers[ans.key]?.let { correctAnswerIds ->
-                                val answerAttempt = ans.value
-                                answerAttempt.correct = correctAnswerIds.containsAll(answerAttempt.answerId.orEmpty())
-                                multiChoiceStats.correct++
+                    correctAnswers[ans.key]?.let { correctAnswerIds ->
+                        val answerAttempt = ans.value
+                        answerAttempt.correct = correctAnswerIds.containsAll(answerAttempt.answerId.orEmpty())
+                        multiChoiceStats.correct++
 
-                                answeredCorrectly++
-                            }
-                        }
+                        answeredCorrectly++
+                    }
+                }
             } ?: println("No multi choice questions for this interview session: ${interviewSession.id}")
         }
 

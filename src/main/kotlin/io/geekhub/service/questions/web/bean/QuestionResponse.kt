@@ -2,6 +2,7 @@ package io.geekhub.service.questions.web.bean
 
 import io.geekhub.service.account.web.model.ClientAccountResponse
 import io.geekhub.service.questions.model.Question
+import io.geekhub.service.shared.model.BaseResponse
 import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.specialization.web.model.SpecializationResponse
 import java.util.*
@@ -15,7 +16,8 @@ data class QuestionResponse(
         val jobTitle: String?,
         val possibleAnswers: List<PossibleAnswerResponse> = listOf(),
         val visibility: Visibility,
-        val modifiedDate: Date?
-) {
+        override val deleted: Boolean,
+        override val lastModifiedDate: Date?
+) : BaseResponse() {
     data class PossibleAnswerResponse(val answerId: String, val answer: String, val correctAnswer: Boolean?)
 }

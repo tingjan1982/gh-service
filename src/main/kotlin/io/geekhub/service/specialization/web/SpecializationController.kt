@@ -5,6 +5,7 @@ import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.specialization.service.SpecializationService
 import io.geekhub.service.specialization.web.model.SpecializationRequest
 import io.geekhub.service.specialization.web.model.SpecializationResponse
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
@@ -39,5 +40,13 @@ class SpecializationController(val specializationService: SpecializationService)
             return specializationService.saveSpecialization(it).toDTO()
         }
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    fun deleteSpecialization(@PathVariable id: String) {
+
+        specializationService.deleteSpecialization(id)
+    }
+
 }
 

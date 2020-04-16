@@ -2,14 +2,13 @@ package io.geekhub.service.questions.service
 
 import assertk.all
 import assertk.assertThat
-import assertk.assertions.each
-import assertk.assertions.hasSize
-import assertk.assertions.isNotNull
-import assertk.assertions.prop
+import assertk.assertions.*
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.model.Question.PossibleAnswer
+import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.annotation.IntegrationTest
+import io.geekhub.service.specialization.repository.Specialization
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.test.context.support.WithMockUser
@@ -21,7 +20,13 @@ internal class QuestionServiceImplIntegrationTest {
     lateinit var questionService: QuestionService
 
     @Autowired
+    lateinit var questionRepository: QuestionRepository
+
+    @Autowired
     lateinit var clientAccount: ClientAccount
+
+    @Autowired
+    lateinit var specialization: Specialization
 
     /**
      * https://medium.com/@elye.project/mastering-kotlin-standard-functions-run-with-let-also-and-apply-9cd334b0ef84
@@ -30,10 +35,10 @@ internal class QuestionServiceImplIntegrationTest {
     @WithMockUser("dummy-user")
     fun saveQuestion() {
 
-        Question(
-                question = "Dummy question",
+        Question(question = "Dummy question",
                 questionType = Question.QuestionType.MULTI_CHOICE,
                 clientAccount = clientAccount,
+                specialization = specialization,
                 jobTitle = "Senior Engineer").apply {
             this.addAnswer(PossibleAnswer(answer = "A", correctAnswer = true))
             this.addAnswer(PossibleAnswer(answer = "B", correctAnswer = false))
@@ -56,6 +61,6 @@ internal class QuestionServiceImplIntegrationTest {
             }
         }
 
-
+        assertThat(questionRepository.countBySpecialization(specialization)).isEqualTo(1)
     }
 }

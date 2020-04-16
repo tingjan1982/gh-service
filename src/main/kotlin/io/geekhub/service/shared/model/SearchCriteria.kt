@@ -52,6 +52,8 @@ data class SearchCriteria(
                     it.addCriteria(Criteria.where("specialization").`is`(specialization))
                 }
             }
+            
+            it.addCriteria(Criteria.where("deleted").`is`(false))
 
             return it
         }

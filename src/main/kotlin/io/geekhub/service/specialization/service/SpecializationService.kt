@@ -11,4 +11,6 @@ interface SpecializationService {
     fun lookupSpecialization(id: String): Specialization?
 
     fun getSpecializations(): List<Specialization>
+
+    fun deleteSpecialization(id: String)
 }

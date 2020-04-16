@@ -5,6 +5,7 @@ import assertk.assertThat
 import assertk.assertions.*
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.interview.model.Interview
+import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.specialization.repository.Specialization
@@ -17,6 +18,9 @@ internal class InterviewServiceImplIntegrationTest {
 
     @Autowired
     private lateinit var interviewService: InterviewService
+
+    @Autowired
+    private lateinit var interviewRepository: InterviewRepository
 
     @Autowired
     private lateinit var clientAccount: ClientAccount
@@ -42,7 +46,8 @@ internal class InterviewServiceImplIntegrationTest {
                 questions.add(Interview.QuestionSnapshot("qid",
                         "dummy question",
                         Question.QuestionType.MULTI_CHOICE,
-                        listOf(Question.PossibleAnswer(answer = "dummy answer", correctAnswer = true))))
+                        listOf(Question.PossibleAnswer(answer = "dummy answer", correctAnswer = true))
+                ))
             }
 
             it.sections.add(section)
@@ -56,5 +61,7 @@ internal class InterviewServiceImplIntegrationTest {
 
             assertThat(interviewService.getInterview(it.id.toString())).isNotNull()
         }
+
+        assertThat(interviewRepository.countBySpecialization(specialization)).isEqualTo(1)
     }
 }
