@@ -42,7 +42,7 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
     override fun sendInterviewSession(interviewSession: InterviewSession): InterviewSession {
 
         interviewSession.interviewSentDate = Date()
-        notificationService.sendNotification(interviewSession)
+        notificationService.sendInterviewInvitation(interviewSession)
 
         return saveInterviewSession(interviewSession)
     }
@@ -142,7 +142,8 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
 
             scoreMultiChoiceQuestions(interviewSession)
 
-            // todo: send completion email to owner
+            notificationService.sendInterviewResult(interviewSession)
+
             return saveInterviewSession(interviewSession)
         }
 

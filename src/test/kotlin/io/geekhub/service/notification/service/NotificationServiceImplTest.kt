@@ -8,6 +8,7 @@ import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.specialization.repository.Specialization
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.test.context.support.WithMockUser
 
 @IntegrationTest
 internal class NotificationServiceImplTest {
@@ -25,14 +26,28 @@ internal class NotificationServiceImplTest {
     lateinit var specialization: Specialization
 
     @Test
-    fun sendNotification() {
+    @WithMockUser
+    fun sendInterviewInvitation() {
         val publishedInterview = Interview(title = "dummy interview", clientAccount = clientAccount, specialization = specialization, jobTitle = "Engineer").let {
             interviewService.saveInterview(it)
             interviewService.publishInterview(it.id.toString())
         }
 
         InterviewSession(publishedInterview = publishedInterview, clientAccount = clientAccount, userEmail = "joelin@geekhub.tw", interviewMode = InterviewSession.InterviewMode.REAL).let {
-            notificationService.sendNotification(it)
+            notificationService.sendInterviewInvitation(it)
+        }
+    }
+
+    @Test
+    @WithMockUser
+    fun sendInterviewResult() {
+        val publishedInterview = Interview(title = "dummy interview", clientAccount = clientAccount, specialization = specialization, jobTitle = "Engineer").let {
+            interviewService.saveInterview(it)
+            interviewService.publishInterview(it.id.toString())
+        }
+
+        InterviewSession(publishedInterview = publishedInterview, clientAccount = clientAccount, userEmail = "candidate@geekhub.tw", interviewMode = InterviewSession.InterviewMode.REAL).let {
+            notificationService.sendInterviewResult(it)
         }
     }
 }

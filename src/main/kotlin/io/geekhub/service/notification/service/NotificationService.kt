@@ -4,5 +4,7 @@ import io.geekhub.service.interview.model.InterviewSession
 
 interface NotificationService {
 
-    fun sendNotification(interviewSession: InterviewSession)
+    fun sendInterviewInvitation(interviewSession: InterviewSession)
+
+    fun sendInterviewResult(interviewSession: InterviewSession)
 }
