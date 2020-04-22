@@ -37,6 +37,6 @@ data class Interview(
     data class QuestionSnapshot(val id: String = ObjectId().toString(),
                                 val question: String,
                                 val questionType: Question.QuestionType,
-                                val possibleAnswers: List<Question.PossibleAnswer>
+                                val possibleAnswers: List<Question.PossibleAnswer> = listOf()
     )
 }

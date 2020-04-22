@@ -21,21 +21,40 @@ fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientAccoun
         duration = this.duration
 )
 
-fun InterviewSession.toDTO() = InterviewSessionResponse(
-        this.id.toString(),
-        this.publishedInterview.referencedInterview.toDTO(false),
-        this.clientAccount.toDTO(),
-        this.userEmail,
-        this.name,
-        this.interviewMode,
-        this.duration,
-        this.interviewSentDate,
-        this.interviewStartDate,
-        this.interviewEndDate,
-        this.totalScore,
-        this.answerAttemptSections,
-        this.followupInterviews
-)
+fun InterviewSession.toDTO(showCorrectAnswer: Boolean): InterviewSessionResponse {
+
+    val updatedAnswerAttemptSection = if (showCorrectAnswer) {
+        this.answerAttemptSections
+    } else {
+        this.answerAttemptSections.forEach {section ->
+            section.value.answerStats.forEach { stats ->
+                stats.value.correct = 0
+            }
+
+            section.value.answerAttempts.forEach { attempt ->
+                attempt.value.correct = null
+            }
+        }
+
+        this.answerAttemptSections
+    }
+
+    return InterviewSessionResponse(
+            this.id.toString(),
+            this.publishedInterview.referencedInterview.toDTO(false),
+            this.clientAccount.toDTO(),
+            this.userEmail,
+            this.name,
+            this.interviewMode,
+            this.duration,
+            this.interviewSentDate,
+            this.interviewStartDate,
+            this.interviewEndDate,
+            this.totalScore,
+            updatedAnswerAttemptSection,
+            this.followupInterviews
+    )
+}
 
 fun InterviewSession.toLightDTO() = InterviewSessionsResponse.LightInterviewSessionResponse(
         this.id.toString(),

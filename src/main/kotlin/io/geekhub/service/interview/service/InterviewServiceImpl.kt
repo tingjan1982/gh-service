@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
@@ -88,6 +89,10 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
     override fun getInterviews(searchCriteria: SearchCriteria): Page<Interview> {
 
         searchCriteria.toQuery(specializationService).let {
+            if (!searchCriteria.filterByClientAccount) {
+                it.addCriteria(Criteria.where("latestPublishedInterviewId").ne(null))
+            }
+
             val count = mongoTemplate.count(Query.of(it).limit(-1).skip(-1), Interview::class.java)
             val results = mongoTemplate.find(it, Interview::class.java)
 

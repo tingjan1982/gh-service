@@ -16,7 +16,11 @@ interface InterviewSessionService {
 
     fun submitInterviewSession(interviewSession: InterviewSession): InterviewSession
 
+    fun markInterviewSessionAnswer(interviewSession: InterviewSession, sectionId: String, questionSnapshotId: String, correct: Boolean): InterviewSession
+
     fun getInterviewSession(id: String): InterviewSession
 
     fun getInterviewSessions(searchCriteria: SearchCriteria): Page<InterviewSession>
+
+    fun calculateScore(id: String): InterviewSession
 }

@@ -50,15 +50,14 @@ internal class InterviewSessionServiceImplTest {
 
                 this.questions.add(
                         Interview.QuestionSnapshot(id = "qid-2",
-                                question = "question 2",
-                                questionType = Question.QuestionType.MULTI_CHOICE,
+                                question = "question that will be answered",
+                                questionType = Question.QuestionType.SHORT_ANSWER,
                                 possibleAnswers = listOf(Question.PossibleAnswer("answer-1", "answer", true))))
 
                 this.questions.add(
                         Interview.QuestionSnapshot(id = "qid-3",
-                                question = "question 3",
-                                questionType = Question.QuestionType.MULTI_CHOICE,
-                                possibleAnswers = listOf(Question.PossibleAnswer("answer-1", "answer", true))))
+                                question = "question left unanswered",
+                                questionType = Question.QuestionType.SHORT_ANSWER))
             }.let {
                 this.sections.add(it)
                 interview = interviewService.saveInterview(this)
@@ -71,6 +70,8 @@ internal class InterviewSessionServiceImplTest {
     @Test
     @WithMockUser
     fun saveInterviewSession() {
+
+        val sectionId = interview.sections[0].id
 
         InterviewSession(
                 publishedInterview = publishedInterview,
@@ -87,14 +88,24 @@ internal class InterviewSessionServiceImplTest {
                 assertThat(session.interviewStartDate).isNotNull()
             }
         }.let {
-            interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = interview.sections[0].id, questionSnapshotId = "qid-1", answerId = listOf("answer-1"))).run {
+            interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = "qid-1", answerId = listOf("answer-1"))).run {
                 assertThat(this.id).isNotNull()
                 assertThat(this.answerAttemptSections).hasSize(1)
 
-                this.answerAttemptSections.getValue(interview.sections[0].id).run {
-                    assertThat(this.answerStats).hasSize(1)
-                    assertThat(this.answerStats.getValue(Question.QuestionType.MULTI_CHOICE).questionTotal).isEqualTo(3)
+                this.answerAttemptSections.getValue(sectionId).run {
+                    assertThat(this.answerStats).hasSize(2)
+                    assertThat(this.answerStats.getValue(Question.QuestionType.MULTI_CHOICE).questionTotal).isEqualTo(1)
+                    assertThat(this.answerStats.getValue(Question.QuestionType.SHORT_ANSWER).questionTotal).isEqualTo(2)
                     assertThat(this.answerAttempts).hasSize(1)
+                }
+            }
+
+            interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = "qid-2", answer = "short answer")).run {
+                assertThat(this.id).isNotNull()
+                assertThat(this.answerAttemptSections).hasSize(1)
+
+                this.answerAttemptSections.getValue(sectionId).run {
+                    assertThat(this.answerAttempts).hasSize(2)
                 }
             }
 
@@ -115,15 +126,39 @@ internal class InterviewSessionServiceImplTest {
         }.let {
             interviewSessionService.submitInterviewSession(it).run {
                 assertThat(this.interviewEndDate).isNotNull()
-                assertThat(this.totalScore).isBetween(BigDecimal(0.33), BigDecimal(0.34))
+                //assertThat(this.totalScore).isBetween(BigDecimal(0.33), BigDecimal(0.34))
                 assertThat(this.answerAttemptSections).hasSize(1)
 
-                this.answerAttemptSections.getValue(interview.sections[0].id).run {
+                this.answerAttemptSections.getValue(sectionId).run {
                     assertThat(this.answerStats.getValue(Question.QuestionType.MULTI_CHOICE).answered).isEqualTo(1)
                     assertThat(this.answerStats.getValue(Question.QuestionType.MULTI_CHOICE).correct).isEqualTo(1)
 
                     assertThat(this.answerAttempts.getValue("qid-1").correct).isEqualTo(true)
                 }
+            }
+
+            interviewSessionService.markInterviewSessionAnswer(it, sectionId, "qid-2", true).run {
+                this.answerAttemptSections.getValue(sectionId).run {
+                    assertThat(this.answerStats.getValue(Question.QuestionType.SHORT_ANSWER).answered).isEqualTo(1)
+                    assertThat(this.answerStats.getValue(Question.QuestionType.SHORT_ANSWER).correct).isEqualTo(1)
+
+                    assertThat(this.answerAttempts.getValue("qid-2").correct).isEqualTo(true)
+                }
+            }
+
+            interviewSessionService.markInterviewSessionAnswer(it, sectionId, "qid-3", false).run {
+                this.answerAttemptSections.getValue(sectionId).run {
+                    assertThat(this.answerStats.getValue(Question.QuestionType.SHORT_ANSWER).answered).isEqualTo(2)
+                    assertThat(this.answerStats.getValue(Question.QuestionType.SHORT_ANSWER).correct).isEqualTo(1)
+
+                    assertThat(this.answerAttempts.getValue("qid-3").correct).isEqualTo(false)
+                }
+            }
+
+            return@let it
+        }.let {
+            interviewSessionService.calculateScore(it.id.toString()).run {
+                assertThat(this.totalScore).isBetween(BigDecimal(0.6), BigDecimal(0.7))
             }
         }
     }

@@ -61,9 +61,9 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
     override fun addAnswerAttempt(interviewSession: InterviewSession, answerAttempt: InterviewSession.QuestionAnswerAttempt): InterviewSession {
 
         checkInterviewSessionTime(interviewSession)
-        validateQuestionAnswerAttempt(interviewSession, answerAttempt)
+        validateSectionAndQuestion(interviewSession, answerAttempt.sectionId, answerAttempt.questionSnapshotId)
 
-        interviewSession.answerAttemptSections.getOrPut(answerAttempt.sectionId, { initializeAnswerAttemptSection(interviewSession, answerAttempt) }).let {
+        interviewSession.answerAttemptSections.getOrPut(answerAttempt.sectionId, { initializeAnswerAttemptSection(interviewSession, answerAttempt.sectionId) }).let {
             it.answerAttempts[answerAttempt.questionSnapshotId] = answerAttempt
         }
 
@@ -71,29 +71,53 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
         return saveInterviewSession(interviewSession)
     }
 
-    private fun validateQuestionAnswerAttempt(interviewSession: InterviewSession, answerAttempt: InterviewSession.QuestionAnswerAttempt) {
+    override fun markInterviewSessionAnswer(interviewSession: InterviewSession, sectionId: String, questionSnapshotId: String, correct: Boolean): InterviewSession {
 
-        interviewSession.publishedInterview.referencedInterview.sections.find { it.id == answerAttempt.sectionId }?.let {
-            if (!it.questions.any { q -> q.id == answerAttempt.questionSnapshotId }) {
-                throw BusinessObjectNotFoundException(Interview.QuestionSnapshot::class, answerAttempt.questionSnapshotId)
+        validateSectionAndQuestion(interviewSession, sectionId, questionSnapshotId)
+
+        interviewSession.answerAttemptSections.getOrPut(sectionId, { initializeAnswerAttemptSection(interviewSession, sectionId) }).let {
+
+            val incorrectAttempt = InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = questionSnapshotId, correct = false)
+            it.answerAttempts.getOrPut(questionSnapshotId, { incorrectAttempt }).let { attempt ->
+                attempt.correct = correct
             }
 
-        } ?: throw BusinessObjectNotFoundException(Interview.Section::class, answerAttempt.sectionId)
+            it.answerStats[Question.QuestionType.SHORT_ANSWER]?.run {
+                this.answered++
+
+                if (correct) {
+                    this.correct++
+                }
+            }
+        }
+
+        return saveInterviewSession(interviewSession)
+    }
+
+
+    private fun validateSectionAndQuestion(interviewSession: InterviewSession, sectionId: String, questionSnapshotId: String) {
+
+        interviewSession.publishedInterview.referencedInterview.sections.find { it.id == sectionId }?.let {
+            if (!it.questions.any { q -> q.id == questionSnapshotId }) {
+                throw BusinessObjectNotFoundException(Interview.QuestionSnapshot::class, questionSnapshotId)
+            }
+
+        } ?: throw BusinessObjectNotFoundException(Interview.Section::class, sectionId)
 
     }
 
-    private fun initializeAnswerAttemptSection(interviewSession: InterviewSession, answerAttempt: InterviewSession.QuestionAnswerAttempt): InterviewSession.AnswerAttemptSection {
+    private fun initializeAnswerAttemptSection(interviewSession: InterviewSession, sectionId: String): InterviewSession.AnswerAttemptSection {
 
-        LOGGER.info("Initialize AnswerAttemptSection for section: ${answerAttempt.sectionId}")
+        LOGGER.info("Initialize AnswerAttemptSection for section: ${sectionId}")
         interviewSession.publishedInterview.referencedInterview.sections
-                .find { it.id == answerAttempt.sectionId }?.let {
+                .find { it.id == sectionId }?.let {
                     val answerStats = it.questions.groupBy({ q -> q.questionType }, { qsnapshot -> qsnapshot })
                             .map { entry -> Pair(entry.key, InterviewSession.AnswerAttemptSection.AnswerStats(questionTotal = entry.value.size)) }
                             .toMap()
 
-                    return InterviewSession.AnswerAttemptSection(id = answerAttempt.sectionId, answerStats = answerStats)
+                    return InterviewSession.AnswerAttemptSection(id = sectionId, answerStats = answerStats)
 
-                } ?: throw BusinessException("Provided section id is not found :${answerAttempt.sectionId}")
+                } ?: throw BusinessException("Provided section id is not found :${sectionId}")
     }
 
     private fun checkInterviewSessionTime(interviewSession: InterviewSession) {
@@ -113,8 +137,19 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
 
     override fun submitInterviewSession(interviewSession: InterviewSession): InterviewSession {
 
-        checkInterviewSessionTime(interviewSession)
-        interviewSession.interviewEndDate = Date()
+        if (interviewSession.interviewEndDate == null) {
+            interviewSession.interviewEndDate = Date()
+
+            scoreMultiChoiceQuestions(interviewSession)
+
+            // todo: send completion email to owner
+            return saveInterviewSession(interviewSession)
+        }
+
+        return interviewSession
+    }
+
+    private fun scoreMultiChoiceQuestions(interviewSession: InterviewSession) {
 
         val correctAnswers = interviewSession.publishedInterview.referencedInterview.sections
                 .flatMap { it.questions }
@@ -122,31 +157,42 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
                 .map { Pair(it.id, it.possibleAnswers.filter { ans -> ans.correctAnswer }.map { ans -> ans.answerId }.toList()) }
                 .toMap()
 
-        val totalMultipleChoice = correctAnswers.size
-        var answeredCorrectly = 0
-
         interviewSession.answerAttemptSections.forEach {
             LOGGER.info("Scoring answers for section: ${it.key}")
 
             val answerAttemptSection = it.value
             answerAttemptSection.answerStats[Question.QuestionType.MULTI_CHOICE]?.let { multiChoiceStats ->
-                multiChoiceStats.answered = answerAttemptSection.answerAttempts.size
 
                 answerAttemptSection.answerAttempts.forEach { ans ->
                     correctAnswers[ans.key]?.let { correctAnswerIds ->
-                        val answerAttempt = ans.value
-                        answerAttempt.correct = correctAnswerIds.containsAll(answerAttempt.answerId.orEmpty())
-                        multiChoiceStats.correct++
+                        multiChoiceStats.answered++
 
-                        answeredCorrectly++
+                        val answerAttempt = ans.value
+
+                        answerAttempt.correct = correctAnswerIds.containsAll(answerAttempt.answerId.orEmpty())
+
+                        if (answerAttempt.correct!!) {
+                            multiChoiceStats.correct++
+                        }
                     }
                 }
-            } ?: println("No multi choice questions for this interview session: ${interviewSession.id}")
+            }
         }
+    }
 
-        interviewSession.totalScore = BigDecimal(answeredCorrectly).divide(BigDecimal(totalMultipleChoice), 2, RoundingMode.CEILING)
+    override fun calculateScore(id: String): InterviewSession {
+        this.getInterviewSession(id).let {
 
-        return saveInterviewSession(interviewSession)
+            val totalQuestions = it.answerAttemptSections.flatMap { sections -> sections.value.answerStats.values }
+                    .sumBy { stats -> stats.questionTotal }
+
+            val totalCorrectAnswers = it.answerAttemptSections.flatMap { sections -> sections.value.answerStats.values }
+                    .sumBy { stats -> stats.correct }
+
+            it.totalScore = BigDecimal(totalCorrectAnswers).divide(BigDecimal(totalQuestions), 2, RoundingMode.CEILING)
+
+            return saveInterviewSession(it)
+        }
     }
 
     override fun getInterviewSession(id: String): InterviewSession {
