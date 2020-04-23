@@ -10,7 +10,7 @@ open class PageableResponse<T>(page: Page<T>, navigationLinkBuilder: UriComponen
     var size: Int = page.size
     var currentPage: Int = page.number
     var results: List<T> = page.content
-    var next: String = if (page.hasNext()) navigationLinkBuilder.queryParam("page", currentPage + 1).toUriString() else ""
-    var prev: String = if (page.hasPrevious()) navigationLinkBuilder.queryParam("page", currentPage - 1).toUriString() else ""
+    var next: String = if (page.hasNext()) navigationLinkBuilder.replaceQueryParam("page", currentPage + 1).toUriString() else ""
+    var prev: String = if (page.hasPrevious()) navigationLinkBuilder.replaceQueryParam("page", currentPage - 1).toUriString() else ""
 
 }
