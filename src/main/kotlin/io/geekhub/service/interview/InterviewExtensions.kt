@@ -86,6 +86,6 @@ fun InterviewSession.toLightDTO() = InterviewSessionsResponse.LightInterviewSess
 fun AnswerAttemptRequest.toEntity() = InterviewSession.QuestionAnswerAttempt(
         sectionId = this.sectionId,
         questionSnapshotId = this.questionSnapshotId,
-        answerId = this.answerId,
+        answerIds = this.answerId,
         answer = this.answer
 )

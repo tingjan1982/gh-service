@@ -173,7 +173,7 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
 
                         val answerAttempt = ans.value
 
-                        answerAttempt.correct = correctAnswerIds.containsAll(answerAttempt.answerId.orEmpty())
+                        answerAttempt.correct = correctAnswerIds.containsAll(answerAttempt.answerIds.orEmpty())
 
                         if (answerAttempt.correct!!) {
                             multiChoiceStats.correct++

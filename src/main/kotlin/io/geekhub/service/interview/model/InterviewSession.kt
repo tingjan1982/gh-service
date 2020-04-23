@@ -46,7 +46,7 @@ data class InterviewSession(
     data class QuestionAnswerAttempt(
             val sectionId: String,
             val questionSnapshotId: String,
-            var answerId: List<String>? = null,
+            var answerIds: List<String>? = null,
             var answer: String? = null,
             var correct: Boolean? = null
     )

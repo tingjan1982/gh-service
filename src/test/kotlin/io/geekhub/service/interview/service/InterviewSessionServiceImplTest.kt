@@ -98,7 +98,7 @@ internal class InterviewSessionServiceImplTest {
 
             it
         }.let {
-            interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = "qid-1", answerId = listOf("answer-1"))).run {
+            interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = "qid-1", answerIds = listOf("answer-1"))).run {
                 assertThat(this.id).isNotNull()
                 assertThat(this.answerAttemptSections).hasSize(1)
 
@@ -188,7 +188,7 @@ internal class InterviewSessionServiceImplTest {
             interviewSessionService.saveInterviewSession(it)
         }.let {
             assertThat {
-                interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = "whatever", questionSnapshotId = "whatever", answerId = listOf("whatever")))
+                interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = "whatever", questionSnapshotId = "whatever", answerIds = listOf("whatever")))
             }.isFailure().isInstanceOf(BusinessException::class)
 
             return@let it
@@ -197,7 +197,7 @@ internal class InterviewSessionServiceImplTest {
             interviewSessionService.saveInterviewSession(it)
         }.let {
             assertThat {
-                interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = "whatever", questionSnapshotId = "whatever", answerId = listOf("whatever")))
+                interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = "whatever", questionSnapshotId = "whatever", answerIds = listOf("whatever")))
             }.isFailure().isInstanceOf(BusinessException::class)
 
             return@let it

@@ -111,7 +111,7 @@ fun Interview.toLightDTO() = InterviewsResponse.LightInterviewResponse(
         clientAccount = this.clientAccount.toDTO(),
         specialization = this.specialization.toDTO(),
         visibility = this.visibility,
-        published = this.latestPublishedInterviewId != null
+        latestPublishedInterviewId = this.latestPublishedInterviewId
 )
 
 fun Interview.Section.toDTO(showAnswer: Boolean) = InterviewResponse.SectionResponse(
