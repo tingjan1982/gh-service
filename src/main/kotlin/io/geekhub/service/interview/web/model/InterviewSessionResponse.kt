@@ -7,12 +7,13 @@ import java.util.*
 
 data class InterviewSessionResponse(
         val id: String,
-        val interview: InterviewResponse,
+        val publishedInterview: PublishedInterviewResponse,
         val clientAccount: ClientAccountResponse,
         val userEmail: String,
         val name: String?,
         val interviewMode: InterviewSession.InterviewMode,
         val duration: Int,
+        val status: InterviewSession.Status,
         val interviewSentDate: Date?,
         val interviewStartDate: Date?,
         val interviewEndDate: Date?,

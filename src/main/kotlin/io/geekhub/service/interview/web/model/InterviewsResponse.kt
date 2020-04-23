@@ -6,10 +6,10 @@ import io.geekhub.service.shared.model.PageableResponse
 import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.specialization.web.model.SpecializationResponse
 import org.springframework.data.domain.Page
+import org.springframework.web.util.UriComponentsBuilder
 
 data class InterviewsResponse(@JsonIgnore val page: Page<LightInterviewResponse>,
-                              @JsonIgnore val contextPath: String,
-                              @JsonIgnore val resourcePrefix: String) : PageableResponse<InterviewsResponse.LightInterviewResponse>(page, contextPath, resourcePrefix) {
+                              @JsonIgnore val navigationLinkBuilder: UriComponentsBuilder) : PageableResponse<InterviewsResponse.LightInterviewResponse>(page, navigationLinkBuilder) {
 
     data class LightInterviewResponse(
             val id: String,

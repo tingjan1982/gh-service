@@ -17,10 +17,11 @@ data class InterviewSession(
         val publishedInterview: PublishedInterview,
         @DBRef
         val clientAccount: ClientAccount,
-        val userEmail: String,
-        val name: String? = null,
+        var userEmail: String,
+        var name: String? = null,
         val interviewMode: InterviewMode,
         val duration: Int = -1,
+        var status: Status = Status.NOT_STARTED,
         var interviewSentDate: Date? = null,
         var interviewStartDate: Date? = null,
         var interviewEndDate: Date? = null,
@@ -68,5 +69,11 @@ data class InterviewSession(
          * Used when company creates an interview session for candidate for actual interview.
          */
         REAL
+    }
+
+    enum class Status {
+        NOT_STARTED,
+        STARTED,
+        ENDED
     }
 }

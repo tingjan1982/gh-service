@@ -8,6 +8,7 @@ import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.annotation.IntegrationTest
+import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.specialization.repository.Specialization
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,6 +43,20 @@ internal class InterviewServiceImplIntegrationTest {
             assertThat(it.id).isNotNull()
             assertThat(it.sections).isEmpty()
 
+            assertThat {
+                interviewService.publishInterview(it.id.toString())
+            }.isFailure().isInstanceOf(BusinessException::class)
+
+            it.sections.add(Interview.Section(title = "foundation"))
+
+            interviewService.saveInterview(it)
+
+            assertThat {
+                interviewService.publishInterview(it.id.toString())
+            }.isFailure().isInstanceOf(BusinessException::class)
+
+            it
+        }.let {
             val section = Interview.Section(title = "foundation").apply {
                 questions.add(Interview.QuestionSnapshot("qid",
                         "dummy question",
@@ -50,7 +65,7 @@ internal class InterviewServiceImplIntegrationTest {
                 ))
             }
 
-            it.sections.add(section)
+            it.sections = mutableListOf(section)
 
             interviewService.saveInterview(it)
         }.let {
@@ -60,6 +75,13 @@ internal class InterviewServiceImplIntegrationTest {
             }
 
             assertThat(interviewService.getInterview(it.id.toString())).isNotNull()
+
+            it
+        }.let {
+            interviewService.publishInterview(it.id.toString()).run {
+                assertThat(this.referencedInterview.id).isEqualTo(it.id)
+                assertThat(this.referencedInterview.latestPublishedInterviewId).isEqualTo(this.id)
+            }
         }
 
         assertThat(interviewRepository.countBySpecialization(specialization)).isEqualTo(1)

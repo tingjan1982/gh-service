@@ -84,9 +84,19 @@ internal class InterviewSessionServiceImplTest {
             interviewSessionService.saveInterviewSession(it)
 
         }.let {
+            assertThat {
+                interviewSessionService.getCurrentInterviewSession(interview.id.toString(), clientAccount)
+            }.isFailure().isInstanceOf(BusinessException::class)
+
             interviewSessionService.startInterviewSession(it).also { session ->
                 assertThat(session.interviewStartDate).isNotNull()
             }
+
+            interviewSessionService.getCurrentInterviewSession(interview.id.toString(), clientAccount).run {
+                assertThat(this).isEqualTo(it)
+            }
+
+            it
         }.let {
             interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = "qid-1", answerId = listOf("answer-1"))).run {
                 assertThat(this.id).isNotNull()

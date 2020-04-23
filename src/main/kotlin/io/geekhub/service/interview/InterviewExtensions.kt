@@ -6,10 +6,11 @@ import io.geekhub.service.interview.model.PublishedInterview
 import io.geekhub.service.interview.web.model.*
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toLightDTO
+import io.geekhub.service.shared.model.Visibility
 
 fun PublishedInterview.toDTO() = PublishedInterviewResponse(
-        this.id.toString(),
-        this.referencedInterview.toDTO()
+        this.id,
+        this.referencedInterview.toDTO(false)
 )
 
 fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientAccount: ClientAccount) = InterviewSession(
@@ -21,12 +22,21 @@ fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientAccoun
         duration = this.duration
 )
 
-fun InterviewSession.toDTO(showCorrectAnswer: Boolean): InterviewSessionResponse {
+fun InterviewSession.showCorrectAnswer(currentAccount: ClientAccount): Boolean {
+    this.publishedInterview.referencedInterview.let {
+        val publicInterview = it.visibility == Visibility.PUBLIC
+        val interviewOwner = it.clientAccount.id == currentAccount.id
 
-    val updatedAnswerAttemptSection = if (showCorrectAnswer) {
+        return publicInterview || interviewOwner
+    }
+}
+
+fun InterviewSession.toDTO(currentAccount: ClientAccount): InterviewSessionResponse {
+
+    val updatedAnswerAttemptSection = if (this.showCorrectAnswer(currentAccount)) {
         this.answerAttemptSections
     } else {
-        this.answerAttemptSections.forEach {section ->
+        this.answerAttemptSections.forEach { section ->
             section.value.answerStats.forEach { stats ->
                 stats.value.correct = 0
             }
@@ -41,12 +51,13 @@ fun InterviewSession.toDTO(showCorrectAnswer: Boolean): InterviewSessionResponse
 
     return InterviewSessionResponse(
             this.id.toString(),
-            this.publishedInterview.referencedInterview.toDTO(false),
+            this.publishedInterview.toDTO(),
             this.clientAccount.toDTO(),
             this.userEmail,
             this.name,
             this.interviewMode,
             this.duration,
+            this.status,
             this.interviewSentDate,
             this.interviewStartDate,
             this.interviewEndDate,
@@ -58,12 +69,14 @@ fun InterviewSession.toDTO(showCorrectAnswer: Boolean): InterviewSessionResponse
 
 fun InterviewSession.toLightDTO() = InterviewSessionsResponse.LightInterviewSessionResponse(
         this.id.toString(),
+        this.publishedInterview.id,
         this.publishedInterview.referencedInterview.toLightDTO(),
         this.clientAccount.toDTO(),
         this.userEmail,
         this.name,
         this.interviewMode,
         this.duration,
+        this.status,
         this.interviewSentDate,
         this.interviewStartDate,
         this.interviewEndDate,

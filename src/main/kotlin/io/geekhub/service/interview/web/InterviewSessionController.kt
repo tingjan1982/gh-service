@@ -1,7 +1,6 @@
 package io.geekhub.service.interview.web
 
 import io.geekhub.service.account.repository.ClientAccount
-import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.interview.service.InterviewSessionService
 import io.geekhub.service.interview.toDTO
@@ -9,18 +8,16 @@ import io.geekhub.service.interview.toEntity
 import io.geekhub.service.interview.toLightDTO
 import io.geekhub.service.interview.web.model.*
 import io.geekhub.service.shared.model.SearchCriteria
-import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.shared.web.filter.ClientAccountFilter
-import org.springframework.boot.autoconfigure.web.ServerProperties
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.util.UriComponentsBuilder
 import javax.validation.Valid
 
 @RestController
 @RequestMapping("/interviewSessions")
 class InterviewSessionController(val interviewSessionService: InterviewSessionService,
-                                 val interviewService: InterviewService,
-                                 val serverProperties: ServerProperties) {
+                                 val interviewService: InterviewService) {
 
 
     @PostMapping
@@ -28,7 +25,7 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
                                @Valid @RequestBody request: InterviewSessionRequest): InterviewSessionResponse {
 
         interviewService.getPublishedInterviewByInterview(request.interviewId).let {
-            return interviewSessionService.saveInterviewSession(request.toEntity(it, clientAccount)).toDTO(true)
+            return interviewSessionService.saveInterviewSession(request.toEntity(it, clientAccount)).toDTO(clientAccount)
         }
     }
 
@@ -37,17 +34,38 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
                             @PathVariable id: String): InterviewSessionResponse {
 
         return interviewSessionService.getInterviewSession(id).let {
-            it.toDTO(showCorrectAnswer(it, clientAccount))
+            it.toDTO(clientAccount)
         }
     }
 
     @GetMapping
     fun listInterviewSessions(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
-                              @RequestParam params: Map<String, String>): InterviewSessionsResponse {
+                              @RequestParam params: Map<String, String>,
+                              uriComponentsBuilder: UriComponentsBuilder): InterviewSessionsResponse {
 
         interviewSessionService.getInterviewSessions(SearchCriteria.fromRequestParameters(clientAccount, params)).let { results ->
-            val contextPath = serverProperties.servlet.contextPath
-            return InterviewSessionsResponse(results.map { it.toLightDTO() }, contextPath, "interviewSessions")
+            val navigationLinkBuilder = uriComponentsBuilder.path("/interviewSessions").let {
+                params.forEach { entry ->
+                    it.queryParam(entry.key, entry.value)
+                }
+
+                it
+            }
+
+            return InterviewSessionsResponse(results.map { it.toLightDTO() }, navigationLinkBuilder)
+        }
+    }
+
+    @PostMapping("/{id}")
+    fun updateInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+                               @PathVariable id: String,
+                               @RequestBody updateRequest: UpdateInterviewSessionRequest): InterviewSessionResponse {
+
+        interviewSessionService.getInterviewSession(id).let {
+            it.userEmail = updateRequest.userEmail
+            it.name = updateRequest.name
+
+            return interviewSessionService.saveInterviewSession(it).toDTO(clientAccount)
         }
     }
 
@@ -56,7 +74,7 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
                              @PathVariable id: String): InterviewSessionResponse {
 
         interviewSessionService.getInterviewSession(id).let {
-            return interviewSessionService.sendInterviewSession(it).toDTO(showCorrectAnswer(it, clientAccount))
+            return interviewSessionService.sendInterviewSession(it).toDTO(clientAccount)
         }
     }
 
@@ -65,7 +83,7 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
                               @PathVariable id: String): InterviewSessionResponse {
 
         interviewSessionService.getInterviewSession(id).let {
-            return interviewSessionService.startInterviewSession(it).toDTO(showCorrectAnswer(it, clientAccount))
+            return interviewSessionService.startInterviewSession(it).toDTO(clientAccount)
         }
     }
 
@@ -85,7 +103,7 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
                                @PathVariable id: String): InterviewSessionResponse {
 
         interviewSessionService.getInterviewSession(id).let {
-            return interviewSessionService.submitInterviewSession(it).toDTO(showCorrectAnswer(it, clientAccount))
+            return interviewSessionService.submitInterviewSession(it).toDTO(clientAccount)
         }
     }
 
@@ -105,17 +123,7 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
                        @PathVariable id: String): InterviewSessionResponse {
 
         interviewSessionService.calculateScore(id).let {
-            return it.toDTO(showCorrectAnswer(it, clientAccount))
-        }
-    }
-
-    private fun showCorrectAnswer(interviewSession: InterviewSession, currentAccount: ClientAccount): Boolean {
-
-        interviewSession.publishedInterview.referencedInterview.let {
-            val publicInterview = it.visibility == Visibility.PUBLIC
-            val interviewOwner = it.clientAccount.id == currentAccount.id
-
-            return publicInterview || interviewOwner
+            return it.toDTO(clientAccount)
         }
     }
 }

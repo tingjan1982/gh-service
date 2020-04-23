@@ -50,6 +50,16 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
     override fun publishInterview(id: String): PublishedInterview {
 
         getInterview(id).let {
+            if (it.sections.isEmpty()) {
+                throw BusinessException("Interview $id must have at least one section.")
+            }
+
+            it.sections.forEach {section ->
+                if (section.questions.isEmpty()) {
+                    throw BusinessException("Section ${section.id} needs at least one question.")
+                }
+            }
+
             // this was done so referencedInterview would also have latestPublishedInterviewId.
             val publishedId = ObjectId().toString()
             it.latestPublishedInterviewId = publishedId

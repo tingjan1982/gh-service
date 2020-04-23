@@ -14,18 +14,17 @@ import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT
 import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.web.ServerProperties
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.util.UriComponentsBuilder
 import javax.validation.Valid
 
 @RestController
 @RequestMapping("/questions")
 class QuestionController(val questionService: QuestionService,
                          val specializationService: SpecializationService,
-                         val socialLikeService: SocialLikeService,
-                         val serverProperties: ServerProperties) {
+                         val socialLikeService: SocialLikeService) {
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(QuestionController::class.java)
@@ -41,7 +40,7 @@ class QuestionController(val questionService: QuestionService,
         }
 
         val questionToCreate = questionRequest.toEntity(clientAccount, specialization)
-        
+
         return this.questionService.saveQuestion(questionToCreate).toDTO()
     }
 
@@ -54,11 +53,19 @@ class QuestionController(val questionService: QuestionService,
 
     @GetMapping
     fun listQuestions(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
-                      @RequestParam map: Map<String, String>): QuestionsResponse {
+                      @RequestParam map: Map<String, String>,
+                      uriComponentsBuilder: UriComponentsBuilder): QuestionsResponse {
 
         this.questionService.getQuestions(SearchCriteria.fromRequestParameters(clientAccount, map)).let { result ->
-            val contextPath = serverProperties.servlet.contextPath
-            return QuestionsResponse(result.map { it.toDTO() }, contextPath, "questions")
+            val navigationLinkBuilder = uriComponentsBuilder.path("/questions").let {
+                map.forEach { entry ->
+                    it.queryParam(entry.key, entry.value)
+                }
+
+                it
+            }
+
+            return QuestionsResponse(result.map { it.toDTO() }, navigationLinkBuilder)
         }
     }
 

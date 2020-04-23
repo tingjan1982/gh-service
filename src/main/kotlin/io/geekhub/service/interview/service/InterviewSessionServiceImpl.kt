@@ -1,5 +1,6 @@
 package io.geekhub.service.interview.service
 
+import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.repository.InterviewSessionRepository
@@ -49,10 +50,11 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
 
     override fun startInterviewSession(interviewSession: InterviewSession): InterviewSession {
 
-        interviewSession.interviewStartDate?.let {
-            throw BusinessException("Interview has already started at $it")
+        if (interviewSession.status == InterviewSession.Status.STARTED) {
+            throw BusinessException("Interview has already started at ${interviewSession.interviewStartDate}")
         }
 
+        interviewSession.status = InterviewSession.Status.STARTED
         interviewSession.interviewStartDate = Date()
 
         return saveInterviewSession(interviewSession)
@@ -138,6 +140,7 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
     override fun submitInterviewSession(interviewSession: InterviewSession): InterviewSession {
 
         if (interviewSession.interviewEndDate == null) {
+            interviewSession.status = InterviewSession.Status.ENDED
             interviewSession.interviewEndDate = Date()
 
             scoreMultiChoiceQuestions(interviewSession)
@@ -199,6 +202,16 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
     override fun getInterviewSession(id: String): InterviewSession {
         return interviewSessionRepository.findById(id).orElseThrow {
             throw BusinessObjectNotFoundException(InterviewSession::class, id)
+        }
+    }
+
+    override fun getCurrentInterviewSession(interviewId: String, clientAccount: ClientAccount): InterviewSession {
+
+        interviewService.getPublishedInterviewByInterview(interviewId).let {
+            interviewSessionRepository.findByPublishedInterviewAndUserEmailAndStatus(it, clientAccount.email, InterviewSession.Status.STARTED)?.let { s ->
+                return s
+
+            } ?: throw BusinessException("This interview $interviewId has no current interview session")
         }
     }
 

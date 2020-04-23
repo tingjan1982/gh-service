@@ -1,5 +1,6 @@
 package io.geekhub.service.shared.config
 
+import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientAccountRepository
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.repository.InterviewRepository
@@ -100,6 +101,7 @@ class ApplicationConfig(val mongoTemplate: MongoTemplate, val mongoMappingContex
                 .build()
                 .apiInfo(apiInfo())
                 .securitySchemes(listOf(basicAuthScheme))
+                .ignoredParameterTypes(ClientAccount::class.java)
     }
 
     /**
