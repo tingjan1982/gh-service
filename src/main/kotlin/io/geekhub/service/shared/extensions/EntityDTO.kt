@@ -98,7 +98,7 @@ fun Interview.toDTO(showAnswer: Boolean = true) = InterviewResponse(
         specialization = this.specialization.toDTO(),
         sections = this.sections.map { it.toDTO(showAnswer) },
         visibility = this.visibility,
-        latestPublishedInterviewId = this.latestPublishedInterviewId,
+        publishedInterviewId = this.latestPublishedInterviewId,
         deleted = this.deleted,
         lastModifiedDate = this.lastModifiedDate
 )
@@ -111,7 +111,7 @@ fun Interview.toLightDTO() = InterviewsResponse.LightInterviewResponse(
         clientAccount = this.clientAccount.toDTO(),
         specialization = this.specialization.toDTO(),
         visibility = this.visibility,
-        latestPublishedInterviewId = this.latestPublishedInterviewId
+        publishedInterviewId = this.latestPublishedInterviewId
 )
 
 fun Interview.Section.toDTO(showAnswer: Boolean) = InterviewResponse.SectionResponse(

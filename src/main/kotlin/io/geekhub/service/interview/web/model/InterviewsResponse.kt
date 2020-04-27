@@ -19,6 +19,6 @@ data class InterviewsResponse(@JsonIgnore val page: Page<LightInterviewResponse>
             val clientAccount: ClientAccountResponse,
             val specialization: SpecializationResponse,
             val visibility: Visibility,
-            val latestPublishedInterviewId: String?
+            val publishedInterviewId: String?
     )
 }

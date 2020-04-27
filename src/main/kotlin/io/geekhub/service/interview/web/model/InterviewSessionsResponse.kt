@@ -14,7 +14,6 @@ data class InterviewSessionsResponse(@JsonIgnore val page: Page<LightInterviewSe
 
     data class LightInterviewSessionResponse(
             val id: String,
-            val publishedInterviewId: String,
             val interview: InterviewsResponse.LightInterviewResponse,
             val clientAccount: ClientAccountResponse,
             val userEmail: String,

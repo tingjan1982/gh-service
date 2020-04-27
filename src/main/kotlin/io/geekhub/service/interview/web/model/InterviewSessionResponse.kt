@@ -7,7 +7,7 @@ import java.util.*
 
 data class InterviewSessionResponse(
         val id: String,
-        val publishedInterview: PublishedInterviewResponse,
+        val interview: InterviewResponse,
         val clientAccount: ClientAccountResponse,
         val userEmail: String,
         val name: String?,

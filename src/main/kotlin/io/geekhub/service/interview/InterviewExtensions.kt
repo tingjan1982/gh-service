@@ -51,7 +51,7 @@ fun InterviewSession.toDTO(currentAccount: ClientAccount): InterviewSessionRespo
 
     return InterviewSessionResponse(
             this.id.toString(),
-            this.publishedInterview.toDTO(),
+            this.publishedInterview.referencedInterview.toDTO(),
             this.clientAccount.toDTO(),
             this.userEmail,
             this.name,
@@ -69,7 +69,6 @@ fun InterviewSession.toDTO(currentAccount: ClientAccount): InterviewSessionRespo
 
 fun InterviewSession.toLightDTO() = InterviewSessionsResponse.LightInterviewSessionResponse(
         this.id.toString(),
-        this.publishedInterview.id,
         this.publishedInterview.referencedInterview.toLightDTO(),
         this.clientAccount.toDTO(),
         this.userEmail,

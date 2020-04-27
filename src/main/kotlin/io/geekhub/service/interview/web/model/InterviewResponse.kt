@@ -17,7 +17,7 @@ data class InterviewResponse(
         val specialization: SpecializationResponse,
         val sections: List<SectionResponse>,
         val visibility: Visibility,
-        val latestPublishedInterviewId: String?,
+        val publishedInterviewId: String?,
         override val deleted: Boolean,
         override val lastModifiedDate: Date?
 ) : BaseResponse() {
