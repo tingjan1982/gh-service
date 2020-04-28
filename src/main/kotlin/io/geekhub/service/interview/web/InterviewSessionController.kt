@@ -1,6 +1,7 @@
 package io.geekhub.service.interview.web
 
 import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.interview.service.InterviewSessionService
 import io.geekhub.service.interview.toDTO
@@ -33,17 +34,16 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
     fun getInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
                             @PathVariable id: String): InterviewSessionResponse {
 
-        return interviewSessionService.getInterviewSession(id).let {
-            it.toDTO(clientAccount)
-        }
+        return interviewSessionService.getInterviewSession(id).toDTO(clientAccount)
     }
 
     @GetMapping
     fun listInterviewSessions(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
                               @RequestParam params: Map<String, String>,
+                              @RequestParam("status", required = false) status: InterviewSession.Status?,
                               uriComponentsBuilder: UriComponentsBuilder): InterviewSessionsResponse {
 
-        interviewSessionService.getInterviewSessions(SearchCriteria.fromRequestParameters(clientAccount, params)).let { results ->
+        interviewSessionService.getInterviewSessions(SearchCriteria.fromRequestParameters(clientAccount, params), status).let { results ->
             val navigationLinkBuilder = uriComponentsBuilder.path("/interviewSessions").let {
                 params.forEach { entry ->
                     it.queryParam(entry.key, entry.value)

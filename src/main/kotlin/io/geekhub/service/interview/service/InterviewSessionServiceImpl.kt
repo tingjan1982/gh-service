@@ -208,14 +208,15 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
     override fun getCurrentInterviewSession(interviewId: String, clientAccount: ClientAccount): InterviewSession {
 
         interviewService.getPublishedInterviewByInterview(interviewId).let {
-            interviewSessionRepository.findByPublishedInterviewAndUserEmailAndStatus(it, clientAccount.email, InterviewSession.Status.STARTED)?.let { s ->
+            interviewSessionRepository.findByPublishedInterviewAndUserEmailAndStatusIn(it, clientAccount.email,
+                    listOf(InterviewSession.Status.NOT_STARTED, InterviewSession.Status.STARTED))?.let { s ->
                 return s
 
             } ?: throw BusinessException("This interview $interviewId has no current interview session")
         }
     }
 
-    override fun getInterviewSessions(searchCriteria: SearchCriteria): Page<InterviewSession> {
+    override fun getInterviewSessions(searchCriteria: SearchCriteria, status: InterviewSession.Status?): Page<InterviewSession> {
 
         Query().with(searchCriteria.pageRequest).let {
             if (searchCriteria.filterByClientAccount) {
@@ -226,6 +227,10 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
                 interviewService.getPublishedInterviewByInterview(id).apply {
                     it.addCriteria(Criteria.where("publishedInterview").`is`(this))
                 }
+            }
+
+            status?.let { s ->
+                it.addCriteria(Criteria.where("status").`is`(s))
             }
 
             val count = mongoTemplate.count(Query.of(it).limit(-1).skip(-1), InterviewSession::class.java)

@@ -6,5 +6,5 @@ import org.springframework.data.repository.PagingAndSortingRepository
 
 interface InterviewSessionRepository : PagingAndSortingRepository<InterviewSession, String> {
 
-    fun findByPublishedInterviewAndUserEmailAndStatus(publishedInterview: PublishedInterview, userEmail: String, status: InterviewSession.Status): InterviewSession?
+    fun findByPublishedInterviewAndUserEmailAndStatusIn(publishedInterview: PublishedInterview, userEmail: String, status: List<InterviewSession.Status>): InterviewSession?
 }

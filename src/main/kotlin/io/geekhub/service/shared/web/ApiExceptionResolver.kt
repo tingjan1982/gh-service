@@ -80,6 +80,13 @@ class ApiExceptionResolver : ResponseEntityExceptionHandler() {
         return this.handleExceptionInternal(ex, apiError, headers, status, request)
     }
 
+    override fun handleExceptionInternal(ex: java.lang.Exception, body: Any?, headers: HttpHeaders, status: HttpStatus, request: WebRequest): ResponseEntity<Any> {
+
+        constructApiError(status, ex, request.getParameter("debug") != null).let {
+            return super.handleExceptionInternal(ex, it, headers, status, request)
+        }
+    }
+
     /**
      * https://kotlinlang.org/docs/reference/lambdas.html
      */
