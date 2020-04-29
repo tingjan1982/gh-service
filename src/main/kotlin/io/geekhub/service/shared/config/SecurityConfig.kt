@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.core.Ordered
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
@@ -44,18 +45,19 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         http.csrf().disable().cors()
 
         http.authorizeRequests()
+                .mvcMatchers(HttpMethod.POST, "/specializations/**").authenticated()
+                .mvcMatchers(HttpMethod.DELETE, "/specializations/**").authenticated()
+                .mvcMatchers(HttpMethod.POST, "/questions/**").authenticated()
+                .mvcMatchers(HttpMethod.DELETE, "/questions/**").authenticated()
+                .mvcMatchers(HttpMethod.POST, "/interviews/**").authenticated()
+                .mvcMatchers(HttpMethod.DELETE, "/interviews/**").authenticated()
+                .mvcMatchers(HttpMethod.POST, "/interviewSessions/**").authenticated()
                 .mvcMatchers("/**").permitAll()
-                .mvcMatchers("/specializations").authenticated()
-                .mvcMatchers("/questions").authenticated()
                 //.mvcMatchers("/api/private-scoped").hasAuthority("SCOPE_read:messages")
                 .and()
-                .oauth2ResourceServer().jwt();
+                .oauth2ResourceServer().jwt()
 
-        /*http.cors()
-                .and().authorizeRequests()
-                .antMatchers("/csrf-token").hasRole("ADMIN")
-                .anyRequest().permitAll()
-                .and().httpBasic()*/
+
     }
 
     @Bean
@@ -83,53 +85,19 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     fun myCorsFilter(): FilterRegistrationBean<CorsFilter> {
         val source = UrlBasedCorsConfigurationSource()
 
-        val configAutenticacao = CorsConfiguration()
-        configAutenticacao.allowCredentials = true
-        configAutenticacao.addAllowedOrigin("*")
-        configAutenticacao.addAllowedHeader("*")
-        configAutenticacao.addAllowedMethod("*")
-        configAutenticacao.setMaxAge(3600L)
-        source.registerCorsConfiguration("/**", configAutenticacao)
+        val corsConfig = CorsConfiguration()
+        corsConfig.allowCredentials = true
+        corsConfig.addAllowedOrigin("*")
+        corsConfig.addAllowedHeader("*")
+        corsConfig.addAllowedMethod("*")
+        corsConfig.maxAge = 3600L
+        source.registerCorsConfiguration("/**", corsConfig)
 
         val bean = FilterRegistrationBean(CorsFilter(source))
         bean.order = Ordered.HIGHEST_PRECEDENCE
 
         return bean
     }
-
-    /*override fun configure(auth: AuthenticationManagerBuilder) {
-        val passwordEncoder = this.passwordEncoder()
-        auth.userDetailsService(this.userDetailsManager())
-
-        auth.jdbcAuthentication()
-                .dataSource(dataSource)
-                .withUser("admin").password(passwordEncoder.encode("admin")).roles("ADMIN")
-    }
-
-    @Bean
-    fun userDetailsManager(): JdbcUserDetailsManager {
-        return JdbcUserDetailsManager().also {
-            it.setDataSource(this.dataSource)
-        }
-    }
-
-    */
-    /**
-     * Expose UserDetailsService instance as bean for other services to use.
-     *//*
-    @Bean
-    override fun userDetailsServiceBean(): UserDetailsService {
-        return super.userDetailsServiceBean()
-    }
-
-    */
-    /**
-     * Expose AuthenticationManager instance as bean for other services to use.
-     *//*
-    @Bean
-    override fun authenticationManagerBean(): AuthenticationManager {
-        return super.authenticationManagerBean()
-    }*/
 
     @Bean
     fun passwordEncoder(): PasswordEncoder {

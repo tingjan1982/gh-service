@@ -127,7 +127,7 @@ fun Interview.QuestionSnapshot.toDTO(showAnswer: Boolean) = InterviewResponse.Qu
         possibleAnswers = this.possibleAnswers.map { it.toDTO(showAnswer) }
 )
 
-fun ClientAccount.toDTO() = ClientAccountResponse(this.email)
+fun ClientAccount.toDTO() = ClientAccountResponse(this.id.toString(), this.clientName, this.email)
 
 fun SpecializationRequest.toEntity() = Specialization(
         name = this.name

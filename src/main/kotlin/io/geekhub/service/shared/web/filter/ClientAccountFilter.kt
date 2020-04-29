@@ -33,6 +33,7 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService) : Once
 
     companion object {
         const val CLIENT_KEY = "CLIENT_KEY"
+        private val GUEST_CLIENT_ACCOUNT = ClientAccount("guest", ClientAccount.AccountType.INDIVIDUAL, "guest", "guest@geekhub.tw")
         private val logger = LoggerFactory.getLogger(ClientAccountFilter::class.java)
     }
 
@@ -47,7 +48,7 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService) : Once
         filterChain.doFilter(request, response)
     }
 
-    private fun resolveClientAccount(): ClientAccount? {
+    private fun resolveClientAccount(): ClientAccount {
 
         SecurityContextHolder.getContext().authentication.let { auth ->
             val principal = auth.principal
@@ -60,7 +61,7 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService) : Once
             }
         }
 
-        throw RuntimeException("Authentication object is not jwt")
+        return GUEST_CLIENT_ACCOUNT
     }
 
     private fun syncClientAccountInfo(jwt: Jwt): ClientAccount {
