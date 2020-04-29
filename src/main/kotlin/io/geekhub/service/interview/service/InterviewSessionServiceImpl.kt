@@ -48,12 +48,13 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
         return saveInterviewSession(interviewSession)
     }
 
-    override fun startInterviewSession(interviewSession: InterviewSession): InterviewSession {
+    override fun startInterviewSession(interviewSession: InterviewSession, candidateAccount: ClientAccount): InterviewSession {
 
         if (interviewSession.status == InterviewSession.Status.STARTED) {
             throw BusinessException("Interview has already started at ${interviewSession.interviewStartDate}")
         }
 
+        interviewSession.candidateAccount = candidateAccount
         interviewSession.status = InterviewSession.Status.STARTED
         interviewSession.interviewStartDate = Date()
 
@@ -208,7 +209,7 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
     override fun getCurrentInterviewSession(interviewId: String, clientAccount: ClientAccount): InterviewSession {
 
         interviewService.getPublishedInterviewByInterview(interviewId).let {
-            interviewSessionRepository.findByPublishedInterviewAndUserEmailAndStatusIn(it, clientAccount.email,
+            interviewSessionRepository.findByPublishedInterviewAndCandidateAccountAndStatusIn(it, clientAccount,
                     listOf(InterviewSession.Status.NOT_STARTED, InterviewSession.Status.STARTED))?.let { s ->
                 return s
 

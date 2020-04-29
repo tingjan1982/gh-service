@@ -84,6 +84,7 @@ class InterviewController(val interviewService: InterviewService,
 
         interviewService.getInterview(id).let {
             it.title = request.title
+            it.description = request.description
             it.jobTitle = request.jobTitle
 
             specializationService.getSpecialization(request.specializationId).let { specialization ->

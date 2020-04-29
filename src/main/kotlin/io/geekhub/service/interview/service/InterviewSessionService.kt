@@ -11,7 +11,7 @@ interface InterviewSessionService {
 
     fun sendInterviewSession(interviewSession: InterviewSession): InterviewSession
 
-    fun startInterviewSession(interviewSession: InterviewSession): InterviewSession
+    fun startInterviewSession(interviewSession: InterviewSession, clientAccount: ClientAccount): InterviewSession
 
     fun addAnswerAttempt(interviewSession: InterviewSession, answerAttempt: InterviewSession.QuestionAnswerAttempt): InterviewSession
 

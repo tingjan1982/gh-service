@@ -83,7 +83,7 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
                               @PathVariable id: String): InterviewSessionResponse {
 
         interviewSessionService.getInterviewSession(id).let {
-            return interviewSessionService.startInterviewSession(it).toDTO(clientAccount)
+            return interviewSessionService.startInterviewSession(it, clientAccount).toDTO(clientAccount)
         }
     }
 

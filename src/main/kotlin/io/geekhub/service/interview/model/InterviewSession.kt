@@ -19,6 +19,7 @@ data class InterviewSession(
         val clientAccount: ClientAccount,
         var userEmail: String,
         var name: String? = null,
+        var candidateAccount: ClientAccount? = null,
         val interviewMode: InterviewMode,
         val duration: Int = -1,
         var status: Status = Status.NOT_STARTED,

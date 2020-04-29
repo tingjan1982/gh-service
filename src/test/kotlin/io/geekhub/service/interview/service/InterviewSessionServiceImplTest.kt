@@ -88,7 +88,7 @@ internal class InterviewSessionServiceImplTest {
                 interviewSessionService.getCurrentInterviewSession(interview.id.toString(), clientAccount)
             }.isFailure().isInstanceOf(BusinessException::class)
 
-            interviewSessionService.startInterviewSession(it).also { session ->
+            interviewSessionService.startInterviewSession(it, clientAccount).also { session ->
                 assertThat(session.interviewStartDate).isNotNull()
             }
 
@@ -129,7 +129,7 @@ internal class InterviewSessionServiceImplTest {
             return@let it
         }.let {
             assertThat {
-                interviewSessionService.startInterviewSession(it)
+                interviewSessionService.startInterviewSession(it, clientAccount)
             }.isFailure().isInstanceOf(BusinessException::class)
 
             return@let it

@@ -18,6 +18,7 @@ data class InterviewSessionsResponse(@JsonIgnore val page: Page<LightInterviewSe
             val clientAccount: ClientAccountResponse,
             val userEmail: String,
             val name: String?,
+            val candidateAccount: ClientAccountResponse?,
             val interviewMode: InterviewSession.InterviewMode,
             val duration: Int,
             val status: InterviewSession.Status,

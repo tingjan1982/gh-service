@@ -11,6 +11,7 @@ data class InterviewSessionResponse(
         val clientAccount: ClientAccountResponse,
         val userEmail: String,
         val name: String?,
+        val candidateAccount: ClientAccountResponse?,
         val interviewMode: InterviewSession.InterviewMode,
         val duration: Int,
         val status: InterviewSession.Status,
