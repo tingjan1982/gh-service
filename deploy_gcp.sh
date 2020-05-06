@@ -8,6 +8,9 @@
 # > gcloud container clusters create gh-cluster --num-nodes=1
 # > kubectl create deployment gh-service --image=docker.io/joelin/gh-service:latest
 # > kubectl expose deployment gh-service --type LoadBalancer --port 80 --target-port 8080
+# > kubectl expose deployment gh-service-nodeport --type NodePort --port 80 --target-port 8080
+# > kubectl apply -f gh-secret.yml
+# > kubectl apply -f gh-ingress.yml
 
 gcloud components install kubectl --quiet
 gcloud config set project gothic-dreamer-271402
