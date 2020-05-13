@@ -6,6 +6,7 @@ import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.interview.service.InterviewSessionService
 import io.geekhub.service.interview.toDTO
 import io.geekhub.service.interview.web.model.*
+import io.geekhub.service.likes.service.LikeService
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
@@ -24,7 +25,8 @@ import javax.validation.Valid
 class InterviewController(val interviewService: InterviewService,
                           val interviewSessionService: InterviewSessionService,
                           val questionService: QuestionService,
-                          val specializationService: SpecializationService) {
+                          val specializationService: SpecializationService,
+                          val likeService: LikeService) {
 
     @PostMapping
     fun createInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
@@ -97,6 +99,28 @@ class InterviewController(val interviewService: InterviewService,
             it.sections = toSections(it, request.sections)
 
             return interviewService.saveInterview(it).toDTO()
+        }
+    }
+
+    @PostMapping("/{id}/like")
+    fun likeInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+                     @PathVariable id: String): InterviewResponse {
+
+        interviewService.getInterview(id).let {
+            likeService.like(clientAccount, it)
+            val showAnswer = it.clientAccount.id == clientAccount.id
+
+            return interviewService.getInterview(id).toDTO(showAnswer)
+        }
+    }
+
+    @PostMapping("/{id}/unlike")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun unlikeInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+                        @PathVariable id: String) {
+
+        interviewService.getInterview(id).let {
+            likeService.unlike(clientAccount, it)
         }
     }
 

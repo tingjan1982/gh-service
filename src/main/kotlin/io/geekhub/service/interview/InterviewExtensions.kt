@@ -23,12 +23,15 @@ fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientAccoun
 )
 
 fun InterviewSession.showCorrectAnswer(currentAccount: ClientAccount): Boolean {
-    this.publishedInterview.referencedInterview.let {
+
+    val (isPublicInterview, isOwner) = this.publishedInterview.referencedInterview.let {
         val publicInterview = it.visibility == Visibility.PUBLIC
         val interviewOwner = it.clientAccount.id == currentAccount.id
 
-        return publicInterview || interviewOwner
+        return@let Pair(publicInterview, interviewOwner)
     }
+
+    return isOwner || isPublicInterview && this.status == InterviewSession.Status.ENDED
 }
 
 fun InterviewSession.toDTO(currentAccount: ClientAccount): InterviewSessionResponse {

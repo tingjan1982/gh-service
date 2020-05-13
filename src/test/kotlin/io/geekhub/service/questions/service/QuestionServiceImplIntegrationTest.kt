@@ -45,7 +45,7 @@ internal class QuestionServiceImplIntegrationTest {
         }.let {
             return@let this.questionService.saveQuestion(it)
         }.let {
-            assertThat(it.questionId).isNotNull()
+            assertThat(it.id).isNotNull()
             assertThat(it.possibleAnswers).all {
                 hasSize(2)
                 each { ans ->

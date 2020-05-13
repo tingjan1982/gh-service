@@ -1,12 +1,11 @@
 package io.geekhub.service.questions.web
 
 import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.likes.service.LikeService
 import io.geekhub.service.questions.service.QuestionService
-import io.geekhub.service.questions.service.SocialLikeService
 import io.geekhub.service.questions.web.bean.QuestionRequest
 import io.geekhub.service.questions.web.bean.QuestionResponse
 import io.geekhub.service.questions.web.bean.QuestionsResponse
-import io.geekhub.service.shared.extensions.currentUser
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.shared.model.SearchCriteria
@@ -15,7 +14,6 @@ import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.util.UriComponentsBuilder
 import javax.validation.Valid
@@ -24,7 +22,7 @@ import javax.validation.Valid
 @RequestMapping("/questions")
 class QuestionController(val questionService: QuestionService,
                          val specializationService: SpecializationService,
-                         val socialLikeService: SocialLikeService) {
+                         val likeService: LikeService) {
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(QuestionController::class.java)
@@ -97,12 +95,24 @@ class QuestionController(val questionService: QuestionService,
         questionService.deleteQuestion(id)
     }
 
-    @PutMapping("/{id}/like")
-    fun likeQuestion(@PathVariable id: String): QuestionResponse {
+    @PostMapping("/{id}/like")
+    fun likeQuestion(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+                     @PathVariable id: String): QuestionResponse {
 
-        val currentUser = SecurityContextHolder.getContext().currentUser()
-        this.socialLikeService.likeQuestion(id, currentUser.userId.toString())
+        questionService.getQuestion(id).let {
+            likeService.like(clientAccount, it)
 
-        return this.questionService.getQuestion(id).toDTO()
+            return this.questionService.getQuestion(id).toDTO()
+        }
+    }
+
+    @PostMapping("/{id}/unlike")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun unlikeQuestion(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+                       @PathVariable id: String) {
+
+        questionService.getQuestion(id).let {
+            likeService.unlike(clientAccount, it)
+        }
     }
 }

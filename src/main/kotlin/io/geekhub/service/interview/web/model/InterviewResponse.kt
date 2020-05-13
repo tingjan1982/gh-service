@@ -18,6 +18,7 @@ data class InterviewResponse(
         val sections: List<SectionResponse>,
         val visibility: Visibility,
         val publishedInterviewId: String?,
+        val likeCount: Long,
         override val deleted: Boolean,
         override val lastModifiedDate: Date?
 ) : BaseResponse() {

@@ -16,6 +16,7 @@ data class QuestionResponse(
         val jobTitle: String?,
         val possibleAnswers: List<PossibleAnswerResponse> = listOf(),
         val visibility: Visibility,
+        val likeCount: Long,
         override val deleted: Boolean,
         override val lastModifiedDate: Date?
 ) : BaseResponse() {

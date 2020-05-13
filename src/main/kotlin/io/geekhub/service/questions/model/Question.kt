@@ -1,7 +1,7 @@
 package io.geekhub.service.questions.model
 
-//import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.likes.data.LikableObject
 import io.geekhub.service.shared.model.BaseMongoObject
 import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.specialization.repository.Specialization
@@ -14,7 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document
 data class Question(
         @Id
-        var questionId: String? = null,
+        var id: String? = null,
         @TextIndexed
         var question: String,
         var questionType: QuestionType,
@@ -26,8 +26,8 @@ data class Question(
         var specialization: Specialization? = null,
         var visibility: Visibility = Visibility.PUBLIC,
         var possibleAnswers: MutableList<PossibleAnswer> = mutableListOf(),
-        val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf()) : BaseMongoObject() {
-
+        val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf(),
+        override var likeCount: Long = 0) : BaseMongoObject(), LikableObject {
 
     fun addAnswer(answer: PossibleAnswer) {
         this.possibleAnswers.add(answer)
@@ -39,6 +39,22 @@ data class Question(
 
     fun getAttribute(attributeKey: String): QuestionAttribute? {
         return attributes[attributeKey]
+    }
+
+    override fun getClientAccountId(): String {
+        return clientAccount.id.toString()
+    }
+
+    override fun getObjectIdPrefix(): String {
+        return "qstn"
+    }
+
+    override fun getObjectId(): String {
+        return id.toString()
+    }
+
+    override fun getObjectType(): String {
+        return this::class.toString()
     }
 
     data class PossibleAnswer(

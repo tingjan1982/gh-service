@@ -1,6 +1,7 @@
 package io.geekhub.service.interview.model
 
 import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.likes.data.LikableObject
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.model.BaseMongoObject
 import io.geekhub.service.shared.model.Visibility
@@ -27,8 +28,25 @@ data class Interview(
         var specialization: Specialization,
         var visibility: Visibility = Visibility.PUBLIC,
         var sections: MutableList<Section> = mutableListOf(),
-        var latestPublishedInterviewId: String? = null
-) : BaseMongoObject() {
+        var latestPublishedInterviewId: String? = null,
+        override var likeCount: Long = 0
+) : BaseMongoObject(), LikableObject {
+
+    override fun getClientAccountId(): String {
+        return clientAccount.id.toString()
+    }
+
+    override fun getObjectIdPrefix(): String {
+        return "itvw"
+    }
+
+    override fun getObjectId(): String {
+        return id.toString()
+    }
+
+    override fun getObjectType(): String {
+        return this::class.toString()
+    }
 
     data class Section(val id: String = ObjectId.get().toString(),
                        val title: String,

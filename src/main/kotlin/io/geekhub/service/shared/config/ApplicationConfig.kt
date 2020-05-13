@@ -5,6 +5,7 @@ import io.geekhub.service.account.repository.ClientAccountRepository
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.interview.repository.InterviewSessionRepository
+import io.geekhub.service.likes.data.LikeRecordRepository
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.auditing.DefaultAuditorProvider
@@ -49,7 +50,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
     SpecializationRepository::class,
     InterviewRepository::class,
     InterviewSessionRepository::class,
-    UserRepository::class])
+    UserRepository::class,
+    LikeRecordRepository::class])
 @EnableMongoAuditing
 @EnableSwagger2
 class ApplicationConfig(val mongoTemplate: MongoTemplate, val mongoMappingContext: MongoMappingContext, val clientAccountFilter: ClientAccountFilter) {
