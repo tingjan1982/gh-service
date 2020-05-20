@@ -40,7 +40,7 @@ class InterviewController(val interviewService: InterviewService,
             it.sections = toSections(it, request.sections)
 
             interviewService.saveInterview(it).let { created ->
-                return created.toDTO()
+                return created.toDTO(clientAccount)
             }
         }
     }
@@ -50,8 +50,7 @@ class InterviewController(val interviewService: InterviewService,
                      @PathVariable id: String): InterviewResponse {
 
         interviewService.getInterview(id).let {
-            val showAnswer = it.clientAccount.id == clientAccount.id
-            return it.toDTO(showAnswer)
+            return it.toDTO(clientAccount)
         }
     }
 
@@ -81,7 +80,8 @@ class InterviewController(val interviewService: InterviewService,
     }
 
     @PostMapping("/{id}")
-    fun updateInterview(@PathVariable id: String,
+    fun updateInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+                        @PathVariable id: String,
                         @Valid @RequestBody request: InterviewRequest): InterviewResponse {
 
         interviewService.getInterview(id).let {
@@ -98,7 +98,7 @@ class InterviewController(val interviewService: InterviewService,
             it.sections.clear()
             it.sections = toSections(it, request.sections)
 
-            return interviewService.saveInterview(it).toDTO()
+            return interviewService.saveInterview(it).toDTO(clientAccount)
         }
     }
 
@@ -108,9 +108,7 @@ class InterviewController(val interviewService: InterviewService,
 
         interviewService.getInterview(id).let {
             likeService.like(clientAccount, it)
-            val showAnswer = it.clientAccount.id == clientAccount.id
-
-            return interviewService.getInterview(id).toDTO(showAnswer)
+            return interviewService.getInterview(id).toDTO(clientAccount)
         }
     }
 
@@ -125,10 +123,11 @@ class InterviewController(val interviewService: InterviewService,
     }
 
     @PostMapping("/{id}/publish")
-    fun publishInterview(@PathVariable id: String): PublishedInterviewResponse {
+    fun publishInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+                         @PathVariable id: String): PublishedInterviewResponse {
 
         interviewService.publishInterview(id).let {
-            return it.toDTO()
+            return it.toDTO(clientAccount)
         }
     }
 

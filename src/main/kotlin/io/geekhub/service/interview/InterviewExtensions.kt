@@ -8,9 +8,9 @@ import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toLightDTO
 import io.geekhub.service.shared.model.Visibility
 
-fun PublishedInterview.toDTO() = PublishedInterviewResponse(
+fun PublishedInterview.toDTO(currentAccount: ClientAccount) = PublishedInterviewResponse(
         this.id,
-        this.referencedInterview.toDTO(false)
+        this.referencedInterview.toDTO(currentAccount)
 )
 
 fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientAccount: ClientAccount) = InterviewSession(
@@ -54,7 +54,7 @@ fun InterviewSession.toDTO(currentAccount: ClientAccount): InterviewSessionRespo
 
     return InterviewSessionResponse(
             this.id.toString(),
-            this.publishedInterview.referencedInterview.toDTO(),
+            this.publishedInterview.referencedInterview.toDTO(currentAccount),
             this.clientAccount.toDTO(),
             this.userEmail,
             this.name,

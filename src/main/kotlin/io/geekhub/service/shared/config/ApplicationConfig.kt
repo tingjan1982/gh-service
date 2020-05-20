@@ -60,7 +60,7 @@ class ApplicationConfig(val mongoTemplate: MongoTemplate, val mongoMappingContex
     fun loggingFilter(): FilterRegistrationBean<ClientAccountFilter> {
         val registrationBean = FilterRegistrationBean<ClientAccountFilter>();
         registrationBean.filter = clientAccountFilter;
-        registrationBean.addUrlPatterns("/questions/*", "/interviews/*", "/interviewSessions/*");
+        registrationBean.addUrlPatterns("/questions/*", "/interviews/*", "/publishedInterviews/*", "/interviewSessions/*");
 
         return registrationBean;
     }

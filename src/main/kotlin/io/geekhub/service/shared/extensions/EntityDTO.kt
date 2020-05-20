@@ -90,20 +90,24 @@ fun InterviewRequest.InterviewQuestionRequest.toSnapshot() = Interview.QuestionS
         possibleAnswers = this.possibleAnswers.map { it.toEntity() }.toMutableList()
 )
 
-fun Interview.toDTO(showAnswer: Boolean = true) = InterviewResponse(
-        id = this.id.toString(),
-        title = this.title,
-        description = this.description,
-        jobTitle = this.jobTitle,
-        clientAccount = this.clientAccount.toDTO(),
-        specialization = this.specialization.toDTO(),
-        sections = this.sections.map { it.toDTO(showAnswer) },
-        visibility = this.visibility,
-        publishedInterviewId = this.latestPublishedInterviewId,
-        likeCount = this.likeCount,
-        deleted = this.deleted,
-        lastModifiedDate = this.lastModifiedDate
-)
+fun Interview.toDTO(currentAccount: ClientAccount): InterviewResponse {
+    val showAnswer = currentAccount.id == this.clientAccount.id
+
+    return InterviewResponse(
+            id = this.id.toString(),
+            title = this.title,
+            description = this.description,
+            jobTitle = this.jobTitle,
+            clientAccount = this.clientAccount.toDTO(),
+            specialization = this.specialization.toDTO(),
+            sections = this.sections.map { it.toDTO(showAnswer) },
+            visibility = this.visibility,
+            publishedInterviewId = this.latestPublishedInterviewId,
+            likeCount = this.likeCount,
+            deleted = this.deleted,
+            lastModifiedDate = this.lastModifiedDate
+    )
+}
 
 fun Interview.toLightDTO() = InterviewsResponse.LightInterviewResponse(
         id = this.id.toString(),
