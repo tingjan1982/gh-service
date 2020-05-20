@@ -1,6 +1,7 @@
 package io.geekhub.service.likes.service
 
 import assertk.assertThat
+import assertk.assertions.hasSize
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import io.geekhub.service.account.repository.ClientAccount
@@ -58,6 +59,8 @@ internal class LikeServiceImplTest {
                 assertThat(this.likeCount).isEqualTo(1)
             }
 
+            assertThat(likeService.getLikedObjects(clientAccount, it::class)).hasSize(1)
+
             it
         }.let {
             likeService.unlike(clientAccount, it)
@@ -90,6 +93,8 @@ internal class LikeServiceImplTest {
             interviewService.getInterview(it.id.toString()).run {
                 assertThat(this.likeCount).isEqualTo(1)
             }
+
+            assertThat(likeService.getLikedObjects(clientAccount, it::class)).hasSize(1)
 
             it
         }.let {

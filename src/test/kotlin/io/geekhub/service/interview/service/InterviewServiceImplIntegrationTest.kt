@@ -9,6 +9,7 @@ import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.shared.exception.BusinessException
+import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.specialization.repository.Specialization
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,7 +37,8 @@ internal class InterviewServiceImplIntegrationTest {
         Interview(title = "sample interview",
                 jobTitle = "Engineer",
                 clientAccount = clientAccount,
-                specialization = specialization).let {
+                specialization = specialization,
+                visibility = Visibility.PUBLIC).let {
             this.interviewService.saveInterview(it)
 
         }.let {

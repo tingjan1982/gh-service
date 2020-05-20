@@ -10,10 +10,12 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
+import kotlin.reflect.KClass
 
 @Service
 @Transactional
-class LikeServiceImpl(val likeRecordRepository: LikeRecordRepository, val mongoTemplate: MongoTemplate) : LikeService {
+class LikeServiceImpl(val likeRecordRepository: LikeRecordRepository,
+                      val mongoTemplate: MongoTemplate) : LikeService {
 
     /**
      * Use MongoDB's $inc modifier operation for atomicity.
@@ -52,5 +54,9 @@ class LikeServiceImpl(val likeRecordRepository: LikeRecordRepository, val mongoT
         val query = Query.query(where("id").`is`(likableObject.getObjectId()))
         val update = Update().inc("likeCount", likeCount)
         mongoTemplate.updateFirst(query, update, likableObject::class.java)
+    }
+
+    override fun getLikedObjects(clientAccount: ClientAccount, likableObjectType: KClass<out LikableObject>): List<LikeRecord> {
+        return likeRecordRepository.findAllByLikedClientAccountAndObjectType(clientAccount.id.toString(), likableObjectType.toString())
     }
 }

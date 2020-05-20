@@ -7,11 +7,13 @@ import org.springframework.data.domain.Page
 
 interface InterviewSessionService {
 
+    fun createInterviewSession(interviewSession: InterviewSession): InterviewSession
+
     fun saveInterviewSession(interviewSession: InterviewSession): InterviewSession
 
     fun sendInterviewSession(interviewSession: InterviewSession): InterviewSession
 
-    fun startInterviewSession(interviewSession: InterviewSession, clientAccount: ClientAccount): InterviewSession
+    fun startInterviewSession(interviewSession: InterviewSession, candidateAccount: ClientAccount): InterviewSession
 
     fun addAnswerAttempt(interviewSession: InterviewSession, answerAttempt: InterviewSession.QuestionAnswerAttempt): InterviewSession
 

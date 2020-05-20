@@ -1,10 +1,10 @@
 package io.geekhub.service.notification.service
 
 import io.geekhub.service.account.repository.ClientAccount
-import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.shared.annotation.IntegrationTest
+import io.geekhub.service.shared.extensions.DummyObject
 import io.geekhub.service.specialization.repository.Specialization
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,7 +28,7 @@ internal class NotificationServiceImplTest {
     @Test
     @WithMockUser
     fun sendInterviewInvitation() {
-        val publishedInterview = Interview(title = "dummy interview", clientAccount = clientAccount, specialization = specialization, jobTitle = "Engineer").let {
+        val publishedInterview = DummyObject.dummyInterview(clientAccount = clientAccount, specialization = specialization).let {
             interviewService.saveInterview(it)
             interviewService.publishInterview(it.id.toString())
         }
@@ -41,7 +41,7 @@ internal class NotificationServiceImplTest {
     @Test
     @WithMockUser
     fun sendInterviewResult() {
-        val publishedInterview = Interview(title = "dummy interview", clientAccount = clientAccount, specialization = specialization, jobTitle = "Engineer").let {
+        val publishedInterview = DummyObject.dummyInterview(clientAccount = clientAccount, specialization = specialization).let {
             interviewService.saveInterview(it)
             interviewService.publishInterview(it.id.toString())
         }

@@ -75,7 +75,9 @@ class InterviewController(val interviewService: InterviewService,
                 it
             }
 
-            return InterviewsResponse(result.map { it.toLightDTO() }, navigationLinkBuilder)
+            val likedInterviews = likeService.getLikedObjects(clientAccount, Interview::class).map { it.objectId }.toList()
+
+            return InterviewsResponse(result.map { it.toLightDTO(likedInterviews.contains(it.id.toString())) }, navigationLinkBuilder)
         }
     }
 

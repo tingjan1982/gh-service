@@ -36,6 +36,18 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
         val LOGGER: Logger = LoggerFactory.getLogger(InterviewSessionServiceImpl::class.java)
     }
 
+    override fun createInterviewSession(interviewSession: InterviewSession): InterviewSession {
+
+        return interviewSessionRepository.save(interviewSession).let {
+            interviewService.getInterview(it.publishedInterview.referencedInterview.id.toString()).let {interview ->
+                interview.addInterviewSession(it)
+                interviewService.saveInterview(interview)
+            }
+
+            it
+        }
+    }
+
     override fun saveInterviewSession(interviewSession: InterviewSession): InterviewSession {
         return interviewSessionRepository.save(interviewSession)
     }

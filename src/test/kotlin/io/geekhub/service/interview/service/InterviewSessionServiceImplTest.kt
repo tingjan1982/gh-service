@@ -10,6 +10,7 @@ import io.geekhub.service.interview.model.PublishedInterview
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.shared.exception.BusinessException
+import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.specialization.repository.Specialization
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -40,7 +41,11 @@ internal class InterviewSessionServiceImplTest {
 
     @BeforeEach
     fun prepareInterview() {
-        Interview(title = "dummy interview", jobTitle = "Engineer", clientAccount = clientAccount, specialization = specialization).apply {
+        Interview(title = "dummy interview",
+                jobTitle = "Engineer",
+                clientAccount = clientAccount,
+                specialization = specialization,
+                visibility = Visibility.PUBLIC).apply {
             Interview.Section(title = "default").apply {
                 this.questions.add(
                         Interview.QuestionSnapshot(id = "qid-1",
@@ -81,7 +86,7 @@ internal class InterviewSessionServiceImplTest {
                 interviewMode = InterviewSession.InterviewMode.REAL,
                 duration = 1
         ).let {
-            interviewSessionService.saveInterviewSession(it)
+            interviewSessionService.createInterviewSession(it)
 
         }.let {
             assertThat {
@@ -185,7 +190,7 @@ internal class InterviewSessionServiceImplTest {
                 interviewMode = InterviewSession.InterviewMode.REAL,
                 duration = 1
         ).let { it ->
-            interviewSessionService.saveInterviewSession(it)
+            interviewSessionService.createInterviewSession(it)
         }.let {
             assertThat {
                 interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = "whatever", questionSnapshotId = "whatever", answerIds = listOf("whatever")))
@@ -205,6 +210,46 @@ internal class InterviewSessionServiceImplTest {
             assertThat {
                 interviewSessionService.submitInterviewSession(it)
             }.isFailure().isInstanceOf(BusinessException::class)
+        }
+    }
+
+    @Test
+    @WithMockUser
+    fun `check interview's interviewSessions reference`() {
+
+        InterviewSession(
+                publishedInterview = publishedInterview,
+                clientAccount = interview.clientAccount,
+                userEmail = "joelin@geekhub.tw",
+                name = "Joe Lin",
+                interviewMode = InterviewSession.InterviewMode.REAL,
+                duration = 1
+        ).let {
+            interviewSessionService.createInterviewSession(it)
+        }.let {
+            interviewService.getInterview(interview.id.toString()).run {
+                assertThat(this.interviewSessions).hasSize(1)
+
+                assertThat(this.groupInterviewSessions()).all {
+                    hasSize(1)
+                    this.key(InterviewSession.Status.NOT_STARTED).hasSize(1)
+                }
+            }
+
+            it
+        }.let {
+            interviewSessionService.startInterviewSession(it, clientAccount).also {
+                interviewService.getInterview(interview.id.toString()).run {
+                    assertThat(this.interviewSessions).hasSize(1)
+
+                    assertThat(this.groupInterviewSessions()).all {
+                        hasSize(1)
+                        this.key(InterviewSession.Status.STARTED).hasSize(1)
+                    }
+                }
+            }
+
+            it
         }
     }
 }

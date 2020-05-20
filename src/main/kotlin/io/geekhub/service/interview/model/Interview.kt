@@ -26,11 +26,27 @@ data class Interview(
         var clientAccount: ClientAccount,
         @DBRef
         var specialization: Specialization,
-        var visibility: Visibility = Visibility.PUBLIC,
+        var defaultDuration: Int = -1,
+        var visibility: Visibility,
         var sections: MutableList<Section> = mutableListOf(),
         var latestPublishedInterviewId: String? = null,
-        override var likeCount: Long = 0
+        override var likeCount: Long = 0,
+        @DBRef(lazy = true)
+        val interviewSessions: MutableList<InterviewSession> = mutableListOf()
 ) : BaseMongoObject(), LikableObject {
+
+    fun addInterviewSession(interviewSession: InterviewSession) {
+        interviewSessions.add(interviewSession)
+    }
+
+    fun groupInterviewSessions(): Map<InterviewSession.Status, List<InterviewSession>> {
+
+        return interviewSessions.groupBy({
+            it.status
+        }, {
+            it
+        })
+    }
 
     override fun getClientAccountId(): String {
         return clientAccount.id.toString()

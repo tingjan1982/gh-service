@@ -2,6 +2,7 @@ package io.geekhub.service.interview.web.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.geekhub.service.account.web.model.ClientAccountResponse
+import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.shared.model.PageableResponse
 import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.specialization.web.model.SpecializationResponse
@@ -20,6 +21,8 @@ data class InterviewsResponse(@JsonIgnore val page: Page<LightInterviewResponse>
             val specialization: SpecializationResponse,
             val visibility: Visibility,
             val publishedInterviewId: String?,
-            val likeCount: Long
+            val likeCount: Long,
+            val likedByClientAccount: Boolean,
+            val interviewSessions: Map<InterviewSession.Status, List<String>>
     )
 }

@@ -26,7 +26,7 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
                                @Valid @RequestBody request: InterviewSessionRequest): InterviewSessionResponse {
 
         interviewService.getPublishedInterviewByInterview(request.interviewId).let {
-            return interviewSessionService.saveInterviewSession(request.toEntity(it, clientAccount)).toDTO(clientAccount)
+            return interviewSessionService.createInterviewSession(request.toEntity(it, clientAccount)).toDTO(clientAccount)
         }
     }
 

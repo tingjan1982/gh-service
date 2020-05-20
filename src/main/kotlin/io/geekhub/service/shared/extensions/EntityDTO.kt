@@ -109,7 +109,7 @@ fun Interview.toDTO(currentAccount: ClientAccount): InterviewResponse {
     )
 }
 
-fun Interview.toLightDTO() = InterviewsResponse.LightInterviewResponse(
+fun Interview.toLightDTO(likedByClientAccount: Boolean = true) = InterviewsResponse.LightInterviewResponse(
         id = this.id.toString(),
         title = this.title,
         description = this.description,
@@ -118,7 +118,9 @@ fun Interview.toLightDTO() = InterviewsResponse.LightInterviewResponse(
         specialization = this.specialization.toDTO(),
         visibility = this.visibility,
         publishedInterviewId = this.latestPublishedInterviewId,
-        likeCount = this.likeCount
+        likeCount = this.likeCount,
+        likedByClientAccount = likedByClientAccount,
+        interviewSessions = this.groupInterviewSessions().mapValues { it -> it.value.map { it.id.toString() }.toList() }
 )
 
 fun Interview.Section.toDTO(showAnswer: Boolean) = InterviewResponse.SectionResponse(

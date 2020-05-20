@@ -3,6 +3,7 @@ package io.geekhub.service.shared.extensions
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.questions.model.Question
+import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.specialization.repository.Specialization
 
 object DummyObject {
@@ -24,5 +25,6 @@ object DummyObject {
             title = "dummy interview",
             clientAccount = clientAccount,
             jobTitle = "dummy job title",
-            specialization = specialization)
+            specialization = specialization,
+            visibility = Visibility.PUBLIC)
 }
