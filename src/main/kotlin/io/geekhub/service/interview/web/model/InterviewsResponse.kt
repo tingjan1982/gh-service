@@ -22,7 +22,7 @@ data class InterviewsResponse(@JsonIgnore val page: Page<LightInterviewResponse>
             val visibility: Visibility,
             val publishedInterviewId: String?,
             val likeCount: Long,
-            val likedByClientAccount: Boolean,
+            val liked: Boolean,
             val interviewSessions: Map<InterviewSession.Status, List<String>>
     )
 }

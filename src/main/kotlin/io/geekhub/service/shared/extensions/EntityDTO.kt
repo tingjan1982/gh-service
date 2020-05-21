@@ -45,7 +45,7 @@ fun QuestionRequest.toEntity(account: ClientAccount, spec: Specialization?) = Qu
 
 fun QuestionRequest.PossibleAnswerRequest.toEntity() = PossibleAnswer(answer = this.answer, correctAnswer = this.correctAnswer)
 
-fun Question.toDTO() = QuestionResponse(
+fun Question.toDTO(liked: Boolean = false) = QuestionResponse(
         this.id.toString(),
         this.question,
         this.questionType,
@@ -55,6 +55,7 @@ fun Question.toDTO() = QuestionResponse(
         this.possibleAnswers.map { it.toDTO(true) }.toList(),
         this.visibility,
         this.likeCount,
+        liked,
         this.deleted,
         this.lastModifiedDate
 )
@@ -109,7 +110,7 @@ fun Interview.toDTO(currentAccount: ClientAccount): InterviewResponse {
     )
 }
 
-fun Interview.toLightDTO(likedByClientAccount: Boolean = true) = InterviewsResponse.LightInterviewResponse(
+fun Interview.toLightDTO(likedByClientAccount: Boolean = false) = InterviewsResponse.LightInterviewResponse(
         id = this.id.toString(),
         title = this.title,
         description = this.description,
@@ -119,7 +120,7 @@ fun Interview.toLightDTO(likedByClientAccount: Boolean = true) = InterviewsRespo
         visibility = this.visibility,
         publishedInterviewId = this.latestPublishedInterviewId,
         likeCount = this.likeCount,
-        likedByClientAccount = likedByClientAccount,
+        liked = likedByClientAccount,
         interviewSessions = this.groupInterviewSessions().mapValues { it -> it.value.map { it.id.toString() }.toList() }
 )
 

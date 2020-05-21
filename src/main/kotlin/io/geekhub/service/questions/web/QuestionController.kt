@@ -2,6 +2,7 @@ package io.geekhub.service.questions.web
 
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.likes.service.LikeService
+import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.questions.web.bean.QuestionRequest
 import io.geekhub.service.questions.web.bean.QuestionResponse
@@ -63,7 +64,9 @@ class QuestionController(val questionService: QuestionService,
                 it
             }
 
-            return QuestionsResponse(result.map { it.toDTO() }, navigationLinkBuilder)
+            val likedQuestions = likeService.getLikedObjects(clientAccount, Question::class).map { it.objectId }.toList()
+
+            return QuestionsResponse(result.map { it.toDTO(likedQuestions.contains(it.id.toString())) }, navigationLinkBuilder)
         }
     }
 
