@@ -110,7 +110,6 @@ class QuestionController(val questionService: QuestionService,
     }
 
     @PostMapping("/{id}/unlike")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun unlikeQuestion(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
                        @PathVariable id: String): QuestionResponse {
 
