@@ -28,7 +28,7 @@ class LikeServiceImpl(val likeRecordRepository: LikeRecordRepository,
         likableObject.id(clientAccount).let {
             return likeRecordRepository.findById(it).orElseGet {
                 LikeRecord(id = it,
-                        likedClientAccount = likableObject.getClientAccountId(),
+                        likedClientAccount = clientAccount.id.toString(),
                         objectId = likableObject.getObjectId(),
                         objectType = likableObject.getObjectType()).let { likeRecord ->
 
