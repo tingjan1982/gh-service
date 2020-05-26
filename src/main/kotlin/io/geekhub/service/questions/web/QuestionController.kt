@@ -105,17 +105,19 @@ class QuestionController(val questionService: QuestionService,
         questionService.getQuestion(id).let {
             likeService.like(clientAccount, it)
 
-            return this.questionService.getQuestion(id).toDTO()
+            return questionService.getQuestion(id).toDTO()
         }
     }
 
     @PostMapping("/{id}/unlike")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun unlikeQuestion(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
-                       @PathVariable id: String) {
+                       @PathVariable id: String): QuestionResponse {
 
         questionService.getQuestion(id).let {
             likeService.unlike(clientAccount, it)
+
+            return questionService.getQuestion(id).toDTO()
         }
     }
 }

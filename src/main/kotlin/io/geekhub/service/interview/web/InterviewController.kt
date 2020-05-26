@@ -117,10 +117,11 @@ class InterviewController(val interviewService: InterviewService,
     @PostMapping("/{id}/unlike")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun unlikeInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
-                        @PathVariable id: String) {
+                        @PathVariable id: String): InterviewResponse {
 
         interviewService.getInterview(id).let {
             likeService.unlike(clientAccount, it)
+            return interviewService.getInterview(id).toDTO(clientAccount)
         }
     }
 
