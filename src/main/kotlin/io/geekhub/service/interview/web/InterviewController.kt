@@ -96,6 +96,7 @@ class InterviewController(val interviewService: InterviewService,
             }
 
             it.visibility = request.visibility
+            it.defaultDuration = request.defaultDuration
 
             it.sections.clear()
             it.sections = toSections(it, request.sections)

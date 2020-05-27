@@ -20,6 +20,7 @@ data class InterviewsResponse(@JsonIgnore val page: Page<LightInterviewResponse>
             val clientAccount: ClientAccountResponse,
             val specialization: SpecializationResponse,
             val visibility: Visibility,
+            val defaultDuration: Int,
             val publishedInterviewId: String?,
             val likeCount: Long,
             val liked: Boolean,

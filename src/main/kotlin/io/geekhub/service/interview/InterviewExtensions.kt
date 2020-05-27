@@ -13,14 +13,23 @@ fun PublishedInterview.toDTO(currentAccount: ClientAccount) = PublishedInterview
         this.referencedInterview.toDTO(currentAccount)
 )
 
-fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientAccount: ClientAccount) = InterviewSession(
-        publishedInterview = interview,
-        clientAccount = clientAccount,
-        userEmail = this.userEmail,
-        name = this.name,
-        interviewMode = this.interviewMode,
-        duration = this.duration
-)
+fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientAccount: ClientAccount): InterviewSession {
+
+    val duration = if (this.duration > 0) {
+        this.duration
+    } else {
+        interview.referencedInterview.defaultDuration
+    }
+
+    return InterviewSession(
+            publishedInterview = interview,
+            clientAccount = clientAccount,
+            userEmail = this.userEmail,
+            name = this.name,
+            interviewMode = this.interviewMode,
+            duration = duration
+    )
+}
 
 fun InterviewSession.showCorrectAnswer(currentAccount: ClientAccount): Boolean {
 

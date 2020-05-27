@@ -68,7 +68,8 @@ fun InterviewRequest.toEntity(account: ClientAccount, spec: Specialization) = In
         jobTitle = this.jobTitle,
         clientAccount = account,
         specialization = spec,
-        visibility = this.visibility
+        visibility = this.visibility,
+        defaultDuration = this.defaultDuration
 )
 
 fun InterviewRequest.SectionRequest.toEntity() = Interview.Section(
@@ -103,6 +104,7 @@ fun Interview.toDTO(currentAccount: ClientAccount): InterviewResponse {
             specialization = this.specialization.toDTO(),
             sections = this.sections.map { it.toDTO(showAnswer) },
             visibility = this.visibility,
+            defaultDuration = this.defaultDuration,
             publishedInterviewId = this.latestPublishedInterviewId,
             likeCount = this.likeCount,
             deleted = this.deleted,
@@ -118,6 +120,7 @@ fun Interview.toLightDTO(likedByClientAccount: Boolean = false) = InterviewsResp
         clientAccount = this.clientAccount.toDTO(),
         specialization = this.specialization.toDTO(),
         visibility = this.visibility,
+        defaultDuration = this.defaultDuration,
         publishedInterviewId = this.latestPublishedInterviewId,
         likeCount = this.likeCount,
         liked = likedByClientAccount,

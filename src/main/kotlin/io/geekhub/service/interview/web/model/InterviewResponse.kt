@@ -17,6 +17,7 @@ data class InterviewResponse(
         val specialization: SpecializationResponse,
         val sections: List<SectionResponse>,
         val visibility: Visibility,
+        val defaultDuration: Int,
         val publishedInterviewId: String?,
         val likeCount: Long,
         override val deleted: Boolean,
