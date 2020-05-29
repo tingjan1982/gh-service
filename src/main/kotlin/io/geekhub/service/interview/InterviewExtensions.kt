@@ -3,10 +3,12 @@ package io.geekhub.service.interview
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.model.PublishedInterview
+import io.geekhub.service.interview.service.bean.SectionAverageStats
 import io.geekhub.service.interview.web.model.*
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toLightDTO
 import io.geekhub.service.shared.model.Visibility
+import java.math.BigDecimal
 
 fun PublishedInterview.toDTO(currentAccount: ClientAccount) = PublishedInterviewResponse(
         this.id,
@@ -101,4 +103,13 @@ fun AnswerAttemptRequest.toEntity() = InterviewSession.QuestionAnswerAttempt(
         questionSnapshotId = this.questionSnapshotId,
         answerIds = this.answerId,
         answer = this.answer
+)
+
+fun SectionAverageStats.toDTO() = InterviewSessionAverageStatsResponse(
+        averageScore = if (this.averageScore.isNotEmpty()) {
+            this.averageScore[0]
+        } else {
+            SectionAverageStats.OverallAverageScore("", BigDecimal.ZERO, 0)
+        },
+        sectionsAverageScore = this.sectionsAverageScore
 )

@@ -3,11 +3,13 @@ package io.geekhub.service.interview.web
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.service.InterviewService
+import io.geekhub.service.interview.service.InterviewSessionAggregationService
 import io.geekhub.service.interview.service.InterviewSessionService
 import io.geekhub.service.interview.toDTO
 import io.geekhub.service.interview.toEntity
 import io.geekhub.service.interview.toLightDTO
 import io.geekhub.service.interview.web.model.*
+import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.web.filter.ClientAccountFilter
 import org.springframework.http.HttpStatus
@@ -18,7 +20,8 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/interviewSessions")
 class InterviewSessionController(val interviewSessionService: InterviewSessionService,
-                                 val interviewService: InterviewService) {
+                                 val interviewService: InterviewService,
+                                 val interviewSessionAggregationService: InterviewSessionAggregationService) {
 
 
     @PostMapping
@@ -35,6 +38,16 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
                             @PathVariable id: String): InterviewSessionResponse {
 
         return interviewSessionService.getInterviewSession(id).toDTO(clientAccount)
+    }
+
+    @GetMapping("/{id}/averageScore")
+    fun getInterviewSessionAverageScore(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+                                        @PathVariable id: String): InterviewSessionAverageStatsResponse {
+
+        interviewSessionService.getInterviewSession(id).let {
+            return interviewSessionAggregationService.getAverageScores(it)?.toDTO()
+                    ?: throw BusinessException("Unable to compute average stats for this interview session $it")
+        }
     }
 
     @GetMapping
