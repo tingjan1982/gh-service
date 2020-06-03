@@ -67,7 +67,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.security.oauth:spring-security-oauth2:2.2.5.RELEASE")
 
-    //implementation("org.apache.httpcomponents:httpclient")
+    implementation("org.apache.httpcomponents:httpclient")
     
     // swagger 2
     implementation("io.springfox:springfox-swagger2:2.7.0")
@@ -110,5 +110,9 @@ tasks {
 
         from("${buildDir}/resources/main/git.properties", "${buildDir}/resources/main/META-INF")
         into("out/production/resources/")
+    }
+
+    "test"(Test::class) {
+        useJUnitPlatform()
     }
 }

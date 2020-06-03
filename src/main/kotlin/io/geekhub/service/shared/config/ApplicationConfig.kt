@@ -2,6 +2,8 @@ package io.geekhub.service.shared.config
 
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientAccountRepository
+import io.geekhub.service.auth0.service.Auth0ApiProperties
+import io.geekhub.service.auth0.service.Auth0ManagementApiProperties
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.interview.repository.InterviewSessionRepository
@@ -13,6 +15,7 @@ import io.geekhub.service.shared.web.filter.ClientAccountFilter
 import io.geekhub.service.specialization.repository.SpecializationRepository
 import io.geekhub.service.user.repository.UserRepository
 import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -54,6 +57,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
     LikeRecordRepository::class])
 @EnableMongoAuditing
 @EnableSwagger2
+@EnableConfigurationProperties(Auth0ManagementApiProperties::class, Auth0ApiProperties::class)
 class ApplicationConfig(val mongoTemplate: MongoTemplate, val mongoMappingContext: MongoMappingContext, val clientAccountFilter: ClientAccountFilter) {
 
     @Bean

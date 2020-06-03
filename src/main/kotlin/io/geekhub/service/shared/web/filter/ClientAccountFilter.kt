@@ -20,16 +20,6 @@ import javax.servlet.http.HttpServletResponse
 class ClientAccountFilter(val clientAccountService: ClientAccountService) : OncePerRequestFilter() {
 
     val restTemplate: RestTemplate = RestTemplate()
-    /*get() {
-        val httpClient: CloseableHttpClient = HttpClients.custom()
-                .setSSLHostnameVerifier(NoopHostnameVerifier())
-                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-                .build()
-        val requestFactory = HttpComponentsClientHttpRequestFactory()
-        requestFactory.httpClient = httpClient
-
-        return RestTemplate(requestFactory)
-    }*/
 
     companion object {
         const val CLIENT_KEY = "CLIENT_KEY"
@@ -40,7 +30,7 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService) : Once
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
 
-        resolveClientAccount()?.let {
+        resolveClientAccount().let {
             logger.info("Resolved client account: $it")
             request.setAttribute(CLIENT_KEY, it)
         }

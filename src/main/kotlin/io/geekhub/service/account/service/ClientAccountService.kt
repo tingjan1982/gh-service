@@ -7,4 +7,6 @@ interface ClientAccountService {
     fun saveClientAccount(clientAccount: ClientAccount): ClientAccount
 
     fun getClientAccount(id: String): ClientAccount?
+
+    fun updatePassword(clientAccount: ClientAccount, updatedPassword: String)
 }
