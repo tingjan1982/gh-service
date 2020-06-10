@@ -13,7 +13,6 @@ import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.auditing.DefaultAuditorProvider
 import io.geekhub.service.shared.web.filter.ClientAccountFilter
 import io.geekhub.service.specialization.repository.SpecializationRepository
-import io.geekhub.service.user.repository.UserRepository
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean
@@ -53,7 +52,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
     SpecializationRepository::class,
     InterviewRepository::class,
     InterviewSessionRepository::class,
-    UserRepository::class,
     LikeRecordRepository::class])
 @EnableMongoAuditing
 @EnableSwagger2

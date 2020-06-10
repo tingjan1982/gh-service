@@ -13,25 +13,7 @@ import io.geekhub.service.questions.web.bean.QuestionResponse
 import io.geekhub.service.specialization.repository.Specialization
 import io.geekhub.service.specialization.web.model.SpecializationRequest
 import io.geekhub.service.specialization.web.model.SpecializationResponse
-import io.geekhub.service.user.model.User
-import io.geekhub.service.user.web.bean.UserRequest
-import io.geekhub.service.user.web.bean.UserResponse
 
-fun UserRequest.toEntity() = User(
-        username = this.username,
-        firstName = this.firstName,
-        lastName = this.lastName,
-        email = this.email
-)
-
-fun User.toDTO() = UserResponse(
-        this.userId.toString(),
-        this.username,
-        this.firstName,
-        this.lastName,
-        this.email,
-        this.savedQuestions.map { it.value.toDTO() }
-)
 
 fun QuestionRequest.toEntity(account: ClientAccount, spec: Specialization?) = Question(
         question = this.question,
