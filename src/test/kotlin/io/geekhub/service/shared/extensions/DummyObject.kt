@@ -1,6 +1,7 @@
 package io.geekhub.service.shared.extensions
 
 import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.model.Visibility
@@ -14,18 +15,27 @@ object DummyObject {
             email = "joelin@geekhub.tw"
     )
 
-    fun dummySpecialization() = Specialization(name = "Front End Engineer")
+    fun dummyClientUser(clientAccount: ClientAccount) = ClientUser(
+            email = "test@geekhub.tw",
+            nickname = "Test Client User",
+            userType = ClientUser.UserType.AUTH0,
+            clientAccount = clientAccount
+    )
 
-    fun dummyQuestion(clientAccount: ClientAccount) = Question(
+    fun dummySpecialization() = Specialization(name = "Test Engineer")
+
+    fun dummyQuestion(clientUser: ClientUser) = Question(
             question = "dummy question",
-            clientAccount = clientAccount,
+            clientUser = clientUser,
             questionType = Question.QuestionType.MULTI_CHOICE,
             jobTitle = "dummy job title")
 
-    fun dummyInterview(clientAccount: ClientAccount, specialization: Specialization) = Interview(
+    fun dummyInterview(clientUser: ClientUser, specialization: Specialization) = Interview(
             title = "dummy interview",
-            clientAccount = clientAccount,
+            clientUser = clientUser,
             jobTitle = "dummy job title",
             specialization = specialization,
             visibility = Visibility.PUBLIC)
+
+
 }

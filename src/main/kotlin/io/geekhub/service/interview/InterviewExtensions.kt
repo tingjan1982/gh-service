@@ -1,6 +1,6 @@
 package io.geekhub.service.interview
 
-import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.model.PublishedInterview
 import io.geekhub.service.interview.service.bean.SectionAverageStats
@@ -10,12 +10,12 @@ import io.geekhub.service.shared.extensions.toLightDTO
 import io.geekhub.service.shared.model.Visibility
 import java.math.BigDecimal
 
-fun PublishedInterview.toDTO(currentAccount: ClientAccount) = PublishedInterviewResponse(
+fun PublishedInterview.toDTO(currentUser: ClientUser) = PublishedInterviewResponse(
         this.id,
-        this.referencedInterview.toDTO(currentAccount)
+        this.referencedInterview.toDTO(currentUser)
 )
 
-fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientAccount: ClientAccount): InterviewSession {
+fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientUser: ClientUser): InterviewSession {
 
     val duration = if (this.duration > 0) {
         this.duration
@@ -25,7 +25,7 @@ fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientAccoun
 
     return InterviewSession(
             publishedInterview = interview,
-            clientAccount = clientAccount,
+            clientUser = clientUser,
             userEmail = this.userEmail,
             name = this.name,
             interviewMode = this.interviewMode,
@@ -33,11 +33,11 @@ fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientAccoun
     )
 }
 
-fun InterviewSession.showCorrectAnswer(currentAccount: ClientAccount): Boolean {
+fun InterviewSession.showCorrectAnswer(currentUser: ClientUser): Boolean {
 
     val (isPublicInterview, isOwner) = this.publishedInterview.referencedInterview.let {
         val publicInterview = it.visibility == Visibility.PUBLIC
-        val interviewOwner = it.clientAccount.id == currentAccount.id
+        val interviewOwner = it.clientUser.id == currentUser.id
 
         return@let Pair(publicInterview, interviewOwner)
     }
@@ -45,9 +45,9 @@ fun InterviewSession.showCorrectAnswer(currentAccount: ClientAccount): Boolean {
     return isOwner || isPublicInterview && this.status == InterviewSession.Status.ENDED
 }
 
-fun InterviewSession.toDTO(currentAccount: ClientAccount): InterviewSessionResponse {
+fun InterviewSession.toDTO(currentUser: ClientUser): InterviewSessionResponse {
 
-    val updatedAnswerAttemptSection = if (this.showCorrectAnswer(currentAccount)) {
+    val updatedAnswerAttemptSection = if (this.showCorrectAnswer(currentUser)) {
         this.answerAttemptSections
     } else {
         this.answerAttemptSections.forEach { section ->
@@ -65,11 +65,11 @@ fun InterviewSession.toDTO(currentAccount: ClientAccount): InterviewSessionRespo
 
     return InterviewSessionResponse(
             this.id.toString(),
-            this.publishedInterview.referencedInterview.toDTO(currentAccount),
-            this.clientAccount.toDTO(),
+            this.publishedInterview.referencedInterview.toDTO(currentUser),
+            this.clientUser.toDTO(),
             this.userEmail,
             this.name,
-            this.candidateAccount?.toDTO(),
+            this.candidateUser?.toDTO(),
             this.interviewMode,
             this.duration,
             this.status,
@@ -85,10 +85,10 @@ fun InterviewSession.toDTO(currentAccount: ClientAccount): InterviewSessionRespo
 fun InterviewSession.toLightDTO() = InterviewSessionsResponse.LightInterviewSessionResponse(
         this.id.toString(),
         this.publishedInterview.referencedInterview.toLightDTO(),
-        this.clientAccount.toDTO(),
+        this.clientUser.toDTO(),
         this.userEmail,
         this.name,
-        this.candidateAccount?.toDTO(),
+        this.candidateUser?.toDTO(),
         this.interviewMode,
         this.duration,
         this.status,

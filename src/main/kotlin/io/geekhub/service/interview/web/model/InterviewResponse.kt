@@ -1,6 +1,6 @@
 package io.geekhub.service.interview.web.model
 
-import io.geekhub.service.account.web.model.ClientAccountResponse
+import io.geekhub.service.account.web.model.ClientUserResponse
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.web.bean.QuestionResponse
 import io.geekhub.service.shared.model.BaseResponse
@@ -13,7 +13,7 @@ data class InterviewResponse(
         val title: String,
         val description: String?,
         val jobTitle: String,
-        val clientAccount: ClientAccountResponse,
+        val clientUser: ClientUserResponse,
         val specialization: SpecializationResponse,
         val sections: List<SectionResponse>,
         val visibility: Visibility,

@@ -4,7 +4,7 @@ import assertk.assertThat
 import assertk.assertions.hasSize
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
-import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.likes.data.LikeRecordRepository
@@ -34,7 +34,7 @@ internal class LikeServiceImplTest {
     lateinit var likeRecordRepository: LikeRecordRepository
 
     @Autowired
-    lateinit var clientAccount: ClientAccount
+    lateinit var clientUser: ClientUser
 
     @Autowired
     lateinit var specialization: Specialization
@@ -43,28 +43,28 @@ internal class LikeServiceImplTest {
     @WithMockUser
     fun likeQuestion() {
 
-        DummyObject.dummyQuestion(clientAccount).let {
+        DummyObject.dummyQuestion(clientUser).let {
             questionService.saveQuestion(it)
 
         }.let {
-            likeService.like(clientAccount, it).run {
-                assertThat(this.likedClientAccount).isEqualTo(clientAccount.id)
+            likeService.like(clientUser, it).run {
+                assertThat(this.likedClientUserId).isEqualTo(clientUser.id)
                 assertThat(this.objectId).isEqualTo(it.id)
                 assertThat(this.objectType).isEqualTo(Question::class.toString())
             }
 
-            likeService.like(clientAccount, it) // this should have no effect as it has already been liked.
+            likeService.like(clientUser, it) // this should have no effect as it has already been liked.
 
             questionService.getQuestion(it.id.toString()).run {
                 assertThat(this.likeCount).isEqualTo(1)
             }
 
-            assertThat(likeService.getLikedObjects(clientAccount, it::class)).hasSize(1)
+            assertThat(likeService.getLikedObjects(clientUser, it::class)).hasSize(1)
 
             it
         }.let {
-            likeService.unlike(clientAccount, it)
-            likeService.unlike(clientAccount, it) // this should have no effect as it has already been unliked
+            likeService.unlike(clientUser, it)
+            likeService.unlike(clientUser, it) // this should have no effect as it has already been unliked
 
             questionService.getQuestion(it.id.toString()).run {
                 assertThat(this.likeCount).isEqualTo(0)
@@ -78,28 +78,28 @@ internal class LikeServiceImplTest {
     @WithMockUser
     fun likeInterview() {
 
-        DummyObject.dummyInterview(clientAccount, specialization).let {
+        DummyObject.dummyInterview(clientUser, specialization).let {
             interviewService.saveInterview(it)
 
         }.let {
-            likeService.like(clientAccount, it).run {
-                assertThat(this.likedClientAccount).isEqualTo(clientAccount.id)
+            likeService.like(clientUser, it).run {
+                assertThat(this.likedClientUserId).isEqualTo(clientUser.id)
                 assertThat(this.objectId).isEqualTo(it.id)
                 assertThat(this.objectType).isEqualTo(Interview::class.toString())
             }
 
-            likeService.like(clientAccount, it) // this should have no effect as it has already been liked.
+            likeService.like(clientUser, it) // this should have no effect as it has already been liked.
 
             interviewService.getInterview(it.id.toString()).run {
                 assertThat(this.likeCount).isEqualTo(1)
             }
 
-            assertThat(likeService.getLikedObjects(clientAccount, it::class)).hasSize(1)
+            assertThat(likeService.getLikedObjects(clientUser, it::class)).hasSize(1)
 
             it
         }.let {
-            likeService.unlike(clientAccount, it)
-            likeService.unlike(clientAccount, it) // this should have no effect as it has already been unliked
+            likeService.unlike(clientUser, it)
+            likeService.unlike(clientUser, it) // this should have no effect as it has already been unliked
 
             interviewService.getInterview(it.id.toString()).run {
                 assertThat(this.likeCount).isEqualTo(0)

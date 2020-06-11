@@ -16,7 +16,9 @@ class SpecializationController(val specializationService: SpecializationService)
     @PostMapping
     fun saveSpecialization(@Valid @RequestBody request: SpecializationRequest): SpecializationResponse {
 
-        request.toEntity().let {
+        specializationService.getSpecializationByName(request.name)?.let {
+            return it.toDTO()
+        } ?: request.toEntity().let {
             return specializationService.saveSpecialization(it).toDTO()
         }
     }

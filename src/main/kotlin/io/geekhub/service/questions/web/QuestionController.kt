@@ -1,6 +1,6 @@
 package io.geekhub.service.questions.web
 
-import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.likes.service.LikeService
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.service.QuestionService
@@ -10,7 +10,7 @@ import io.geekhub.service.questions.web.bean.QuestionsResponse
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.shared.model.SearchCriteria
-import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_KEY
+import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_USER_KEY
 import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,7 +30,7 @@ class QuestionController(val questionService: QuestionService,
     }
 
     @PostMapping
-    fun createQuestion(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+    fun createQuestion(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                        @Valid @RequestBody questionRequest: QuestionRequest): QuestionResponse {
         logger.info("Received creation request for: $questionRequest")
 
@@ -38,7 +38,7 @@ class QuestionController(val questionService: QuestionService,
             specializationService.getSpecialization(it)
         }
 
-        val questionToCreate = questionRequest.toEntity(clientAccount, specialization)
+        val questionToCreate = questionRequest.toEntity(clientUser, specialization)
 
         return this.questionService.saveQuestion(questionToCreate).toDTO()
     }
@@ -51,11 +51,11 @@ class QuestionController(val questionService: QuestionService,
     }
 
     @GetMapping
-    fun listQuestions(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+    fun listQuestions(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                       @RequestParam map: Map<String, String>,
                       uriComponentsBuilder: UriComponentsBuilder): QuestionsResponse {
 
-        this.questionService.getQuestions(SearchCriteria.fromRequestParameters(clientAccount, map)).let { result ->
+        this.questionService.getQuestions(SearchCriteria.fromRequestParameters(clientUser, map)).let { result ->
             val navigationLinkBuilder = uriComponentsBuilder.path("/questions").let {
                 map.forEach { entry ->
                     it.queryParam(entry.key, entry.value)
@@ -64,14 +64,15 @@ class QuestionController(val questionService: QuestionService,
                 it
             }
 
-            val likedQuestions = likeService.getLikedObjects(clientAccount, Question::class).map { it.objectId }.toList()
+            val likedQuestions = likeService.getLikedObjects(clientUser, Question::class).map { it.objectId }.toList()
 
             return QuestionsResponse(result.map { it.toDTO(likedQuestions.contains(it.id.toString())) }, navigationLinkBuilder)
         }
     }
 
     @PostMapping("/{id}")
-    fun updateQuestion(@PathVariable id: String, @Valid @RequestBody request: QuestionRequest): QuestionResponse {
+    fun updateQuestion(@PathVariable id: String,
+                       @Valid @RequestBody request: QuestionRequest): QuestionResponse {
 
         questionService.getQuestion(id).let { q ->
             q.question = request.question
@@ -99,22 +100,22 @@ class QuestionController(val questionService: QuestionService,
     }
 
     @PostMapping("/{id}/like")
-    fun likeQuestion(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+    fun likeQuestion(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                      @PathVariable id: String): QuestionResponse {
 
         questionService.getQuestion(id).let {
-            likeService.like(clientAccount, it)
+            likeService.like(clientUser, it)
 
             return questionService.getQuestion(id).toDTO()
         }
     }
 
     @PostMapping("/{id}/unlike")
-    fun unlikeQuestion(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+    fun unlikeQuestion(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                        @PathVariable id: String): QuestionResponse {
 
         questionService.getQuestion(id).let {
-            likeService.unlike(clientAccount, it)
+            likeService.unlike(clientUser, it)
 
             return questionService.getQuestion(id).toDTO()
         }

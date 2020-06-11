@@ -3,7 +3,7 @@ package io.geekhub.service.questions.service
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.*
-import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.model.Question.PossibleAnswer
 import io.geekhub.service.questions.repository.QuestionRepository
@@ -23,7 +23,7 @@ internal class QuestionServiceImplIntegrationTest {
     lateinit var questionRepository: QuestionRepository
 
     @Autowired
-    lateinit var clientAccount: ClientAccount
+    lateinit var clientUser: ClientUser
 
     @Autowired
     lateinit var specialization: Specialization
@@ -37,7 +37,7 @@ internal class QuestionServiceImplIntegrationTest {
 
         Question(question = "Dummy question",
                 questionType = Question.QuestionType.MULTI_CHOICE,
-                clientAccount = clientAccount,
+                clientUser = clientUser,
                 specialization = specialization,
                 jobTitle = "Senior Engineer").apply {
             this.addAnswer(PossibleAnswer(answer = "A", correctAnswer = true))

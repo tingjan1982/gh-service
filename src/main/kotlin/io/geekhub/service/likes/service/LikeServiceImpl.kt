@@ -1,6 +1,6 @@
 package io.geekhub.service.likes.service
 
-import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.likes.data.LikableObject
 import io.geekhub.service.likes.data.LikeRecord
 import io.geekhub.service.likes.data.LikeRecordRepository
@@ -23,12 +23,12 @@ class LikeServiceImpl(val likeRecordRepository: LikeRecordRepository,
      * https://stackoverflow.com/questions/6997835/how-does-mongodb-deal-with-concurrent-updates
      * https://docs.mongodb.com/manual/reference/operator/update/inc/
      */
-    override fun like(clientAccount: ClientAccount, likableObject: LikableObject): LikeRecord {
+    override fun like(clientUser: ClientUser, likableObject: LikableObject): LikeRecord {
 
-        likableObject.id(clientAccount).let {
+        likableObject.id(clientUser).let {
             return likeRecordRepository.findById(it).orElseGet {
                 LikeRecord(id = it,
-                        likedClientAccount = clientAccount.id.toString(),
+                        likedClientUserId = clientUser.id.toString(),
                         objectId = likableObject.getObjectId(),
                         objectType = likableObject.getObjectType()).let { likeRecord ->
 
@@ -40,9 +40,9 @@ class LikeServiceImpl(val likeRecordRepository: LikeRecordRepository,
         }
     }
 
-    override fun unlike(clientAccount: ClientAccount, likableObject: LikableObject) {
+    override fun unlike(clientUser: ClientUser, likableObject: LikableObject) {
 
-        mongoTemplate.remove(Query.query(where("id").`is`(likableObject.id(clientAccount))), LikeRecord::class.java).let {
+        mongoTemplate.remove(Query.query(where("id").`is`(likableObject.id(clientUser))), LikeRecord::class.java).let {
             if (it.deletedCount > 0) {
                 updateLikeCount(likableObject, -1)
             }
@@ -56,7 +56,7 @@ class LikeServiceImpl(val likeRecordRepository: LikeRecordRepository,
         mongoTemplate.updateFirst(query, update, likableObject::class.java)
     }
 
-    override fun getLikedObjects(clientAccount: ClientAccount, likableObjectType: KClass<out LikableObject>): List<LikeRecord> {
-        return likeRecordRepository.findAllByLikedClientAccountAndObjectType(clientAccount.id.toString(), likableObjectType.toString())
+    override fun getLikedObjects(clientUser: ClientUser, likableObjectType: KClass<out LikableObject>): List<LikeRecord> {
+        return likeRecordRepository.findAllByLikedClientUserIdAndObjectType(clientUser.id.toString(), likableObjectType.toString())
     }
 }

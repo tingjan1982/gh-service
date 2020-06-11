@@ -1,6 +1,6 @@
 package io.geekhub.service.interview.web
 
-import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.interview.service.InterviewSessionAggregationService
@@ -25,23 +25,23 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
 
 
     @PostMapping
-    fun createInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+    fun createInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser,
                                @Valid @RequestBody request: InterviewSessionRequest): InterviewSessionResponse {
 
         interviewService.getPublishedInterviewByInterview(request.interviewId).let {
-            return interviewSessionService.createInterviewSession(request.toEntity(it, clientAccount)).toDTO(clientAccount)
+            return interviewSessionService.createInterviewSession(request.toEntity(it, clientUser)).toDTO(clientUser)
         }
     }
 
     @GetMapping("/{id}")
-    fun getInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+    fun getInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser,
                             @PathVariable id: String): InterviewSessionResponse {
 
-        return interviewSessionService.getInterviewSession(id).toDTO(clientAccount)
+        return interviewSessionService.getInterviewSession(id).toDTO(clientUser)
     }
 
     @GetMapping("/{id}/averageScore")
-    fun getInterviewSessionAverageScore(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+    fun getInterviewSessionAverageScore(@RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser,
                                         @PathVariable id: String): InterviewSessionAverageStatsResponse {
 
         interviewSessionService.getInterviewSession(id).let {
@@ -51,12 +51,12 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
     }
 
     @GetMapping
-    fun listInterviewSessions(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+    fun listInterviewSessions(@RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser,
                               @RequestParam params: Map<String, String>,
                               @RequestParam("status", required = false) status: InterviewSession.Status?,
                               uriComponentsBuilder: UriComponentsBuilder): InterviewSessionsResponse {
 
-        interviewSessionService.getInterviewSessions(SearchCriteria.fromRequestParameters(clientAccount, params), status).let { results ->
+        interviewSessionService.getInterviewSessions(SearchCriteria.fromRequestParameters(clientUser, params), status).let { results ->
             val navigationLinkBuilder = uriComponentsBuilder.path("/interviewSessions").let {
                 params.forEach { entry ->
                     it.queryParam(entry.key, entry.value)
@@ -70,7 +70,7 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
     }
 
     @PostMapping("/{id}")
-    fun updateInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+    fun updateInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser,
                                @PathVariable id: String,
                                @RequestBody updateRequest: UpdateInterviewSessionRequest): InterviewSessionResponse {
 
@@ -78,31 +78,31 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
             it.userEmail = updateRequest.userEmail
             it.name = updateRequest.name
 
-            return interviewSessionService.saveInterviewSession(it).toDTO(clientAccount)
+            return interviewSessionService.saveInterviewSession(it).toDTO(clientUser)
         }
     }
 
     @PostMapping("/{id}/send")
-    fun sendInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+    fun sendInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser,
                              @PathVariable id: String): InterviewSessionResponse {
 
         interviewSessionService.getInterviewSession(id).let {
-            return interviewSessionService.sendInterviewSession(it).toDTO(clientAccount)
+            return interviewSessionService.sendInterviewSession(it).toDTO(clientUser)
         }
     }
 
     @PostMapping("/{id}/start")
-    fun startInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+    fun startInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser,
                               @PathVariable id: String): InterviewSessionResponse {
 
         interviewSessionService.getInterviewSession(id).let {
-            return interviewSessionService.startInterviewSession(it, clientAccount).toDTO(clientAccount)
+            return interviewSessionService.startInterviewSession(it, clientUser).toDTO(clientUser)
         }
     }
 
     @PostMapping("/{id}/answers")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun postAnswerAttempt(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+    fun postAnswerAttempt(@RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser,
                           @PathVariable id: String,
                           @Valid @RequestBody request: AnswerAttemptRequest) {
 
@@ -112,17 +112,17 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
     }
 
     @PostMapping("/{id}/submit")
-    fun submitInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+    fun submitInterviewSession(@RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser,
                                @PathVariable id: String): InterviewSessionResponse {
 
         interviewSessionService.getInterviewSession(id).let {
-            return interviewSessionService.submitInterviewSession(it).toDTO(clientAccount)
+            return interviewSessionService.submitInterviewSession(it).toDTO(clientUser)
         }
     }
 
     @PostMapping("/{id}/markQuestion")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun markQuestion(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+    fun markQuestion(@RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser,
                      @PathVariable id: String,
                      @Valid @RequestBody request: MarkAnswerRequest) {
 
@@ -132,11 +132,11 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
     }
 
     @PostMapping("/{id}/calculateScore")
-    fun calculateScore(@RequestAttribute(ClientAccountFilter.CLIENT_KEY) clientAccount: ClientAccount,
+    fun calculateScore(@RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser,
                        @PathVariable id: String): InterviewSessionResponse {
 
         interviewSessionService.calculateScore(id).let {
-            return it.toDTO(clientAccount)
+            return it.toDTO(clientUser)
         }
     }
 }

@@ -1,6 +1,6 @@
 package io.geekhub.service.shared.model
 
-import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.specialization.service.SpecializationService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -11,13 +11,13 @@ import org.springframework.data.mongodb.core.query.TextCriteria
 data class SearchCriteria(
         val interviewId: String?,
         val filterByClientAccount: Boolean,
-        val clientAccount: ClientAccount,
+        val clientUser: ClientUser,
         val keyword: String?,
         val specialization: String?,
         val pageRequest: PageRequest
 ) {
     companion object {
-        fun fromRequestParameters(clientAccount: ClientAccount, map: Map<String, String>): SearchCriteria {
+        fun fromRequestParameters(clientUser: ClientUser, map: Map<String, String>): SearchCriteria {
 
             val interviewId = if (map["interviewId"].isNullOrEmpty()) null else map["interviewId"]
             val owner = map["owner"]?.toBoolean() ?: false
@@ -30,7 +30,7 @@ data class SearchCriteria(
             val pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Order.desc(sortField)))
             val decoratedKeyword = if (keyword.isNullOrEmpty()) null else keyword
 
-            return SearchCriteria(interviewId, owner, clientAccount, decoratedKeyword, specialization, pageRequest)
+            return SearchCriteria(interviewId, owner, clientUser, decoratedKeyword, specialization, pageRequest)
         }
     }
 
@@ -38,7 +38,7 @@ data class SearchCriteria(
 
         Query().with(pageRequest).let {
             if (filterByClientAccount) {
-                it.addCriteria(Criteria.where("clientAccount").`is`(clientAccount))
+                it.addCriteria(Criteria.where("clientUser").`is`(clientUser))
             } else {
                 it.addCriteria(Criteria.where("visibility").`in`(Visibility.PUBLIC, null))
             }

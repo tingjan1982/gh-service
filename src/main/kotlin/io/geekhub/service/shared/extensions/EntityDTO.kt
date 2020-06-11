@@ -1,7 +1,9 @@
 package io.geekhub.service.shared.extensions
 
 import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.account.web.model.ClientAccountResponse
+import io.geekhub.service.account.web.model.ClientUserResponse
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.web.model.InterviewRequest
 import io.geekhub.service.interview.web.model.InterviewResponse
@@ -15,10 +17,10 @@ import io.geekhub.service.specialization.web.model.SpecializationRequest
 import io.geekhub.service.specialization.web.model.SpecializationResponse
 
 
-fun QuestionRequest.toEntity(account: ClientAccount, spec: Specialization?) = Question(
+fun QuestionRequest.toEntity(user: ClientUser, spec: Specialization?) = Question(
         question = this.question,
         questionType = this.questionType ?: Question.QuestionType.MULTI_CHOICE,
-        clientAccount = account,
+        clientUser = user,
         specialization = spec,
         jobTitle = this.jobTitle,
         visibility = this.visibility,
@@ -31,7 +33,7 @@ fun Question.toDTO(liked: Boolean = false) = QuestionResponse(
         this.id.toString(),
         this.question,
         this.questionType,
-        this.clientAccount.toDTO(),
+        this.clientUser.toDTO(),
         this.specialization?.toDTO(),
         this.jobTitle,
         this.possibleAnswers.map { it.toDTO(true) }.toList(),
@@ -44,11 +46,11 @@ fun Question.toDTO(liked: Boolean = false) = QuestionResponse(
 
 fun PossibleAnswer.toDTO(showAnswer: Boolean) = QuestionResponse.PossibleAnswerResponse(this.answerId, this.answer, if (showAnswer) this.correctAnswer else null)
 
-fun InterviewRequest.toEntity(account: ClientAccount, spec: Specialization) = Interview(
+fun InterviewRequest.toEntity(user: ClientUser, spec: Specialization) = Interview(
         title = this.title,
         description = this.description,
         jobTitle = this.jobTitle,
-        clientAccount = account,
+        clientUser = user,
         specialization = spec,
         visibility = this.visibility,
         defaultDuration = this.defaultDuration
@@ -61,7 +63,7 @@ fun InterviewRequest.SectionRequest.toEntity() = Interview.Section(
 fun InterviewRequest.InterviewQuestionRequest.toEntity(interview: Interview) = Question(
         question = this.question,
         questionType = this.questionType,
-        clientAccount = interview.clientAccount,
+        clientUser = interview.clientUser,
         specialization = interview.specialization,
         jobTitle = interview.jobTitle,
         visibility = interview.visibility,
@@ -74,15 +76,15 @@ fun InterviewRequest.InterviewQuestionRequest.toSnapshot() = Interview.QuestionS
         possibleAnswers = this.possibleAnswers.map { it.toEntity() }.toMutableList()
 )
 
-fun Interview.toDTO(currentAccount: ClientAccount): InterviewResponse {
-    val showAnswer = currentAccount.id == this.clientAccount.id
+fun Interview.toDTO(currentUser: ClientUser): InterviewResponse {
+    val showAnswer = currentUser.id == this.clientUser.id
 
     return InterviewResponse(
             id = this.id.toString(),
             title = this.title,
             description = this.description,
             jobTitle = this.jobTitle,
-            clientAccount = this.clientAccount.toDTO(),
+            clientUser = this.clientUser.toDTO(),
             specialization = this.specialization.toDTO(),
             sections = this.sections.map { it.toDTO(showAnswer) },
             visibility = this.visibility,
@@ -99,7 +101,7 @@ fun Interview.toLightDTO(likedByClientAccount: Boolean = false) = InterviewsResp
         title = this.title,
         description = this.description,
         jobTitle = this.jobTitle,
-        clientAccount = this.clientAccount.toDTO(),
+        clientUser = this.clientUser.toDTO(),
         specialization = this.specialization.toDTO(),
         visibility = this.visibility,
         defaultDuration = this.defaultDuration,
@@ -123,6 +125,14 @@ fun Interview.QuestionSnapshot.toDTO(showAnswer: Boolean) = InterviewResponse.Qu
 )
 
 fun ClientAccount.toDTO() = ClientAccountResponse(this.id.toString(), this.clientName, this.email)
+
+fun ClientUser.toDTO() = ClientUserResponse(
+        id = this.id.toString(),
+        email = this.email,
+        nickname = this.nickname,
+        avatar = this.avatar,
+        userType = this.userType
+)
 
 fun SpecializationRequest.toEntity() = Specialization(
         name = this.name

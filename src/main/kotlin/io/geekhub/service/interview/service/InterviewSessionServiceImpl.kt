@@ -1,6 +1,6 @@
 package io.geekhub.service.interview.service
 
-import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.repository.InterviewSessionRepository
@@ -60,13 +60,13 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
         return saveInterviewSession(interviewSession)
     }
 
-    override fun startInterviewSession(interviewSession: InterviewSession, candidateAccount: ClientAccount): InterviewSession {
+    override fun startInterviewSession(interviewSession: InterviewSession, candidateUser: ClientUser): InterviewSession {
 
         if (interviewSession.status == InterviewSession.Status.STARTED) {
             throw BusinessException("Interview has already started at ${interviewSession.interviewStartDate}")
         }
 
-        interviewSession.candidateAccount = candidateAccount
+        interviewSession.candidateUser = candidateUser
         interviewSession.status = InterviewSession.Status.STARTED
         interviewSession.interviewStartDate = Date()
 
@@ -218,10 +218,10 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
         }
     }
 
-    override fun getCurrentInterviewSession(interviewId: String, clientAccount: ClientAccount): InterviewSession {
+    override fun getCurrentInterviewSession(interviewId: String, clientUser: ClientUser): InterviewSession {
 
         interviewService.getPublishedInterviewByInterview(interviewId).let {
-            interviewSessionRepository.findByPublishedInterviewAndCandidateAccountAndStatusIn(it, clientAccount,
+            interviewSessionRepository.findByPublishedInterviewAndCandidateUserAndStatusIn(it, clientUser,
                     listOf(InterviewSession.Status.NOT_STARTED, InterviewSession.Status.STARTED))?.let { s ->
                 return s
 
@@ -233,7 +233,7 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
 
         Query().with(searchCriteria.pageRequest).let {
             if (searchCriteria.filterByClientAccount) {
-                it.addCriteria(Criteria.where("clientAccount").`is`(searchCriteria.clientAccount))
+                it.addCriteria(Criteria.where("clientUser").`is`(searchCriteria.clientUser))
             }
 
             searchCriteria.interviewId?.let { id ->

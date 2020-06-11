@@ -1,6 +1,5 @@
 package io.geekhub.service.interview.model
 
-import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.model.BaseMongoObject
@@ -17,15 +16,9 @@ data class InterviewSession(
         @DBRef
         val publishedInterview: PublishedInterview,
         @DBRef
-        @Deprecated("use clientUser instead")
-        val clientAccount: ClientAccount,
-        @DBRef
-        var clientUser: ClientUser? = null,
+        var clientUser: ClientUser,
         var userEmail: String,
         var name: String? = null,
-        @DBRef
-        @Deprecated("use candidate instead")
-        var candidateAccount: ClientAccount? = null,
         @DBRef
         var candidateUser: ClientUser? = null,
         val interviewMode: InterviewMode,

@@ -93,10 +93,11 @@ class UpdateClientUser {
         likeRecordRepository.findAll().forEach {
 
             if (it.likedClientUserId == null) {
-                it.likedClientUserId = it.likedClientAccount
+                // commented out as deprecated reference has been removed
+                /*it.likedClientUserId = it.likedClientAccount
 
                 likeRecordRepository.save(it)
-                println("Updated like record ${it.id} client user id")
+                println("Updated like record ${it.id} client user id")*/
             }
 
             assertThat(it.likedClientUserId).isNotNull()
@@ -112,12 +113,13 @@ class UpdateClientUser {
         publishedInterviewRepository.findAll().forEach {
 
             if (it.referencedInterview.clientUser == null) {
-                clientUserRepository.findById(it.referencedInterview.clientAccount.id.toString()).ifPresent { user ->
+                // commented out as deprecated reference has been removed
+                /*clientUserRepository.findById(it.referencedInterview.clientAccount.id.toString()).ifPresent { user ->
                     it.referencedInterview.clientUser = user
                     publishedInterviewRepository.save(it)
 
                     println("Updated published interview ${it.id} client user")
-                }
+                }*/
             }
 
             assertThat(it.referencedInterview.clientUser).isNotNull()
@@ -132,7 +134,9 @@ class UpdateClientUser {
 
         interviewSessionRepository.findAll().forEach {
 
-            if (it.clientUser == null) {
+            // commented out as deprecated reference has been removed
+
+            /*if (it.clientUser == null) {
                 clientUserRepository.findById(it.clientAccount.id.toString()).ifPresent { user ->
                     it.clientUser = user
                     interviewSessionRepository.save(it)
@@ -152,7 +156,7 @@ class UpdateClientUser {
                 }
 
                 assertThat(it.candidateUser).isNotNull()
-            }
+            }*/
         }
 
     }
@@ -168,12 +172,13 @@ class UpdateClientUser {
             if (it.clientUser == null) {
                 println("Updating interview ${it.id}")
 
-                clientUserRepository.findById(it.clientAccount.id.toString()).ifPresent { user ->
+                // commented out as deprecated reference has been removed
+                /*clientUserRepository.findById(it.clientAccount.id.toString()).ifPresent { user ->
                     it.clientUser = user
                     interviewRepository.save(it)
 
                     println("Updated interview ${it.id} client user")
-                }
+                }*/
             }
 
             assertThat(it.clientUser).isNotNull()
@@ -189,12 +194,13 @@ class UpdateClientUser {
         questionRepository.findAll().forEach {
 
             if (it.clientUser == null) {
-                clientUserRepository.findById(it.clientAccount.id.toString()).ifPresent { user ->
+                // commented out as deprecated reference has been removed
+                /*clientUserRepository.findById(it.clientAccount.id.toString()).ifPresent { user ->
                     it.clientUser = user
                     questionRepository.save(it)
 
                     println("Updated question ${it.id} client user")
-                }
+                }*/
             }
 
             assertThat(it.clientUser).isNotNull()

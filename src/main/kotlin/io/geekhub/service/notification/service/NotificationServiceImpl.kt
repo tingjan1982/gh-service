@@ -77,15 +77,15 @@ fun InterviewSession.toInterviewInvitationPersonalization() = NotificationServic
         to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(this.userEmail)),
         dynamic_template_data = mapOf(
                 Pair("name", this.name ?: this.userEmail),
-                Pair("companyName", this.clientAccount.clientName),
+                Pair("companyName", this.clientUser.clientAccount.clientName),
                 Pair("interviewSessionLink", "https://geekhub.tw/interviewSessions/${this.id}")
         )
 )
 
 fun InterviewSession.toInterviewResultPersonalization() = NotificationServiceImpl.SendGridRequest.Personalization(
-        to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(this.clientAccount.email)),
+        to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(this.clientUser.email)),
         dynamic_template_data = mapOf(
-                Pair("companyName", this.clientAccount.clientName),
+                Pair("companyName", this.clientUser.clientAccount.clientName),
                 Pair("candidateName", this.name ?: this.userEmail),
                 Pair("interviewSessionLink", "https://geekhub.tw/interviewResult/${this.id}")
         )

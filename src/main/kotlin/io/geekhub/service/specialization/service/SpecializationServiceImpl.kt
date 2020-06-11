@@ -27,6 +27,10 @@ class SpecializationServiceImpl(val repository: SpecializationRepository,
         return repository.findById(id).orElse(null)
     }
 
+    override fun getSpecializationByName(name: String): Specialization? {
+        return repository.findByName(name)
+    }
+
     override fun getSpecializations(): List<Specialization> {
         return repository.findAll().distinct()
     }
@@ -35,7 +39,7 @@ class SpecializationServiceImpl(val repository: SpecializationRepository,
 
         this.getSpecialization(id).let {
             if (interviewRepository.countBySpecialization(it) > 0 || questionRepository.countBySpecialization(it) > 0) {
-                throw BusinessException("Specialization is used by at least one question or interview: $id")
+                throw BusinessException("Cannot delete specialization $id, in use by at least one question or interview.")
             }
 
             repository.delete(it)

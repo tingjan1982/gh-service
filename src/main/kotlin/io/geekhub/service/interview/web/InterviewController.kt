@@ -1,6 +1,6 @@
 package io.geekhub.service.interview.web
 
-import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.interview.service.InterviewSessionService
@@ -13,7 +13,7 @@ import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.shared.extensions.toLightDTO
 import io.geekhub.service.shared.extensions.toSnapshot
 import io.geekhub.service.shared.model.SearchCriteria
-import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_KEY
+import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_USER_KEY
 import io.geekhub.service.specialization.service.SpecializationService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -29,44 +29,44 @@ class InterviewController(val interviewService: InterviewService,
                           val likeService: LikeService) {
 
     @PostMapping
-    fun createInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+    fun createInterview(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                         @Valid @RequestBody request: InterviewRequest): InterviewResponse {
 
         val specialization = request.specializationId.let {
             specializationService.getSpecialization(it)
         }
 
-        request.toEntity(clientAccount, specialization).let {
+        request.toEntity(clientUser, specialization).let {
             it.sections = toSections(it, request.sections)
 
             interviewService.saveInterview(it).let { created ->
-                return created.toDTO(clientAccount)
+                return created.toDTO(clientUser)
             }
         }
     }
 
     @GetMapping("/{id}")
-    fun getInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+    fun getInterview(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                      @PathVariable id: String): InterviewResponse {
 
         interviewService.getInterview(id).let {
-            return it.toDTO(clientAccount)
+            return it.toDTO(clientUser)
         }
     }
 
     @GetMapping("/{id}/interviewSession")
-    fun getCurrentInterviewSession(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+    fun getCurrentInterviewSession(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                                    @PathVariable id: String): InterviewSessionResponse {
 
-        return interviewSessionService.getCurrentInterviewSession(id, clientAccount).toDTO(clientAccount)
+        return interviewSessionService.getCurrentInterviewSession(id, clientUser).toDTO(clientUser)
     }
 
     @GetMapping
-    fun listInterviews(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+    fun listInterviews(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                        @RequestParam map: Map<String, String>,
                        uriComponentsBuilder: UriComponentsBuilder): InterviewsResponse {
 
-        interviewService.getInterviews(SearchCriteria.fromRequestParameters(clientAccount, map)).let { result ->
+        interviewService.getInterviews(SearchCriteria.fromRequestParameters(clientUser, map)).let { result ->
             val navigationLinkBuilder = uriComponentsBuilder.path("/interviews").let {
                 map.forEach { entry ->
                     it.queryParam(entry.key, entry.value)
@@ -75,14 +75,14 @@ class InterviewController(val interviewService: InterviewService,
                 it
             }
 
-            val likedInterviews = likeService.getLikedObjects(clientAccount, Interview::class).map { it.objectId }.toList()
+            val likedInterviews = likeService.getLikedObjects(clientUser, Interview::class).map { it.objectId }.toList()
 
             return InterviewsResponse(result.map { it.toLightDTO(likedInterviews.contains(it.id.toString())) }, navigationLinkBuilder)
         }
     }
 
     @PostMapping("/{id}")
-    fun updateInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+    fun updateInterview(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                         @PathVariable id: String,
                         @Valid @RequestBody request: InterviewRequest): InterviewResponse {
 
@@ -101,36 +101,36 @@ class InterviewController(val interviewService: InterviewService,
             it.sections.clear()
             it.sections = toSections(it, request.sections)
 
-            return interviewService.saveInterview(it).toDTO(clientAccount)
+            return interviewService.saveInterview(it).toDTO(clientUser)
         }
     }
 
     @PostMapping("/{id}/like")
-    fun likeInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+    fun likeInterview(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                       @PathVariable id: String): InterviewResponse {
 
         interviewService.getInterview(id).let {
-            likeService.like(clientAccount, it)
-            return interviewService.getInterview(id).toDTO(clientAccount)
+            likeService.like(clientUser, it)
+            return interviewService.getInterview(id).toDTO(clientUser)
         }
     }
 
     @PostMapping("/{id}/unlike")
-    fun unlikeInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+    fun unlikeInterview(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                         @PathVariable id: String): InterviewResponse {
 
         interviewService.getInterview(id).let {
-            likeService.unlike(clientAccount, it)
-            return interviewService.getInterview(id).toDTO(clientAccount)
+            likeService.unlike(clientUser, it)
+            return interviewService.getInterview(id).toDTO(clientUser)
         }
     }
 
     @PostMapping("/{id}/publish")
-    fun publishInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
+    fun publishInterview(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                          @PathVariable id: String): PublishedInterviewResponse {
 
         interviewService.publishInterview(id).let {
-            return it.toDTO(clientAccount)
+            return it.toDTO(clientUser)
         }
     }
 

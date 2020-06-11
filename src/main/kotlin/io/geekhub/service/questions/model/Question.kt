@@ -1,6 +1,5 @@
 package io.geekhub.service.questions.model
 
-import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.likes.data.LikableObject
 import io.geekhub.service.shared.model.BaseMongoObject
@@ -22,10 +21,7 @@ data class Question(
         @TextIndexed
         var jobTitle: String?,
         @DBRef
-        @Deprecated("use clientUser instead")
-        val clientAccount: ClientAccount,
-        @DBRef
-        var clientUser: ClientUser? = null,
+        var clientUser: ClientUser,
         @DBRef
         var specialization: Specialization? = null,
         var visibility: Visibility = Visibility.PUBLIC,
@@ -45,8 +41,8 @@ data class Question(
         return attributes[attributeKey]
     }
 
-    override fun getClientAccountId(): String {
-        return clientAccount.id.toString()
+    override fun getClientUserId(): String {
+        return clientUser.id.toString()
     }
 
     override fun getObjectIdPrefix(): String {

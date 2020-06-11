@@ -1,6 +1,5 @@
 package io.geekhub.service.interview.model
 
-import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.likes.data.LikableObject
 import io.geekhub.service.questions.model.Question
@@ -24,10 +23,7 @@ data class Interview(
         @TextIndexed
         var jobTitle: String,
         @DBRef
-        @Deprecated("use clientUser instead")
-        val clientAccount: ClientAccount,
-        @DBRef
-        var clientUser: ClientUser? = null,
+        var clientUser: ClientUser,
         @DBRef
         var specialization: Specialization,
         var defaultDuration: Int = -1,
@@ -52,8 +48,8 @@ data class Interview(
         })
     }
 
-    override fun getClientAccountId(): String {
-        return clientAccount.id.toString()
+    override fun getClientUserId(): String {
+        return clientUser.id.toString()
     }
 
     override fun getObjectIdPrefix(): String {

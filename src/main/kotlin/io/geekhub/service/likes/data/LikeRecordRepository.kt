@@ -4,5 +4,5 @@ import org.springframework.data.repository.PagingAndSortingRepository
 
 interface LikeRecordRepository : PagingAndSortingRepository<LikeRecord, String> {
 
-    fun findAllByLikedClientAccountAndObjectType(likedClientAccount: String, objectType: String): List<LikeRecord>
+    fun findAllByLikedClientUserIdAndObjectType(likedClientUserId: String, objectType: String): List<LikeRecord>
 }

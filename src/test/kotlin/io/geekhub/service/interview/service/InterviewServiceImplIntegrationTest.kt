@@ -3,7 +3,7 @@ package io.geekhub.service.interview.service
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.*
-import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.questions.model.Question
@@ -25,7 +25,7 @@ internal class InterviewServiceImplIntegrationTest {
     private lateinit var interviewRepository: InterviewRepository
 
     @Autowired
-    private lateinit var clientAccount: ClientAccount
+    private lateinit var clientUser: ClientUser
 
     @Autowired
     private lateinit var specialization: Specialization
@@ -36,7 +36,7 @@ internal class InterviewServiceImplIntegrationTest {
 
         Interview(title = "sample interview",
                 jobTitle = "Engineer",
-                clientAccount = clientAccount,
+                clientUser = clientUser,
                 specialization = specialization,
                 visibility = Visibility.PUBLIC).let {
             this.interviewService.saveInterview(it)

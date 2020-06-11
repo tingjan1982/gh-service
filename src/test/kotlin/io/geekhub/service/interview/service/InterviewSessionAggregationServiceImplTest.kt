@@ -3,7 +3,7 @@ package io.geekhub.service.interview.service
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.*
-import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.service.bean.SectionAverageStats
@@ -29,7 +29,7 @@ internal class InterviewSessionAggregationServiceImplTest {
     lateinit var interviewService: InterviewService
 
     @Autowired
-    lateinit var clientAccount: ClientAccount
+    lateinit var clientUser: ClientUser
 
     @Autowired
     lateinit var specialization: Specialization
@@ -38,7 +38,7 @@ internal class InterviewSessionAggregationServiceImplTest {
     @WithMockUser
     fun getAverageScores() {
 
-        val interviewSession = DummyObject.dummyInterview(clientAccount, specialization).let {
+        val interviewSession = DummyObject.dummyInterview(clientUser, specialization).let {
             Interview.Section(title = "default").apply {
                 this.questions.add(
                         Interview.QuestionSnapshot(id = "qid-1",
@@ -77,7 +77,7 @@ internal class InterviewSessionAggregationServiceImplTest {
         }.let {
             InterviewSession(
                     publishedInterview = it,
-                    clientAccount = clientAccount,
+                    clientUser = clientUser,
                     userEmail = "joelin@geekhub.tw",
                     name = "Joe Lin",
                     interviewMode = InterviewSession.InterviewMode.REAL,
@@ -85,7 +85,7 @@ internal class InterviewSessionAggregationServiceImplTest {
                 //this.totalScore = BigDecimal("100")
             }.let { session ->
                 interviewSessionService.createInterviewSession(session)
-                interviewSessionService.startInterviewSession(session, clientAccount)
+                interviewSessionService.startInterviewSession(session, clientUser)
 
                 it.referencedInterview.sections[0].run {
                     val q = this.questions[0]

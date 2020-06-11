@@ -3,7 +3,7 @@ package io.geekhub.service.interview.service
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.*
-import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.model.PublishedInterview
@@ -30,7 +30,7 @@ internal class InterviewSessionServiceImplTest {
     lateinit var interviewService: InterviewService
 
     @Autowired
-    lateinit var clientAccount: ClientAccount
+    lateinit var clientUser: ClientUser
 
     @Autowired
     lateinit var specialization: Specialization
@@ -43,7 +43,7 @@ internal class InterviewSessionServiceImplTest {
     fun prepareInterview() {
         Interview(title = "dummy interview",
                 jobTitle = "Engineer",
-                clientAccount = clientAccount,
+                clientUser = clientUser,
                 specialization = specialization,
                 visibility = Visibility.PUBLIC).apply {
             Interview.Section(title = "default").apply {
@@ -80,7 +80,7 @@ internal class InterviewSessionServiceImplTest {
 
         InterviewSession(
                 publishedInterview = publishedInterview,
-                clientAccount = interview.clientAccount,
+                clientUser = interview.clientUser,
                 userEmail = "joelin@geekhub.tw",
                 name = "Joe Lin",
                 interviewMode = InterviewSession.InterviewMode.REAL,
@@ -90,14 +90,14 @@ internal class InterviewSessionServiceImplTest {
 
         }.let {
             assertThat {
-                interviewSessionService.getCurrentInterviewSession(interview.id.toString(), clientAccount)
+                interviewSessionService.getCurrentInterviewSession(interview.id.toString(), clientUser)
             }.isFailure().isInstanceOf(BusinessException::class)
 
-            interviewSessionService.startInterviewSession(it, clientAccount).also { session ->
+            interviewSessionService.startInterviewSession(it, clientUser).also { session ->
                 assertThat(session.interviewStartDate).isNotNull()
             }
 
-            interviewSessionService.getCurrentInterviewSession(interview.id.toString(), clientAccount).run {
+            interviewSessionService.getCurrentInterviewSession(interview.id.toString(), clientUser).run {
                 assertThat(this).isEqualTo(it)
             }
 
@@ -134,7 +134,7 @@ internal class InterviewSessionServiceImplTest {
             return@let it
         }.let {
             assertThat {
-                interviewSessionService.startInterviewSession(it, clientAccount)
+                interviewSessionService.startInterviewSession(it, clientUser)
             }.isFailure().isInstanceOf(BusinessException::class)
 
             return@let it
@@ -184,7 +184,7 @@ internal class InterviewSessionServiceImplTest {
 
         InterviewSession(
                 publishedInterview = publishedInterview,
-                clientAccount = interview.clientAccount,
+                clientUser = interview.clientUser,
                 userEmail = "joelin@geekhub.tw",
                 name = "Joe Lin",
                 interviewMode = InterviewSession.InterviewMode.REAL,
@@ -219,7 +219,7 @@ internal class InterviewSessionServiceImplTest {
 
         InterviewSession(
                 publishedInterview = publishedInterview,
-                clientAccount = interview.clientAccount,
+                clientUser = interview.clientUser,
                 userEmail = "joelin@geekhub.tw",
                 name = "Joe Lin",
                 interviewMode = InterviewSession.InterviewMode.REAL,
@@ -238,7 +238,7 @@ internal class InterviewSessionServiceImplTest {
 
             it
         }.let {
-            interviewSessionService.startInterviewSession(it, clientAccount).also {
+            interviewSessionService.startInterviewSession(it, clientUser).also {
                 interviewService.getInterview(interview.id.toString()).run {
                     assertThat(this.interviewSessions).hasSize(1)
 

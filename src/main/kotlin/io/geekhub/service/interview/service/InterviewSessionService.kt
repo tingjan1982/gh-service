@@ -1,6 +1,6 @@
 package io.geekhub.service.interview.service
 
-import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.shared.model.SearchCriteria
 import org.springframework.data.domain.Page
@@ -13,7 +13,7 @@ interface InterviewSessionService {
 
     fun sendInterviewSession(interviewSession: InterviewSession): InterviewSession
 
-    fun startInterviewSession(interviewSession: InterviewSession, candidateAccount: ClientAccount): InterviewSession
+    fun startInterviewSession(interviewSession: InterviewSession, candidateUser: ClientUser): InterviewSession
 
     fun addAnswerAttempt(interviewSession: InterviewSession, answerAttempt: InterviewSession.QuestionAnswerAttempt): InterviewSession
 
@@ -23,7 +23,7 @@ interface InterviewSessionService {
 
     fun getInterviewSession(id: String): InterviewSession
 
-    fun getCurrentInterviewSession(interviewId: String, clientAccount: ClientAccount): InterviewSession
+    fun getCurrentInterviewSession(interviewId: String, clientUser: ClientUser): InterviewSession
 
     fun getInterviewSessions(searchCriteria: SearchCriteria, status: InterviewSession.Status?): Page<InterviewSession>
 
