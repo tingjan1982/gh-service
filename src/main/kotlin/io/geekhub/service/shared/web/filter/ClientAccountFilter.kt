@@ -1,38 +1,51 @@
 package io.geekhub.service.shared.web.filter
 
 import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.account.service.ClientAccountService
+import io.geekhub.service.account.service.ClientUserService
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestTemplate
 import org.springframework.web.filter.OncePerRequestFilter
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
-class ClientAccountFilter(val clientAccountService: ClientAccountService) : OncePerRequestFilter() {
-
-    val restTemplate: RestTemplate = RestTemplate()
+class ClientAccountFilter(val clientAccountService: ClientAccountService, val clientUserService: ClientUserService) : OncePerRequestFilter() {
 
     companion object {
         const val CLIENT_KEY = "CLIENT_KEY"
-        private val GUEST_CLIENT_ACCOUNT = ClientAccount("guest", ClientAccount.AccountType.INDIVIDUAL, "guest", "guest@geekhub.tw")
-        private val logger = LoggerFactory.getLogger(ClientAccountFilter::class.java)
-    }
+        const val CLIENT_USER_KEY = "CLIENT_USER_KEY"
 
+        private val GUEST_CLIENT_ACCOUNT = ClientAccount("guest",
+                ClientAccount.AccountType.INDIVIDUAL,
+                ClientAccount.PlanType.FREE,
+                "guest",
+                "guest@geekhub.tw")
+
+        private val GUEST_CLIENT_USER = ClientUser(id = "guest",
+                email = "guest@geekhub.tw",
+                nickname = "guest",
+                userType = ClientUser.UserType.AUTH0,
+                clientAccount = GUEST_CLIENT_ACCOUNT)
+
+        private val LOGGER: Logger = LoggerFactory.getLogger(ClientAccountFilter::class.java)
+    }
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
 
         resolveClientAccount().let {
-            logger.info("Resolved client account: $it")
+            LOGGER.info("Resolved client account: $it")
             request.setAttribute(CLIENT_KEY, it)
+        }
+
+        resolveClientUser().let {
+            LOGGER.info("Resolved client user: $it")
+            request.setAttribute(CLIENT_USER_KEY, it)
         }
 
         filterChain.doFilter(request, response)
@@ -59,30 +72,42 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService) : Once
         val id = jwt.claims["sub"] as String
         val email = jwt.claims["https://api.geekhub.tw/email"] as String
 
-        ClientAccount(id, ClientAccount.AccountType.INDIVIDUAL, email, email).let {
-
-            val headers = HttpHeaders()
-            headers.contentType = MediaType.APPLICATION_JSON
-            headers.setBearerAuth(jwt.tokenValue)
-            val requestEntity = HttpEntity<Void>(headers)
-
-            restTemplate.exchange("https://geekhub.auth0.com/userinfo", HttpMethod.GET, requestEntity, Auth0UserInfo::class.java).let { response ->
-                response.body?.let { userInfo ->
-                    println(userInfo)
-                    it.avatar = userInfo.picture
-
-                    userInfo.nickname?.let { name ->
-                        it.clientName = name
-                    }
-                }
+        clientUserService.getAuth0UserInfo(jwt.tokenValue).let {
+            ClientAccount(id, ClientAccount.AccountType.INDIVIDUAL, ClientAccount.PlanType.FREE, it.nickname, email, it.picture).let { account ->
+                return clientAccountService.saveClientAccount(account)
             }
-
-            return clientAccountService.saveClientAccount(it)
         }
     }
 
-    data class Auth0UserInfo(
-            val nickname: String?,
-            val picture: String?
-    )
+    private fun resolveClientUser(): ClientUser {
+
+        SecurityContextHolder.getContext().authentication.let { auth ->
+            val principal = auth.principal
+
+            if (principal is Jwt) {
+                val id = principal.claims["sub"] as String
+                clientUserService.getClientUser(id)?.let {
+                    return it
+                } ?: return syncClientUserInfo(principal)
+            }
+        }
+
+        return GUEST_CLIENT_USER
+    }
+
+    private fun syncClientUserInfo(jwt: Jwt): ClientUser {
+
+        val id = jwt.claims["sub"] as String
+        val email = jwt.claims["https://api.geekhub.tw/email"] as String
+
+        clientUserService.getAuth0UserInfo(jwt.tokenValue).let {
+            val clientAccount = ClientAccount(id, ClientAccount.AccountType.INDIVIDUAL, ClientAccount.PlanType.FREE, it.name, it.email, it.picture).let { account ->
+                clientAccountService.saveClientAccount(account)
+            }
+
+            ClientUser(id, it.email, it.nickname, it.picture, it.getUserType(), clientAccount).let { user ->
+                return clientUserService.saveClientUser(user)
+            }
+        }
+    }
 }

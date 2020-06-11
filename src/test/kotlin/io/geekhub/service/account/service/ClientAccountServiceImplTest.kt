@@ -38,7 +38,7 @@ internal class ClientAccountServiceImplTest(@Autowired val clientAccountService:
     @Test
     fun updatePassword() {
 
-        ClientAccount(id = user.userId, email = user.email, accountType = ClientAccount.AccountType.CORPORATE, clientName = user.email).let {
+        ClientAccount(id = user.userId, email = user.email, accountType = ClientAccount.AccountType.CORPORATE, planType = ClientAccount.PlanType.FREE, clientName = user.email).let {
             clientAccountService.updatePassword(it, "%%90Stuauth0")
         }
     }

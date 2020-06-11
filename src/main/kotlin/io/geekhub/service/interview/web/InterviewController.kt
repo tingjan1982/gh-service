@@ -107,7 +107,7 @@ class InterviewController(val interviewService: InterviewService,
 
     @PostMapping("/{id}/like")
     fun likeInterview(@RequestAttribute(CLIENT_KEY) clientAccount: ClientAccount,
-                     @PathVariable id: String): InterviewResponse {
+                      @PathVariable id: String): InterviewResponse {
 
         interviewService.getInterview(id).let {
             likeService.like(clientAccount, it)

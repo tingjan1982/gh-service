@@ -1,6 +1,7 @@
 package io.geekhub.service.interview.model
 
 import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.likes.data.LikableObject
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.model.BaseMongoObject
@@ -23,7 +24,10 @@ data class Interview(
         @TextIndexed
         var jobTitle: String,
         @DBRef
-        var clientAccount: ClientAccount,
+        @Deprecated("use clientUser instead")
+        val clientAccount: ClientAccount,
+        @DBRef
+        var clientUser: ClientUser? = null,
         @DBRef
         var specialization: Specialization,
         var defaultDuration: Int = -1,

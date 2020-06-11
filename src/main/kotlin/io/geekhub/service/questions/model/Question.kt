@@ -1,6 +1,7 @@
 package io.geekhub.service.questions.model
 
 import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.likes.data.LikableObject
 import io.geekhub.service.shared.model.BaseMongoObject
 import io.geekhub.service.shared.model.Visibility
@@ -21,7 +22,10 @@ data class Question(
         @TextIndexed
         var jobTitle: String?,
         @DBRef
-        var clientAccount: ClientAccount,
+        @Deprecated("use clientUser instead")
+        val clientAccount: ClientAccount,
+        @DBRef
+        var clientUser: ClientUser? = null,
         @DBRef
         var specialization: Specialization? = null,
         var visibility: Visibility = Visibility.PUBLIC,
