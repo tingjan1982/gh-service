@@ -13,6 +13,7 @@ data class ClientUser(
         @Id
         var id: String? = null,
         var email: String,
+        var name: String,
         var nickname: String,
         var avatar: String? = null,
         val userType: UserType,

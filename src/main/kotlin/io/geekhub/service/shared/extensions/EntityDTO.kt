@@ -96,7 +96,7 @@ fun Interview.toDTO(currentUser: ClientUser): InterviewResponse {
     )
 }
 
-fun Interview.toLightDTO(likedByClientAccount: Boolean = false) = InterviewsResponse.LightInterviewResponse(
+fun Interview.toLightDTO(likedByClientUser: Boolean = false) = InterviewsResponse.LightInterviewResponse(
         id = this.id.toString(),
         title = this.title,
         description = this.description,
@@ -107,7 +107,7 @@ fun Interview.toLightDTO(likedByClientAccount: Boolean = false) = InterviewsResp
         defaultDuration = this.defaultDuration,
         publishedInterviewId = this.latestPublishedInterviewId,
         likeCount = this.likeCount,
-        liked = likedByClientAccount,
+        liked = likedByClientUser,
         interviewSessions = this.groupInterviewSessions().mapValues { it -> it.value.map { it.id.toString() }.toList() }
 )
 
@@ -129,6 +129,7 @@ fun ClientAccount.toDTO() = ClientAccountResponse(this.id.toString(), this.clien
 fun ClientUser.toDTO() = ClientUserResponse(
         id = this.id.toString(),
         email = this.email,
+        name = this.name,
         nickname = this.nickname,
         avatar = this.avatar,
         userType = this.userType

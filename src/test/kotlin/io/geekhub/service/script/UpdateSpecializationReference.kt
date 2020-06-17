@@ -7,6 +7,7 @@ import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.specialization.repository.Specialization
 import io.geekhub.service.specialization.repository.SpecializationRepository
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -16,6 +17,7 @@ import org.springframework.data.mongodb.core.query.Update
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.TestPropertySource
 
+@Disabled
 @IntegrationTest
 @TestPropertySource(properties = ["spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration"])
 internal class UpdateSpecializationReference {

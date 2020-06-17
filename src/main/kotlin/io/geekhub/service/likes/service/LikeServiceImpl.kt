@@ -4,6 +4,9 @@ import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.likes.data.LikableObject
 import io.geekhub.service.likes.data.LikeRecord
 import io.geekhub.service.likes.data.LikeRecordRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query
@@ -58,5 +61,18 @@ class LikeServiceImpl(val likeRecordRepository: LikeRecordRepository,
 
     override fun getLikedObjects(clientUser: ClientUser, likableObjectType: KClass<out LikableObject>): List<LikeRecord> {
         return likeRecordRepository.findAllByLikedClientUserIdAndObjectType(clientUser.id.toString(), likableObjectType.toString())
+    }
+
+    override fun <T : LikableObject> getLikedObjectsAsType(clientUser: ClientUser, likableObjectType: KClass<T>, pageRequest: PageRequest): Page<T> {
+
+        this.getLikedObjects(clientUser, likableObjectType).map { it.objectId }.toList().let {
+            Query().with(pageRequest)
+                    .addCriteria(where("id").`in`(it)).let { query ->
+                        val count = mongoTemplate.count(Query.of(query).limit(-1).skip(-1), likableObjectType.java)
+                        val results = mongoTemplate.find(query, likableObjectType.java)
+
+                        return PageImpl(results, pageRequest, count)
+                    }
+        }
     }
 }

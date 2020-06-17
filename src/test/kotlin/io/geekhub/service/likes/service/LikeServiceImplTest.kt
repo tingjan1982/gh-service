@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.hasSize
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
+import assertk.assertions.isNotEmpty
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.service.InterviewService
@@ -15,6 +16,7 @@ import io.geekhub.service.shared.extensions.DummyObject
 import io.geekhub.service.specialization.repository.Specialization
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.security.test.context.support.WithMockUser
 
 @IntegrationTest
@@ -95,6 +97,11 @@ internal class LikeServiceImplTest {
             }
 
             assertThat(likeService.getLikedObjects(clientUser, it::class)).hasSize(1)
+
+            likeService.getLikedObjectsAsType(clientUser, it::class, PageRequest.of(0, 20)).run {
+                assertThat(this).isNotEmpty()
+                assertThat(this.totalElements).isEqualTo(1)
+            }
 
             it
         }.let {

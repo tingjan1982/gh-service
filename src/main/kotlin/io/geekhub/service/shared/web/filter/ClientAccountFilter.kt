@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletResponse
 class ClientAccountFilter(val clientAccountService: ClientAccountService, val clientUserService: ClientUserService) : OncePerRequestFilter() {
 
     companion object {
-        const val CLIENT_KEY = "CLIENT_KEY"
         const val CLIENT_USER_KEY = "CLIENT_USER_KEY"
 
         private val GUEST_CLIENT_ACCOUNT = ClientAccount("guest",
@@ -29,6 +28,7 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService, val cl
 
         private val GUEST_CLIENT_USER = ClientUser(id = "guest",
                 email = "guest@geekhub.tw",
+                name = "guest",
                 nickname = "guest",
                 userType = ClientUser.UserType.AUTH0,
                 clientAccount = GUEST_CLIENT_ACCOUNT)
@@ -38,45 +38,12 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService, val cl
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
 
-        resolveClientAccount().let {
-            LOGGER.info("Resolved client account: $it")
-            request.setAttribute(CLIENT_KEY, it)
-        }
-
         resolveClientUser().let {
             LOGGER.info("Resolved client user: $it")
             request.setAttribute(CLIENT_USER_KEY, it)
         }
 
         filterChain.doFilter(request, response)
-    }
-
-    private fun resolveClientAccount(): ClientAccount {
-
-        SecurityContextHolder.getContext().authentication.let { auth ->
-            val principal = auth.principal
-
-            if (principal is Jwt) {
-                val id = principal.claims["sub"] as String
-                clientAccountService.getClientAccount(id)?.let {
-                    return it
-                } ?: return syncClientAccountInfo(principal)
-            }
-        }
-
-        return GUEST_CLIENT_ACCOUNT
-    }
-
-    private fun syncClientAccountInfo(jwt: Jwt): ClientAccount {
-
-        val id = jwt.claims["sub"] as String
-        val email = jwt.claims["https://api.geekhub.tw/email"] as String
-
-        clientUserService.getAuth0UserInfo(jwt.tokenValue).let {
-            ClientAccount(id, ClientAccount.AccountType.INDIVIDUAL, ClientAccount.PlanType.FREE, it.nickname, email, it.picture).let { account ->
-                return clientAccountService.saveClientAccount(account)
-            }
-        }
     }
 
     private fun resolveClientUser(): ClientUser {
@@ -101,12 +68,12 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService, val cl
         val email = jwt.claims["https://api.geekhub.tw/email"] as String
 
         clientUserService.getAuth0UserInfo(jwt.tokenValue).let {
-            val clientAccount = ClientAccount(id, ClientAccount.AccountType.INDIVIDUAL, ClientAccount.PlanType.FREE, it.name, it.email, it.picture).let { account ->
+            ClientAccount(id, ClientAccount.AccountType.INDIVIDUAL, ClientAccount.PlanType.FREE, it.name, it.email, it.picture).let { account ->
                 clientAccountService.saveClientAccount(account)
-            }
 
-            ClientUser(id, it.email, it.nickname, it.picture, it.getUserType(), clientAccount).let { user ->
-                return clientUserService.saveClientUser(user)
+                ClientUser(id, it.email, it.name, it.nickname, it.picture, it.getUserType(), account).let { user ->
+                    return clientUserService.saveClientUser(user)
+                }
             }
         }
     }

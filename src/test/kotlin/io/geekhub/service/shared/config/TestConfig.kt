@@ -31,9 +31,13 @@ class TestConfig(val clientAccountService: ClientAccountService,
 
     @Bean
     fun defaultClientUser(clientAccount: ClientAccount): ClientUser {
-        return clientUser?.let {
-            clientUser
-        } ?: clientUserService.saveClientUser(DummyObject.dummyClientUser(clientAccount))
+        clientUser?.let {
+            return it
+        } ?: clientUserService.saveClientUser(DummyObject.dummyClientUser(clientAccount)).let {
+            clientUser = it
+
+            return it
+        }
     }
 
     @Bean

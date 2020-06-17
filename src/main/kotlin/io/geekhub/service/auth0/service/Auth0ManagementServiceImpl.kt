@@ -1,6 +1,7 @@
 package io.geekhub.service.auth0.service
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import io.geekhub.service.account.web.model.UpdateClientUserRequest
 import io.geekhub.service.auth0.service.bean.Auth0User
 import io.geekhub.service.auth0.service.bean.Auth0UserResponse
 import io.geekhub.service.shared.exception.BusinessException
@@ -107,6 +108,24 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
         }
     }
 
+    override fun updateUser(userId: String, updateUserRequest: UpdateClientUserRequest, oAuthToken: OAuthToken) {
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers.setBearerAuth(oAuthToken.accessToken)
+        val requestEntity = HttpEntity(UpdateUserRequest(updateUserRequest.name, updateUserRequest.nickname), headers)
+
+        LOGGER.info("Updating user info, id=$userId")
+
+        restTemplate.exchange("https://geekhub.auth0.com/api/v2/users/$userId", HttpMethod.PATCH, requestEntity,
+                Auth0UserResponse::class.java).let { response ->
+
+            response.body?.let { userInfo ->
+                println(userInfo)
+            }
+        }
+    }
+
     override fun updateUserPassword(userId: String, updatedPassword: String, oAuthToken: OAuthToken) {
 
         val headers = HttpHeaders()
@@ -142,6 +161,8 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
     data class OAuthToken(@field:JsonAlias("access_token") val accessToken: String,
                           @field:JsonAlias("scope") val scope: String,
                           @field:JsonAlias("expires_in") val expireInSeconds: Int)
+
+    data class UpdateUserRequest(val name: String, val nickname: String, val connection: String = "Username-Password-Authentication")
 
     data class UpdatePasswordRequest(val password: String, val connection: String = "Username-Password-Authentication")
 }

@@ -5,8 +5,8 @@ package io.geekhub.service.account.repository
  */
 data class Auth0UserInfo(
         val sub: String,
-        val nickname: String,
         val name: String,
+        val nickname: String,
         val email: String,
         val picture: String
 ) {

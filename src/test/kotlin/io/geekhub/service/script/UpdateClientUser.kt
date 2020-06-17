@@ -13,6 +13,8 @@ import io.geekhub.service.interview.repository.PublishedInterviewRepository
 import io.geekhub.service.likes.data.LikeRecordRepository
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.annotation.IntegrationTest
+import io.geekhub.service.specialization.repository.Specialization
+import io.geekhub.service.specialization.repository.SpecializationRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -45,6 +47,9 @@ class UpdateClientUser {
     lateinit var publishedInterviewRepository: PublishedInterviewRepository
 
     @Autowired
+    lateinit var specializationRepository: SpecializationRepository
+
+    @Autowired
     lateinit var likeRecordRepository: LikeRecordRepository
 
     @Autowired
@@ -58,8 +63,13 @@ class UpdateClientUser {
         mongoTemplate.remove(Query(Criteria.where("clientName").`is`("Test Client Account")), ClientAccount::class.java).let {
             println("Removed ${it.deletedCount} client account")
         }
-        mongoTemplate.remove(Query(Criteria.where("nickname").`is`("Test Client Account")), ClientUser::class.java).let {
+
+        mongoTemplate.remove(Query(Criteria.where("email").`is`("test@geekhub.tw")), ClientUser::class.java).let {
             println("Removed ${it.deletedCount} client user")
+        }
+
+        mongoTemplate.remove(Query(Criteria.where("name").`is`("Test Engineer")), Specialization::class.java).let {
+            println("Removed ${it.deletedCount} specialization")
         }
 
         mongoTemplate.find<org.bson.Document>(query = Query(Criteria.where("clientAccount").exists(true)), collectionName = "question").forEach {
@@ -67,9 +77,21 @@ class UpdateClientUser {
             val clientAccount = it["clientAccount"] as DBRef
 
             if (!clientAccountRepository.existsById(clientAccount.id.toString())) {
-                println("Removing question $questionId has obsolete client account reference: ${clientAccount.id}")
+                println("Removing question $questionId with obsolete client account reference: ${clientAccount.id}")
                 questionRepository.deleteById(questionId.toString())
             }
+        }
+    }
+
+    @Test
+    @WithMockUser("script.updateName")
+    fun updateName() {
+
+        clientUserRepository.findAll().forEach {
+            it.name = it.nickname
+            clientUserRepository.save(it)
+
+            println("Updated client user ${it.id} name")
         }
     }
 
@@ -229,7 +251,7 @@ class UpdateClientUser {
                 else
                     ClientUser.UserType.AUTH0
 
-                ClientUser(it.id, it.email, it.clientName, it.avatar, userType, it).let { user ->
+                ClientUser(it.id, it.email, it.clientName, it.clientName, it.avatar, userType, it).let { user ->
                     clientUserRepository.save(user)
                     println("Created default client user for ${it.id}")
                 }
