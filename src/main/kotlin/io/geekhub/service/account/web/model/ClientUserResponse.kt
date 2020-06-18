@@ -8,5 +8,6 @@ data class ClientUserResponse(
         val name: String,
         val nickname: String,
         val avatar: String?,
-        val userType: ClientUser.UserType
+        val userType: ClientUser.UserType,
+        val metadata: Map<String, Any>? = mapOf()
 )

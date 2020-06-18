@@ -17,6 +17,7 @@ import io.geekhub.service.specialization.repository.SpecializationRepository
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.EventListener
@@ -55,6 +56,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
     InterviewSessionRepository::class,
     LikeRecordRepository::class])
 @EnableMongoAuditing
+@EnableCaching
 @EnableSwagger2
 @EnableConfigurationProperties(Auth0ManagementApiProperties::class, Auth0ApiProperties::class)
 class ApplicationConfig(val mongoTemplate: MongoTemplate, val mongoMappingContext: MongoMappingContext, val clientAccountFilter: ClientAccountFilter) {

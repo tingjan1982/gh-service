@@ -1,7 +1,9 @@
 package io.geekhub.service.auth0.service
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.geekhub.service.account.web.model.UpdateClientUserRequest
+import io.geekhub.service.account.web.model.UpdateUserPasswordRequest
 import io.geekhub.service.auth0.service.bean.Auth0User
 import io.geekhub.service.auth0.service.bean.Auth0UserResponse
 import io.geekhub.service.shared.exception.BusinessException
@@ -13,9 +15,11 @@ import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.*
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
 @Service
@@ -37,6 +41,7 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
         val LOGGER: Logger = LoggerFactory.getLogger(Auth0ManagementServiceImpl::class.java)
     }
 
+    @Cacheable("managementToken")
     override fun getManagementToken(): OAuthToken {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -64,9 +69,12 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
                 "scope" to "openid profile email read:profile")
         val requestEntity = HttpEntity(requestParams, headers)
 
-        restTemplate.postForEntity("https://geekhub.auth0.com/oauth/token", requestEntity, OAuthToken::class.java).let { response ->
-            return response.body
-                    ?: throw BusinessException("Failed to obtain user token")
+        try {
+            restTemplate.postForEntity("https://geekhub.auth0.com/oauth/token", requestEntity, OAuthToken::class.java).let { response ->
+                return response.body ?: throw BusinessException("Failed to obtain user token")
+            }
+        } catch (ex: HttpClientErrorException) {
+            throw BusinessException("The provided credentials account cannot be authenticated.")
         }
     }
 
@@ -108,12 +116,12 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
         }
     }
 
-    override fun updateUser(userId: String, updateUserRequest: UpdateClientUserRequest, oAuthToken: OAuthToken) {
+    override fun updateUser(userId: String, updateUserRequest: UpdateUserRequest, oAuthToken: OAuthToken): Auth0UserResponse {
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.setBearerAuth(oAuthToken.accessToken)
-        val requestEntity = HttpEntity(UpdateUserRequest(updateUserRequest.name, updateUserRequest.nickname), headers)
+        val requestEntity = HttpEntity(updateUserRequest, headers)
 
         LOGGER.info("Updating user info, id=$userId")
 
@@ -121,25 +129,33 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
                 Auth0UserResponse::class.java).let { response ->
 
             response.body?.let { userInfo ->
-                println(userInfo)
-            }
+                return userInfo
+            } ?: throw BusinessObjectNotFoundException(Auth0UserResponse::class, userId)
         }
     }
 
-    override fun updateUserPassword(userId: String, updatedPassword: String, oAuthToken: OAuthToken) {
+    override fun updateUserPassword(updateRequest: UpdateUserPasswordRequest, oAuthToken: OAuthToken) {
 
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers.setBearerAuth(oAuthToken.accessToken)
-        val requestEntity = HttpEntity(UpdatePasswordRequest(updatedPassword), headers)
+        getUserToken(updateRequest.email, updateRequest.oldPassword).let {
+            val headers = HttpHeaders()
+            headers.contentType = MediaType.APPLICATION_JSON
+            headers.setBearerAuth(oAuthToken.accessToken)
+            val requestEntity = HttpEntity(UpdatePasswordRequest(updateRequest.newPassword), headers)
 
-        LOGGER.info("Updating user password, id=$userId")
+            LOGGER.info("Updating user password, id=${updateRequest.userId}")
 
-        restTemplate.exchange("https://geekhub.auth0.com/api/v2/users/$userId", HttpMethod.PATCH, requestEntity,
-                Auth0UserResponse::class.java).let { response ->
+            try {
+                restTemplate.exchange("https://geekhub.auth0.com/api/v2/users/${updateRequest.userId}", HttpMethod.PATCH, requestEntity,
+                        Auth0UserResponse::class.java).let { response ->
 
-            response.body?.let { userInfo ->
-                println(userInfo)
+                    println(response.statusCode)
+
+                    response.body?.let { userInfo ->
+                        println(userInfo)
+                    }
+                }
+            } catch (ex: HttpClientErrorException) {
+                throw BusinessException(ex.localizedMessage)
             }
         }
     }
@@ -162,7 +178,20 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
                           @field:JsonAlias("scope") val scope: String,
                           @field:JsonAlias("expires_in") val expireInSeconds: Int)
 
-    data class UpdateUserRequest(val name: String, val nickname: String, val connection: String = "Username-Password-Authentication")
+    data class UpdateUserRequest(val name: String,
+                                 val nickname: String,
+                                 @field:JsonProperty("user_metadata") val userMetadata: Map<String, Any>,
+                                 val connection: String = "Username-Password-Authentication")
 
     data class UpdatePasswordRequest(val password: String, val connection: String = "Username-Password-Authentication")
 }
+
+fun UpdateClientUserRequest.toUpdateUserRequest() = Auth0ManagementServiceImpl.UpdateUserRequest(
+        name = this.name,
+        nickname = this.nickname,
+        userMetadata = mapOf(
+                "companyName" to (this.companyName ?: ""),
+                "note" to (this.note ?: ""),
+                "socialProfiles" to this.toSocialProfiles()
+        )
+)

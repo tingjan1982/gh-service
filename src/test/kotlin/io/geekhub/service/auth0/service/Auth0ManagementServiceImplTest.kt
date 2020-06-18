@@ -2,10 +2,9 @@ package io.geekhub.service.auth0.service
 
 import assertk.all
 import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isGreaterThan
-import assertk.assertions.isNotNull
-import assertk.assertions.prop
+import assertk.assertions.*
+import io.geekhub.service.account.web.model.UpdateClientUserRequest
+import io.geekhub.service.account.web.model.UpdateUserPasswordRequest
 import io.geekhub.service.auth0.service.bean.Auth0User
 import io.geekhub.service.auth0.service.bean.Auth0UserResponse
 import io.geekhub.service.shared.annotation.IntegrationTest
@@ -43,12 +42,32 @@ internal class Auth0ManagementServiceImplTest(@Autowired val auth0ManagementServ
                 println(user)
                 this.user = user
 
-                auth0ManagementService.getUser(user.userId, it).run {
-                    assertThat(this.userId).isEqualTo(user.userId)
+                Auth0ManagementServiceImpl.UpdateUserRequest(name = "integration-test",
+                        nickname = "int",
+                        userMetadata = mapOf(
+                                "companyName" to "geekhub",
+                                "note" to "this is a brief description that i have added to describe me",
+                                "socialProfiles" to listOf(
+                                        UpdateClientUserRequest.SocialProfile("linkedIn", "https://linkedin.com/profile/integration-test")
+                                )
+                        )).let { request ->
+                    auth0ManagementService.updateUser(user.userId, request, it)
                 }
 
-                auth0ManagementService.updateUserPassword(user.userId, "integration1", it)
-                
+                auth0ManagementService.getUser(user.userId, it).run {
+                    assertThat(this.userId).isEqualTo(user.userId)
+                    assertThat(this.name).isEqualTo("integration-test")
+                    assertThat(this.nickname).isEqualTo("int")
+                    assertThat(this.userMetadata!!).hasSize(3)
+                }
+
+                UpdateUserPasswordRequest("integration", "integration1").apply {
+                    userId = user.userId
+                    email = user.email
+                }.let { request ->
+                    auth0ManagementService.updateUserPassword(request, it)
+                }
+
                 auth0ManagementService.getUserToken(user.email, "integration1").run {
                     println(this)
 
@@ -57,5 +76,4 @@ internal class Auth0ManagementServiceImplTest(@Autowired val auth0ManagementServ
             }
         }
     }
-
 }

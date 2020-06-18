@@ -7,7 +7,9 @@ interface ClientUserService {
 
     fun saveClientUser(clientUser: ClientUser): ClientUser
 
-    fun getClientUser(id: String): ClientUser?
+    fun lookupClientUser(id: String): ClientUser?
+
+    fun getClientUser(id: String): ClientUser
 
     fun getAuth0UserInfo(token: String): Auth0UserInfo
 }

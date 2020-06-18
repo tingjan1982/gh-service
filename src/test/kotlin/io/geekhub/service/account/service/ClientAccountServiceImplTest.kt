@@ -1,6 +1,5 @@
 package io.geekhub.service.account.service
 
-import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.auth0.service.Auth0ManagementService
 import io.geekhub.service.auth0.service.Auth0ManagementServiceImpl
 import io.geekhub.service.auth0.service.bean.Auth0User
@@ -8,7 +7,6 @@ import io.geekhub.service.auth0.service.bean.Auth0UserResponse
 import io.geekhub.service.shared.annotation.IntegrationTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @IntegrationTest
@@ -33,13 +31,5 @@ internal class ClientAccountServiceImplTest(@Autowired val clientAccountService:
     @AfterEach
     fun deleteUser() {
         auth0ManagementService.deleteUser(user.userId, oauthToken)
-    }
-
-    @Test
-    fun updatePassword() {
-
-        ClientAccount(id = user.userId, email = user.email, accountType = ClientAccount.AccountType.CORPORATE, planType = ClientAccount.PlanType.FREE, clientName = user.email).let {
-            clientAccountService.updatePassword(it, "%%90Stuauth0")
-        }
     }
 }

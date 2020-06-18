@@ -15,11 +15,4 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository, val auth
     override fun getClientAccount(id: String): ClientAccount? {
         return repository.findById(id).orElse(null)
     }
-
-    override fun updatePassword(clientAccount: ClientAccount, updatedPassword: String) {
-
-        auth0ManagementService.getManagementToken().let {
-            auth0ManagementService.updateUserPassword(clientAccount.id.toString(), updatedPassword, it)
-        }
-    }
 }

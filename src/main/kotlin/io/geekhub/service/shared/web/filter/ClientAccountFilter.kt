@@ -53,7 +53,7 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService, val cl
 
             if (principal is Jwt) {
                 val id = principal.claims["sub"] as String
-                clientUserService.getClientUser(id)?.let {
+                clientUserService.lookupClientUser(id)?.let {
                     return it
                 } ?: return syncClientUserInfo(principal)
             }

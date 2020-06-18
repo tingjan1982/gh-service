@@ -126,13 +126,14 @@ fun Interview.QuestionSnapshot.toDTO(showAnswer: Boolean) = InterviewResponse.Qu
 
 fun ClientAccount.toDTO() = ClientAccountResponse(this.id.toString(), this.clientName, this.email)
 
-fun ClientUser.toDTO() = ClientUserResponse(
+fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf()) = ClientUserResponse(
         id = this.id.toString(),
         email = this.email,
         name = this.name,
         nickname = this.nickname,
         avatar = this.avatar,
-        userType = this.userType
+        userType = this.userType,
+        metadata = metadata
 )
 
 fun SpecializationRequest.toEntity() = Specialization(

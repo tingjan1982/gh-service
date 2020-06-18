@@ -22,7 +22,13 @@ class ClientUserServiceImpl(val clientUserRepository: ClientUserRepository) : Cl
         return clientUserRepository.save(clientUser)
     }
 
-    override fun getClientUser(id: String): ClientUser? {
+    override fun getClientUser(id: String): ClientUser {
+        return clientUserRepository.findById(id).orElseThrow {
+            throw BusinessObjectNotFoundException(ClientUser::class, id)
+        }
+    }
+
+    override fun lookupClientUser(id: String): ClientUser? {
         return clientUserRepository.findById(id).orElse(null)
     }
 

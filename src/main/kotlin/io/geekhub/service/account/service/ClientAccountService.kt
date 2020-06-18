@@ -8,5 +8,4 @@ interface ClientAccountService {
 
     fun getClientAccount(id: String): ClientAccount?
 
-    fun updatePassword(clientAccount: ClientAccount, updatedPassword: String)
 }

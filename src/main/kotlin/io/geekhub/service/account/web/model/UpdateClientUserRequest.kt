@@ -1,8 +1,35 @@
 package io.geekhub.service.account.web.model
 
-import javax.validation.constraints.NotBlank
+import org.hibernate.validator.constraints.Length
 
 data class UpdateClientUserRequest(
-        @field:NotBlank val name: String,
-        @field:NotBlank val nickname: String
-)
+        val name: String,
+        val nickname: String,
+        @Length(min = 0, max = 100)
+        val companyName: String?,
+        @Length(min = 0, max = 1000)
+        val note: String?,
+        @Length(min = 0, max = 200)
+        val linkedIn: String?,
+        @Length(min = 0, max = 200)
+        val github: String?,
+        @Length(min = 0, max = 200)
+        val facebook: String?,
+        @Length(min = 0, max = 200)
+        val ig: String?,
+        @Length(min = 0, max = 200)
+        val twitter: String?
+) {
+
+    fun toSocialProfiles(): List<SocialProfile> {
+        return listOf(
+                SocialProfile("linkedIn", (this.linkedIn ?: "")),
+                SocialProfile("github", (this.github ?: "")),
+                SocialProfile("facebook", (this.facebook ?: "")),
+                SocialProfile("ig", (this.ig ?: "")),
+                SocialProfile("twitter", (this.twitter ?: ""))
+        )
+    }
+
+    data class SocialProfile(val name: String, val value: String)
+}
