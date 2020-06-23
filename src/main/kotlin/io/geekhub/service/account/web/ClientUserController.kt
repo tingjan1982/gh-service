@@ -28,7 +28,7 @@ class ClientUserController(val clientUserService: ClientUserService,
                            val likeService: LikeService,
                            val auth0ManagementService: Auth0ManagementService) {
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:[\\w|]+}")
     fun getUserProfile(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                        @PathVariable id: String): ClientUserResponse {
 
