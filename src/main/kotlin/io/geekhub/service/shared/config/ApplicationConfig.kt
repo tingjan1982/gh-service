@@ -5,6 +5,7 @@ import io.geekhub.service.account.repository.ClientAccountRepository
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.auth0.service.Auth0ApiProperties
 import io.geekhub.service.auth0.service.Auth0ManagementApiProperties
+import io.geekhub.service.binarystorage.data.BinaryFileRepository
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.interview.repository.InterviewSessionRepository
@@ -54,7 +55,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
     SpecializationRepository::class,
     InterviewRepository::class,
     InterviewSessionRepository::class,
-    LikeRecordRepository::class])
+    LikeRecordRepository::class,
+    BinaryFileRepository::class])
 @EnableMongoAuditing
 @EnableCaching
 @EnableSwagger2

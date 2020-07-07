@@ -1,5 +1,6 @@
 package io.geekhub.service.account.repository
 
+import io.geekhub.service.binarystorage.data.BinaryFile
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
@@ -18,7 +19,9 @@ data class ClientUser(
         var avatar: String? = null,
         val userType: UserType,
         @DBRef
-        var clientAccount: ClientAccount
+        var clientAccount: ClientAccount,
+        @DBRef
+        var avatarBinary: BinaryFile? = null
 ) {
 
     /**

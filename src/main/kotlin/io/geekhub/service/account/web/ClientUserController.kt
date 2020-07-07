@@ -7,6 +7,7 @@ import io.geekhub.service.account.web.model.UpdateClientUserRequest
 import io.geekhub.service.account.web.model.UpdateUserPasswordRequest
 import io.geekhub.service.auth0.service.Auth0ManagementService
 import io.geekhub.service.auth0.service.toUpdateUserRequest
+import io.geekhub.service.binarystorage.service.BinaryStorageService
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.interview.web.model.InterviewsResponse
@@ -17,8 +18,11 @@ import io.geekhub.service.shared.extensions.toLightDTO
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_USER_KEY
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
+import org.springframework.util.FileCopyUtils
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.util.UriComponentsBuilder
+import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
 
 @RestController
@@ -26,7 +30,18 @@ import javax.validation.Valid
 class ClientUserController(val clientUserService: ClientUserService,
                            val interviewService: InterviewService,
                            val likeService: LikeService,
-                           val auth0ManagementService: Auth0ManagementService) {
+                           val auth0ManagementService: Auth0ManagementService,
+                           val binaryStorageService: BinaryStorageService) {
+
+    @GetMapping("/me")
+    fun getMyProfile(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser): ClientUserResponse {
+
+        auth0ManagementService.getManagementToken().let { token ->
+            auth0ManagementService.getUser(clientUser.id.toString(), token).let { auth0User ->
+                return clientUser.toDTO(auth0User.userMetadata)
+            }
+        }
+    }
 
     @GetMapping("/{id:[\\w|]+}")
     fun getUserProfile(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
@@ -59,6 +74,37 @@ class ClientUserController(val clientUserService: ClientUserService,
         }
     }
 
+    @GetMapping("/me/avatar")
+    fun getAvatar(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+                  response: HttpServletResponse) {
+
+        clientUser.avatarBinary?.let {
+            FileCopyUtils.copy(it.binary.data, response.outputStream);
+        } ?: run {
+            response.status = 204
+        }
+
+
+    }
+
+    @PostMapping("/me/avatar")
+    fun uploadAvatar(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+                     @RequestParam("file") multipartFile: MultipartFile): ClientUserResponse {
+
+        return binaryStorageService.saveClientUserAvatar(clientUser, multipartFile).toDTO()
+    }
+
+    @DeleteMapping("/me/avatar")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteAvatar(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser) {
+
+        clientUser.avatarBinary?.let {
+            binaryStorageService.deleteBinary(it)
+            clientUser.avatarBinary = null
+            clientUserService.saveClientUser(clientUser)
+        }
+    }
+
     @PostMapping("/me/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun updateUserPassword(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
@@ -76,6 +122,11 @@ class ClientUserController(val clientUserService: ClientUserService,
         auth0ManagementService.getManagementToken().let {
             auth0ManagementService.updateUserPassword(updatePasswordRequest, it)
         }
+    }
+
+    @GetMapping("/{id:[\\w|]+}/ownedInterviews")
+    fun getOwnedInterviews(@PathVariable id: String) {
+
     }
 
     @GetMapping("/{id:[\\w|]+}/likedInterviews")
