@@ -23,8 +23,7 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService, val cl
         private val GUEST_CLIENT_ACCOUNT = ClientAccount("guest",
                 ClientAccount.AccountType.INDIVIDUAL,
                 ClientAccount.PlanType.FREE,
-                "guest",
-                "guest@geekhub.tw")
+                "guest")
 
         private val GUEST_CLIENT_USER = ClientUser(id = "guest",
                 email = "guest@geekhub.tw",
@@ -68,7 +67,7 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService, val cl
         val email = jwt.claims["https://api.geekhub.tw/email"] as String
 
         clientUserService.getAuth0UserInfo(jwt.tokenValue).let {
-            ClientAccount(id, ClientAccount.AccountType.INDIVIDUAL, ClientAccount.PlanType.FREE, it.name, it.email, it.picture).let { account ->
+            ClientAccount(id, ClientAccount.AccountType.INDIVIDUAL, ClientAccount.PlanType.FREE, it.name).let { account ->
                 clientAccountService.saveClientAccount(account)
 
                 ClientUser(id, it.email, it.name, it.nickname, it.picture, it.getUserType(), account).let { user ->
