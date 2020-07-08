@@ -9,6 +9,10 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import javax.transaction.Transactional
 
+/**
+ * https://www.baeldung.com/spring-boot-mongodb-upload-file
+ * https://stackoverflow.com/questions/4796914/store-images-in-a-mongodb-database/4800186
+ */
 @Service
 @Transactional
 class BinaryStorageServiceImpl(val binaryFileRepository: BinaryFileRepository,

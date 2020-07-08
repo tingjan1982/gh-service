@@ -13,12 +13,9 @@ data class ClientAccount(
         @Id
         var id: String? = null,
         var accountType: AccountType,
-        var planType: PlanType? = null,
-        var clientName: String, // e.g. corporate name
-        // todo: can be removed once migrated to client user.
-        var email: String,
-        // todo: can be removed once migrated to client user.
-        var avatar: String? = null) {
+        var planType: PlanType,
+        var clientName: String // e.g. corporate name
+) {
 
     enum class AccountType {
         CORPORATE, INDIVIDUAL

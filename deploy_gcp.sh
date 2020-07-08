@@ -21,4 +21,4 @@ gcloud container clusters get-credentials gh-cluster --zone asia-east1-b --proje
 kubectl set env deployment/gh-service PROFILE=gcp
 kubectl scale deployment gh-service --replicas=0
 kubectl scale deployment gh-service --replicas=1
-kubectl get services gh-service
+kubectl get services gh-service-nodeport
