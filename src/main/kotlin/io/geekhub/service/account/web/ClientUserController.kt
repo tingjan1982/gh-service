@@ -15,6 +15,7 @@ import io.geekhub.service.likes.service.LikeService
 import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toLightDTO
+import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_USER_KEY
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
@@ -125,8 +126,26 @@ class ClientUserController(val clientUserService: ClientUserService,
     }
 
     @GetMapping("/{id:[\\w|]+}/ownedInterviews")
-    fun getOwnedInterviews(@PathVariable id: String) {
+    fun getOwnedInterviews(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+                           @PathVariable id: String,
+                           @RequestParam("page", defaultValue = "0") page: Int,
+                           @RequestParam("pageSize", defaultValue = "20") pageSize: Int,
+                           uriComponentsBuilder: UriComponentsBuilder): InterviewsResponse {
 
+        clientUserService.getClientUser(id).let {
+            val requestMap = mapOf("owner" to "true", "page" to page.toString(), "pageSize" to pageSize.toString())
+            interviewService.getInterviews(SearchCriteria.fromRequestParameters(clientUser, requestMap)).let { result ->
+                val navigationLinkBuilder = uriComponentsBuilder.path("/interviews").let {
+                    requestMap.forEach { entry ->
+                        it.queryParam(entry.key, entry.value)
+                    }
+
+                    it
+                }
+
+                return InterviewsResponse(result.map { it.toLightDTO() }, navigationLinkBuilder)
+            }
+        }
     }
 
     @GetMapping("/{id:[\\w|]+}/likedInterviews")
