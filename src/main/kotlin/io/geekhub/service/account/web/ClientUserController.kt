@@ -1,10 +1,9 @@
 package io.geekhub.service.account.web
 
 import io.geekhub.service.account.repository.ClientUser
+import io.geekhub.service.account.service.ClientAccountService
 import io.geekhub.service.account.service.ClientUserService
-import io.geekhub.service.account.web.model.ClientUserResponse
-import io.geekhub.service.account.web.model.UpdateClientUserRequest
-import io.geekhub.service.account.web.model.UpdateUserPasswordRequest
+import io.geekhub.service.account.web.model.*
 import io.geekhub.service.auth0.service.Auth0ManagementService
 import io.geekhub.service.auth0.service.toUpdateUserRequest
 import io.geekhub.service.binarystorage.service.BinaryStorageService
@@ -29,6 +28,7 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/users")
 class ClientUserController(val clientUserService: ClientUserService,
+                           val clientAccountService: ClientAccountService,
                            val interviewService: InterviewService,
                            val likeService: LikeService,
                            val auth0ManagementService: Auth0ManagementService,
@@ -75,6 +75,27 @@ class ClientUserController(val clientUserService: ClientUserService,
         }
     }
 
+    @PostMapping("/me/organization")
+    fun enableOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+                           @Valid @RequestBody request: EnableOrganizationRequest): ClientAccountResponse {
+
+        return clientAccountService.enableOrganization(clientUser, request.organizationName).toDTO()
+    }
+
+    @PostMapping("/me/organization/invite")
+    fun inviteClientUser(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+                         @Valid @RequestBody request: InviteOrganizationUserRequest): ClientAccountResponse {
+
+        return clientAccountService.inviteOrganizationUser(clientUser, request.email).toDTO()
+    }
+
+    @DeleteMapping("/me/organization/invite/{email}")
+    fun uninviteClientUser(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+                           @PathVariable email: String): ClientAccountResponse {
+
+        return clientAccountService.uninviteOrganizationUser(clientUser, email).toDTO()
+    }
+
     @GetMapping("/me/avatar")
     fun getAvatar(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                   response: HttpServletResponse) {
@@ -84,8 +105,6 @@ class ClientUserController(val clientUserService: ClientUserService,
         } ?: run {
             response.status = 204
         }
-
-
     }
 
     @PostMapping("/me/avatar")

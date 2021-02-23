@@ -125,10 +125,12 @@ fun Interview.QuestionSnapshot.toDTO(showAnswer: Boolean) = InterviewResponse.Qu
 )
 
 fun ClientAccount.toDTO() = ClientAccountResponse(
-        this.id.toString(),
-        this.clientName,
-        this.accountType,
-        this.planType)
+    this.id.toString(),
+    this.clientName,
+    this.accountType,
+    this.planType,
+    this.userInvitations
+)
 
 fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf()) = ClientUserResponse(
         id = this.id.toString(),

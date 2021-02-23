@@ -14,8 +14,21 @@ data class ClientAccount(
         var id: String? = null,
         var accountType: AccountType,
         var planType: PlanType,
-        var clientName: String // e.g. corporate name
+        var clientName: String, // e.g. corporate name
+        val userInvitations: MutableList<UserInvitation> = mutableListOf()
 ) {
+    fun addUserInvitation(userInvitation: UserInvitation): ClientAccount {
+        userInvitations.add(userInvitation)
+        return this
+    }
+
+    fun removeUserInvitation(email: String): ClientAccount {
+        userInvitations.removeIf {
+            it.email == email && it.status != InvitationStatus.JOINED
+        }
+
+        return this
+    }
 
     enum class AccountType {
         CORPORATE, INDIVIDUAL
@@ -23,5 +36,14 @@ data class ClientAccount(
 
     enum class PlanType {
         FREE, PREMIUM
+    }
+
+    data class UserInvitation(
+        val email: String,
+        var status: InvitationStatus = InvitationStatus.INVITED
+    )
+
+    enum class InvitationStatus {
+        INVITED, JOINED
     }
 }

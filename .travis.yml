@@ -24,3 +24,6 @@ after_script:
 notifications:
   slack:
     secure: kdgU7pV+SKtbKTVuGDKao9aFisScJ/+g830aolnr1O/RrQ9/s8jeLiJL7D83lD8RywFvVb0/VKEYn2gArOmzBJjLse1/q/F9Dpwf01+EgPf94DcZ4vctqdslS1kqLBvSa8dwaawAkblh2/JSB+WaFfCBuOLMzBCkf3oQ6K2b+Iuo9WaqCwA4jJ/fspTwEgCKK8o0Yo64i8I6TFLmGf4hou46iOqQ6HmJXH9jg2TdsvX5WozGnuLHGX+B9fQBHh4lDEb91uh4Jx37AYa7GhwiWij7+sZV7wwLf08NKpBhb0ttCp2/Wfh8bX28UiAmTCL990puY9jZ4bTMXbAShh5d60qXKrMY2rtn/fD+/ZjsL+4hTNOI2eKjqR8zEFFDT8VHXk7T5YKGMkQ+J7GqbkFdBitiimT76XfdbGa+zK+ibtTFhLGNYZN1+OULxdk04odwskh8pHxVfh7an1jtOlF1bLVA21EhcV9I35Vj0g6ZGjBQ0ye9sEG0xxXxQn2c314Rtz/1mIvecH3QnI9p5OL+M1Kt0ZT3eyTb2ORzy9PtDalBYErhzjxxB7b/fo2+rroZP2UjXPFfO+exFY6hS4nYCldb0/Vjd8iqLuNL7NCofKJ0pfi7/sftlqd4kPqNFgqcYI73/NyY786V3izO+AL1k8svNgRXDBRvdhVPESuJpEA=
+    template:
+      - "%{repository_slug} (%{commit}) : %{message}"
+      - "Build <%{build_url}|#%{build_number}> (<%{compare_url}|%{commit}>) of %{repository_slug}@%{branch} by %{author} %{result} in %{duration}"

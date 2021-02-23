@@ -18,6 +18,7 @@ data class ClientUser(
         var nickname: String,
         var avatar: String? = null,
         val userType: UserType,
+        var accountOwner: Boolean = true,
         @DBRef
         var clientAccount: ClientAccount,
         @DBRef
@@ -30,5 +31,9 @@ data class ClientUser(
      */
     enum class UserType {
         AUTH0, GITHUB
+    }
+
+    fun hasOrganizationAccess(): Boolean {
+        return accountOwner
     }
 }

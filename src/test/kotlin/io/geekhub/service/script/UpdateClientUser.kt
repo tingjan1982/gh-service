@@ -98,7 +98,7 @@ class UpdateClientUser {
     @Test
     @WithMockUser("script.UpdateClientUser")
     fun run() {
-        `update client account's default plan type and create default client user`()
+//        `update client account's default plan type and create default client user`()
         `update question's client user reference`()
         `update interview's client user reference`()
         `update interview session's client user reference`()
@@ -229,35 +229,35 @@ class UpdateClientUser {
         }
     }
 
-    private fun `update client account's default plan type and create default client user`() {
-
-        clientAccountRepository.count().run {
-            println("Found $this records, updating these client accounts")
-        }
-
-        clientAccountRepository.findAll().forEach {
-
-            if (it.planType == null) {
-                it.planType = ClientAccount.PlanType.FREE
-                clientAccountRepository.save(it)
-
-                println("Updated client account ${it.id}=${it.email}")
-            }
-
-            if (clientUserRepository.findById(it.id.toString()).isEmpty) {
-
-                val userType = if (it.id.toString().startsWith("github"))
-                    ClientUser.UserType.GITHUB
-                else
-                    ClientUser.UserType.AUTH0
-
-                ClientUser(it.id, it.email, it.clientName, it.clientName, it.avatar, userType, it).let { user ->
-                    clientUserRepository.save(user)
-                    println("Created default client user for ${it.id}")
-                }
-            }
-
-            assertThat(clientUserRepository.findById(it.id.toString())).isNotNull()
-        }
-    }
+//    private fun `update client account's default plan type and create default client user`() {
+//
+//        clientAccountRepository.count().run {
+//            println("Found $this records, updating these client accounts")
+//        }
+//
+//        clientAccountRepository.findAll().forEach {
+//
+//            if (it.planType == null) {
+//                it.planType = ClientAccount.PlanType.FREE
+//                clientAccountRepository.save(it)
+//
+//                println("Updated client account ${it.id}=${it.email}")
+//            }
+//
+//            if (clientUserRepository.findById(it.id.toString()).isEmpty) {
+//
+//                val userType = if (it.id.toString().startsWith("github"))
+//                    ClientUser.UserType.GITHUB
+//                else
+//                    ClientUser.UserType.AUTH0
+//
+//                ClientUser(it.id, it.email, it.clientName, it.clientName, it.avatar, userType, it).let { user ->
+//                    clientUserRepository.save(user)
+//                    println("Created default client user for ${it.id}")
+//                }
+//            }
+//
+//            assertThat(clientUserRepository.findById(it.id.toString())).isNotNull()
+//        }
+//    }
 }

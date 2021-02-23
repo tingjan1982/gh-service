@@ -11,8 +11,7 @@ object DummyObject {
 
     fun dummyClient() = ClientAccount(accountType = ClientAccount.AccountType.CORPORATE,
             planType = ClientAccount.PlanType.FREE,
-            clientName = "Test Client Account",
-            email = "test@geekhub.tw"
+            clientName = "Test Client Account"
     )
 
     fun dummyClientUser(clientAccount: ClientAccount) = ClientUser(
