@@ -39,7 +39,9 @@ class ClientUserController(val clientUserService: ClientUserService,
 
         auth0ManagementService.getManagementToken().let { token ->
             auth0ManagementService.getUser(clientUser.id.toString(), token).let { auth0User ->
-                return clientUser.toDTO(auth0User.userMetadata)
+                val invitedCorporateAccounts = clientAccountService.getInvitedCorporateAccounts(clientUser.email).map { it.toDTO() }.toMutableList()
+
+                return clientUser.toDTO(auth0User.userMetadata, invitedCorporateAccounts)
             }
         }
     }
@@ -82,18 +84,20 @@ class ClientUserController(val clientUserService: ClientUserService,
         return clientAccountService.enableOrganization(clientUser, request.organizationName).toDTO()
     }
 
-    @PostMapping("/me/organization/invite")
-    fun inviteClientUser(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                         @Valid @RequestBody request: InviteOrganizationUserRequest): ClientAccountResponse {
+    @PostMapping("/me/organization/join")
+    fun joinOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+                         @Valid @RequestBody request: JoinOrganizationRequest): ClientAccountResponse {
 
-        return clientAccountService.inviteOrganizationUser(clientUser, request.email).toDTO()
+        clientAccountService.getClientAccount(request.organizationId).let {
+            return clientAccountService.joinOrganization(clientUser, it).toDTO()
+        }
     }
 
-    @DeleteMapping("/me/organization/invite/{email}")
-    fun uninviteClientUser(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                           @PathVariable email: String): ClientAccountResponse {
+    @DeleteMapping("/me/organization")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun leaveOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser) {
 
-        return clientAccountService.uninviteOrganizationUser(clientUser, email).toDTO()
+        clientAccountService.leaveOrganization(clientUser)
     }
 
     @GetMapping("/me/avatar")

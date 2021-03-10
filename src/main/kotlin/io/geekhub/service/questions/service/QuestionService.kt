@@ -1,5 +1,6 @@
 package io.geekhub.service.questions.service
 
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.model.Question.QuestionAttribute
 import io.geekhub.service.shared.model.SearchCriteria
@@ -12,6 +13,8 @@ interface QuestionService {
     fun getQuestion(id: String): Question
 
     fun getQuestions(searchCriteria: SearchCriteria): Page<Question>
+
+    fun getQuestions(clientUser: ClientUser): List<Question>
 
     /**
      * Save or update attribute in Question and return fully loaded question.

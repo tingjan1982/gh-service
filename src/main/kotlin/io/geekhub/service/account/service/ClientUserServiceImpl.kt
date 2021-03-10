@@ -1,6 +1,7 @@
 package io.geekhub.service.account.service
 
 import io.geekhub.service.account.repository.Auth0UserInfo
+import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.account.repository.ClientUserRepository
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
@@ -32,6 +33,11 @@ class ClientUserServiceImpl(val clientUserRepository: ClientUserRepository) : Cl
         return clientUserRepository.findById(id).orElse(null)
     }
 
+    override fun getClientAccountOwner(clientAccount: ClientAccount): ClientUser {
+        return clientUserRepository.findByClientAccountAndAccountPrivilege(clientAccount, ClientUser.AccountPrivilege.OWNER)
+            ?: throw BusinessObjectNotFoundException(ClientUser::class, "owner")
+    }
+
     /**
      * todo: check that the passed in token contains the required scope: openid profile email
      */
@@ -42,11 +48,12 @@ class ClientUserServiceImpl(val clientUserRepository: ClientUserRepository) : Cl
         headers.setBearerAuth(token)
         val requestEntity = HttpEntity<Void>(headers)
 
-        restTemplate.exchange("https://geekhub.auth0.com/userinfo", HttpMethod.GET, requestEntity, Auth0UserInfo::class.java).let { response ->
-            response.body?.let { userInfo ->
-                return userInfo
+        restTemplate.exchange("https://geekhub.auth0.com/userinfo", HttpMethod.GET, requestEntity, Auth0UserInfo::class.java)
+            .let { response ->
+                response.body?.let { userInfo ->
+                    return userInfo
 
-            } ?: throw BusinessObjectNotFoundException(Auth0UserInfo::class, token)
-        }
+                } ?: throw BusinessObjectNotFoundException(Auth0UserInfo::class, token)
+            }
     }
 }

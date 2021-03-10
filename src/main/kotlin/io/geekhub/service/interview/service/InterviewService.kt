@@ -1,5 +1,6 @@
 package io.geekhub.service.interview.service
 
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.PublishedInterview
 import io.geekhub.service.shared.model.SearchCriteria
@@ -20,4 +21,6 @@ interface InterviewService {
     fun deleteInterview(id: String)
 
     fun getInterviews(searchCriteria: SearchCriteria): Page<Interview>
+
+    fun getInterviews(clientUser: ClientUser): List<Interview>
 }

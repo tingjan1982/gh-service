@@ -13,9 +13,9 @@ data class ClientAccount(
         @Id
         var id: String? = null,
         var accountType: AccountType,
-        var planType: PlanType,
+        var planType: PlanType, // todo: move plan to another class
         var clientName: String, // e.g. corporate name
-        val userInvitations: MutableList<UserInvitation> = mutableListOf()
+        val userInvitations: MutableSet<UserInvitation> = mutableSetOf()
 ) {
     fun addUserInvitation(userInvitation: UserInvitation): ClientAccount {
         userInvitations.add(userInvitation)
@@ -28,6 +28,14 @@ data class ClientAccount(
         }
 
         return this
+    }
+
+    fun userInvitationJoined(email: String) {
+        userInvitations.forEach {
+            if (it.email == email) {
+                it.status = InvitationStatus.JOINED
+            }
+        }
     }
 
     enum class AccountType {

@@ -1,5 +1,6 @@
 package io.geekhub.service.interview.repository
 
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.specialization.repository.Specialization
 import org.springframework.data.repository.PagingAndSortingRepository
@@ -7,4 +8,6 @@ import org.springframework.data.repository.PagingAndSortingRepository
 interface InterviewRepository : PagingAndSortingRepository<Interview, String> {
 
     fun countBySpecialization(specialization: Specialization): Long
+
+    fun findAllByClientUser(clientUser: ClientUser): List<Interview>
 }

@@ -22,6 +22,8 @@ data class Question(
         var jobTitle: String?,
         @DBRef
         var clientUser: ClientUser,
+//        @DBRef
+//        var clientAccount: ClientAccount?, // optional - represent user's corporate account
         @DBRef
         var specialization: Specialization? = null,
         var visibility: Visibility = Visibility.PUBLIC,

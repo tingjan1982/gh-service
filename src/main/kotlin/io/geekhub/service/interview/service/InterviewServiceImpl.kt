@@ -1,5 +1,6 @@
 package io.geekhub.service.interview.service
 
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.PublishedInterview
 import io.geekhub.service.interview.repository.InterviewRepository
@@ -108,5 +109,9 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
 
             return PageImpl(results, searchCriteria.pageRequest, count)
         }
+    }
+
+    override fun getInterviews(clientUser: ClientUser): List<Interview> {
+        return interviewRepository.findAllByClientUser(clientUser)
     }
 }

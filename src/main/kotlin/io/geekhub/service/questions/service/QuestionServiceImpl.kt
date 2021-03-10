@@ -1,5 +1,6 @@
 package io.geekhub.service.questions.service
 
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.model.Question.QuestionAttribute
 import io.geekhub.service.questions.repository.QuestionRepository
@@ -52,6 +53,10 @@ class QuestionServiceImpl(val mongoTemplate: MongoTemplate,
 
             return PageImpl(results, searchCriteria.pageRequest, count)
         }
+    }
+
+    override fun getQuestions(clientUser: ClientUser): List<Question> {
+        return questionRepository.findAllByClientUser(clientUser);
     }
 
     override fun deleteQuestion(id: String) {

@@ -11,19 +11,18 @@ import org.springframework.data.mongodb.core.mapping.Document
  */
 @Document
 data class ClientUser(
-        @Id
-        var id: String? = null,
-        var email: String,
-        var name: String,
-        var nickname: String,
-        var avatar: String? = null,
-        val userType: UserType,
-        var accountOwner: Boolean = true,
-        @DBRef
-        var clientAccount: ClientAccount,
-        @DBRef
-        var avatarBinary: BinaryFile? = null
-) {
+    @Id
+    var id: String? = null,
+    var email: String,
+    var name: String,
+    var nickname: String,
+    var avatar: String? = null,
+    val userType: UserType,
+    var accountPrivilege: AccountPrivilege = AccountPrivilege.OWNER,
+    @DBRef
+    var clientAccount: ClientAccount,
+    @DBRef
+    var avatarBinary: BinaryFile? = null) {
 
     /**
      * UserType will allow the system to determine if user profile information can be updated and synced
@@ -33,7 +32,21 @@ data class ClientUser(
         AUTH0, GITHUB
     }
 
-    fun hasOrganizationAccess(): Boolean {
-        return accountOwner
+    enum class AccountPrivilege {
+
+        /**
+         * Organization owner.
+         */
+        OWNER,
+
+        /**
+         * Administrator.
+         */
+        ADMIN,
+
+        /**
+         * Standard user.
+         */
+        USER
     }
 }

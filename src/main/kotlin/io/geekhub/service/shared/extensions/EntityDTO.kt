@@ -3,6 +3,7 @@ package io.geekhub.service.shared.extensions
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.account.web.model.ClientAccountResponse
+import io.geekhub.service.account.web.model.ClientOrganizationResponse
 import io.geekhub.service.account.web.model.ClientUserResponse
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.web.model.InterviewRequest
@@ -132,14 +133,21 @@ fun ClientAccount.toDTO() = ClientAccountResponse(
     this.userInvitations
 )
 
-fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf()) = ClientUserResponse(
+fun ClientAccount.toOrganization() = ClientOrganizationResponse(
+        this.id.toString(),
+        this.clientName,
+        this.userInvitations
+)
+
+fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf(), invitations: List<ClientAccountResponse> = listOf()) = ClientUserResponse(
         id = this.id.toString(),
         email = this.email,
         name = this.name,
         nickname = this.nickname,
         avatar = this.avatar,
         userType = this.userType,
-        metadata = metadata
+        metadata = metadata,
+        invitations = invitations
 )
 
 fun SpecializationRequest.toEntity() = Specialization(

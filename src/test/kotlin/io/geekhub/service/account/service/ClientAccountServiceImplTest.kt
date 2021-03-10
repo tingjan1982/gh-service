@@ -14,6 +14,7 @@ import io.geekhub.service.shared.annotation.IntegrationTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 
 @IntegrationTest
@@ -38,7 +39,14 @@ internal class ClientAccountServiceImplTest(@Autowired val clientAccountService:
                 ClientAccount(user.userId, ClientAccount.AccountType.INDIVIDUAL, ClientAccount.PlanType.FREE, user.name).let { account ->
                     clientAccountService.saveClientAccount(account)
 
-                    ClientUser(user.userId, user.email, user.name, user.nickname, user.picture, ClientUser.UserType.AUTH0, true, account).let { user ->
+                    ClientUser(user.userId,
+                        user.email,
+                        user.name,
+                        user.nickname,
+                        user.picture,
+                        ClientUser.UserType.AUTH0,
+                        ClientUser.AccountPrivilege.OWNER,
+                        account).let { user ->
                         clientUser = clientUserService.saveClientUser(user)
                     }
                 }
@@ -60,12 +68,56 @@ internal class ClientAccountServiceImplTest(@Autowired val clientAccountService:
             assertThat(it.clientName).isEqualTo(orgName)
         }
 
-        clientAccountService.inviteOrganizationUser(clientUser, "user1@gmail.com").also {
+        assertThat(clientUser.accountPrivilege).isEqualTo(ClientUser.AccountPrivilege.OWNER)
+
+        clientAccountService.inviteOrganizationUser(clientUser, clientUser.clientAccount, "user1@gmail.com")
+        clientAccountService.inviteOrganizationUser(clientUser, clientUser.clientAccount, "user1@gmail.com").also {
             assertThat(it.userInvitations).hasSize(1)
         }
 
-        clientAccountService.uninviteOrganizationUser(clientUser, "user1@gmail.com").also {
+        clientAccountService.getInvitedCorporateAccounts("user1@gmail.com").also {
+            assertThat(it).hasSize(1)
+        }
+
+        clientAccountService.uninviteOrganizationUser(clientUser, clientUser.clientAccount, "user1@gmail.com").also {
             assertThat(it.userInvitations).isEmpty()
+        }
+
+        val name = "Joe"
+        val email = "joelin@geekhub.tw"
+
+        val user = ClientAccount(accountType = ClientAccount.AccountType.INDIVIDUAL,
+            clientName = name,
+            planType = ClientAccount.PlanType.FREE).let {
+            clientAccountService.saveClientAccount(it)
+
+            return@let ClientUser(it.id,
+                email,
+                name,
+                name,
+                null,
+                ClientUser.UserType.AUTH0,
+                ClientUser.AccountPrivilege.OWNER,
+                it).let { user ->
+                clientUserService.saveClientUser(user)
+            }
+        }
+
+        clientAccountService.joinOrganization(user, clientUser.clientAccount)
+
+        clientUserService.getClientUser(user.id.toString()).also {
+            assertThat(it.clientAccount).isEqualTo(clientUser.clientAccount)
+            assertThat(it.accountPrivilege).isEqualTo(ClientUser.AccountPrivilege.USER)
+        }
+
+        clientAccountService.leaveOrganization(user)
+
+        clientUserService.getClientUser(user.id.toString()).also {
+            assertThat(it.clientAccount.accountType).isEqualTo(ClientAccount.AccountType.INDIVIDUAL)
+        }
+
+        assertDoesNotThrow {
+            clientAccountService.getClientOrganizationAccount(clientUser.clientAccount.id.toString())
         }
     }
 }

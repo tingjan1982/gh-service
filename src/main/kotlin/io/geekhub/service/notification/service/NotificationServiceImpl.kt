@@ -49,7 +49,7 @@ class NotificationServiceImpl(@Value("\${spring.mail.password}") val apiKey: Str
             this.contentType = MediaType.APPLICATION_JSON
         }
 
-        val requestEntity = HttpEntity<SendGridRequest>(emailRequest, headers)
+        val requestEntity = HttpEntity(emailRequest, headers)
 
         restTemplate.exchange("https://api.sendgrid.com/v3/mail/send", HttpMethod.POST, requestEntity, String::class.java).run {
             LOGGER.debug(this.body)
