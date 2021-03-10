@@ -61,13 +61,20 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
 @EnableCaching
 @EnableSwagger2
 @EnableConfigurationProperties(Auth0ManagementApiProperties::class, Auth0ApiProperties::class)
-class ApplicationConfig(val mongoTemplate: MongoTemplate, val mongoMappingContext: MongoMappingContext, val clientAccountFilter: ClientAccountFilter) {
+class ApplicationConfig(val mongoTemplate: MongoTemplate,
+                        val mongoMappingContext: MongoMappingContext,
+                        val clientAccountFilter: ClientAccountFilter) {
 
     @Bean
     fun loggingFilter(): FilterRegistrationBean<ClientAccountFilter> {
         val registrationBean = FilterRegistrationBean<ClientAccountFilter>();
         registrationBean.filter = clientAccountFilter;
-        registrationBean.addUrlPatterns("/users/*", "/organizations/*", "/questions/*", "/interviews/*", "/publishedInterviews/*", "/interviewSessions/*");
+        registrationBean.addUrlPatterns("/users/*",
+            "/organizations/*",
+            "/questions/*",
+            "/interviews/*",
+            "/publishedInterviews/*",
+            "/interviewSessions/*");
 
         return registrationBean;
     }
@@ -104,14 +111,14 @@ class ApplicationConfig(val mongoTemplate: MongoTemplate, val mongoMappingContex
     fun api(): Docket {
         val basicAuthScheme = BasicAuth("geekhub")
         return Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("io.geekhub.service"))
-                .paths(PathSelectors.any())
-                .build()
-                .apiInfo(apiInfo())
-                .securitySchemes(listOf(basicAuthScheme))
-                .ignoredParameterTypes(ClientAccount::class.java)
-                .ignoredParameterTypes(ClientUser::class.java)
+            .select()
+            .apis(RequestHandlerSelectors.basePackage("io.geekhub.service"))
+            .paths(PathSelectors.any())
+            .build()
+            .apiInfo(apiInfo())
+            .securitySchemes(listOf(basicAuthScheme))
+            .ignoredParameterTypes(ClientAccount::class.java)
+            .ignoredParameterTypes(ClientUser::class.java)
     }
 
     /**
@@ -120,12 +127,12 @@ class ApplicationConfig(val mongoTemplate: MongoTemplate, val mongoMappingContex
      */
     private fun apiInfo(): ApiInfo {
         return ApiInfo(
-                "GeekHub REST API",
-                "GeekHub API Backend",
-                "0.1.0",
-                "Terms of service",
-                Contact("Joe Lin", "www.geekhub.io", "tingjan1982@geekhub.io"),
-                "Copyright (c) 2018 Joe Lin", "",
-                setOf())
+            "GeekHub REST API",
+            "GeekHub API Backend",
+            "0.1.0",
+            "Terms of service",
+            Contact("Joe Lin", "www.geekhub.io", "tingjan1982@geekhub.io"),
+            "Copyright (c) 2018 Joe Lin", "",
+            setOf())
     }
 }

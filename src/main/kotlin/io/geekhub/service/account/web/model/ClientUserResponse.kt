@@ -9,6 +9,8 @@ data class ClientUserResponse(
         val nickname: String,
         val avatar: String?,
         val userType: ClientUser.UserType,
+        val accountPrivilege: ClientUser.AccountPrivilege,
+        val organization: ClientOrganizationResponse?,
         val metadata: Map<String, Any>? = mapOf(),
-        val invitations: List<ClientAccountResponse>
+        val invitations: List<UserInvitationResponse>
 )

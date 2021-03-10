@@ -7,5 +7,5 @@ data class ClientAccountResponse(
     val clientName: String,
     val accountType: ClientAccount.AccountType,
     val planType: ClientAccount.PlanType,
-    val userInvitations: Set<ClientAccount.UserInvitation>)
+    val userInvitations: Set<UserInvitationResponse>)
 

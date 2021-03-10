@@ -56,4 +56,8 @@ class ClientUserServiceImpl(val clientUserRepository: ClientUserRepository) : Cl
                 } ?: throw BusinessObjectNotFoundException(Auth0UserInfo::class, token)
             }
     }
+
+    override fun getClientUsers(clientAccount: ClientAccount): List<ClientUser> {
+        return clientUserRepository.findAllByClientAccount(clientAccount)
+    }
 }

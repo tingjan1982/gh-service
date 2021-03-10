@@ -15,27 +15,25 @@ data class ClientAccount(
         var accountType: AccountType,
         var planType: PlanType, // todo: move plan to another class
         var clientName: String, // e.g. corporate name
-        val userInvitations: MutableSet<UserInvitation> = mutableSetOf()
-) {
-    fun addUserInvitation(userInvitation: UserInvitation): ClientAccount {
-        userInvitations.add(userInvitation)
+        val userInvitations: MutableSet<UserInvitation> = mutableSetOf()) {
+
+    fun addUserInvitation(inviter: ClientUser, email: String): ClientAccount {
+        userInvitations.add(UserInvitation(inviter.id.toString(), inviter.name, inviter.email, inviter.clientAccount.clientName, email))
+
         return this
     }
 
     fun removeUserInvitation(email: String): ClientAccount {
         userInvitations.removeIf {
-            it.email == email && it.status != InvitationStatus.JOINED
+            it.email == email
         }
 
         return this
     }
 
     fun userInvitationJoined(email: String) {
-        userInvitations.forEach {
-            if (it.email == email) {
-                it.status = InvitationStatus.JOINED
-            }
-        }
+
+        removeUserInvitation(email)
     }
 
     enum class AccountType {
@@ -47,11 +45,10 @@ data class ClientAccount(
     }
 
     data class UserInvitation(
-        val email: String,
-        var status: InvitationStatus = InvitationStatus.INVITED
+        val inviterId: String,
+        val inviterName: String,
+        val inviterEmail: String,
+        val inviterOrganization: String,
+        val email: String
     )
-
-    enum class InvitationStatus {
-        INVITED, JOINED
-    }
 }

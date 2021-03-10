@@ -5,5 +5,6 @@ import io.geekhub.service.account.repository.ClientAccount
 data class ClientOrganizationResponse(
     val id: String,
     val organizationName: String,
-    val userInvitations: Set<ClientAccount.UserInvitation>
+    val userInvitations: Set<ClientAccount.UserInvitation>,
+    val users: List<LightClientUserResponse>
 )

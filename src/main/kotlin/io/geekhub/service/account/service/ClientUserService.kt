@@ -15,4 +15,6 @@ interface ClientUserService {
     fun getClientAccountOwner(clientAccount: ClientAccount): ClientUser
 
     fun getAuth0UserInfo(token: String): Auth0UserInfo
+
+    fun getClientUsers(clientAccount: ClientAccount): List<ClientUser>
 }

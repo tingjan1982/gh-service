@@ -39,9 +39,9 @@ class ClientUserController(val clientUserService: ClientUserService,
 
         auth0ManagementService.getManagementToken().let { token ->
             auth0ManagementService.getUser(clientUser.id.toString(), token).let { auth0User ->
-                val invitedCorporateAccounts = clientAccountService.getInvitedCorporateAccounts(clientUser.email).map { it.toDTO() }.toMutableList()
+                val invitations = clientAccountService.getInvitedCorporateAccounts(clientUser.email).map { it.toDTO() }.toList()
 
-                return clientUser.toDTO(auth0User.userMetadata, invitedCorporateAccounts)
+                return clientUser.toDTO(auth0User.userMetadata, invitations)
             }
         }
     }
@@ -79,17 +79,20 @@ class ClientUserController(val clientUserService: ClientUserService,
 
     @PostMapping("/me/organization")
     fun enableOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                           @Valid @RequestBody request: EnableOrganizationRequest): ClientAccountResponse {
+                           @Valid @RequestBody request: EnableOrganizationRequest): ClientUserResponse {
 
-        return clientAccountService.enableOrganization(clientUser, request.organizationName).toDTO()
+        clientAccountService.enableOrganization(clientUser, request.organizationName)
+        return clientUser.toDTO()
     }
 
     @PostMapping("/me/organization/join")
     fun joinOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                         @Valid @RequestBody request: JoinOrganizationRequest): ClientAccountResponse {
+                         @Valid @RequestBody request: JoinOrganizationRequest): ClientUserResponse {
 
         clientAccountService.getClientAccount(request.organizationId).let {
-            return clientAccountService.joinOrganization(clientUser, it).toDTO()
+            clientAccountService.joinOrganization(clientUser, it)
+
+            return clientUser.toDTO()
         }
     }
 

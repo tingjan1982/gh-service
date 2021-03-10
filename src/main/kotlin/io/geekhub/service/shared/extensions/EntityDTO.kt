@@ -2,9 +2,7 @@ package io.geekhub.service.shared.extensions
 
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
-import io.geekhub.service.account.web.model.ClientAccountResponse
-import io.geekhub.service.account.web.model.ClientOrganizationResponse
-import io.geekhub.service.account.web.model.ClientUserResponse
+import io.geekhub.service.account.web.model.*
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.web.model.InterviewRequest
 import io.geekhub.service.interview.web.model.InterviewResponse
@@ -130,24 +128,41 @@ fun ClientAccount.toDTO() = ClientAccountResponse(
     this.clientName,
     this.accountType,
     this.planType,
-    this.userInvitations
+    this.userInvitations.map { it.toDTO() }.toSet()
 )
 
-fun ClientAccount.toOrganization() = ClientOrganizationResponse(
+fun ClientAccount.toOrganization(users: List<LightClientUserResponse> = listOf()) = ClientOrganizationResponse(
         this.id.toString(),
         this.clientName,
-        this.userInvitations
+        this.userInvitations,
+        users
 )
 
-fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf(), invitations: List<ClientAccountResponse> = listOf()) = ClientUserResponse(
+fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf(), invitations: List<UserInvitationResponse> = listOf()) = ClientUserResponse(
         id = this.id.toString(),
         email = this.email,
         name = this.name,
         nickname = this.nickname,
         avatar = this.avatar,
         userType = this.userType,
+        accountPrivilege = this.accountPrivilege,
+        organization = if (this.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) { this.clientAccount.toOrganization() } else { null },
         metadata = metadata,
         invitations = invitations
+)
+
+fun ClientUser.toLightDTO() = LightClientUserResponse(
+        id = this.id.toString(),
+        name = this.name,
+        email = this.email,
+        accountPrivilege = this.accountPrivilege
+)
+
+fun ClientAccount.UserInvitation.toDTO() = UserInvitationResponse(
+        inviterId = this.inviterId,
+        inviterName = this.inviterName,
+        inviterEmail = this.inviterEmail,
+        email = this.email
 )
 
 fun SpecializationRequest.toEntity() = Specialization(

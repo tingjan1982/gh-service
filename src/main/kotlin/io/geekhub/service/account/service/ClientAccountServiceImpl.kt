@@ -39,7 +39,9 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
 
     override fun enableOrganization(clientUser: ClientUser, organizationName: String): ClientAccount {
 
-        checkClientUserAccess(clientUser)
+        if (clientUser.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) {
+            return clientUser.clientAccount
+        }
 
         clientUser.clientAccount.apply {
             this.accountType = ClientAccount.AccountType.CORPORATE
@@ -52,17 +54,20 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
     /**
      * User can be invited to many corporate accounts.
      */
-    override fun getInvitedCorporateAccounts(email: String): List<ClientAccount> {
+    override fun getInvitedCorporateAccounts(email: String): List<ClientAccount.UserInvitation> {
 
         val query = Query.query(where("userInvitations").elemMatch(where("email").isEqualTo(email)))
-        return mongoTemplate.find(query, ClientAccount::class.java)
+
+        return mongoTemplate.find(query, ClientAccount::class.java).map { acc ->
+            return@map acc.userInvitations.find { it.email == email }!!
+        }.toList()
     }
 
     override fun inviteOrganizationUser(clientUser: ClientUser, organizationAccount: ClientAccount, email: String): ClientAccount {
 
         checkClientOrganization(clientUser, organizationAccount)
 
-        organizationAccount.addUserInvitation(ClientAccount.UserInvitation(email)).let {
+        organizationAccount.addUserInvitation(clientUser, email).let {
             return saveClientAccount(it)
         }
     }
@@ -100,6 +105,10 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
             throw BusinessException("User is not part of an organization")
         }
 
+        if (clientUser.accountPrivilege == ClientUser.AccountPrivilege.OWNER) {
+            throw BusinessException("Organization owner cannot leave organization")
+        }
+
         clientUserService.getClientAccountOwner(clientUser.clientAccount).let { owner ->
             questionService.getQuestions(clientUser).forEach { q ->
                 q.clientUser = owner
@@ -114,6 +123,7 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
 
         ClientAccount(clientUser.id, ClientAccount.AccountType.INDIVIDUAL, ClientAccount.PlanType.FREE, clientUser.name).let {
             this.saveClientAccount(it)
+            clientUser.accountPrivilege = ClientUser.AccountPrivilege.OWNER
             clientUser.clientAccount = it
             clientUserService.saveClientUser(clientUser)
         }
@@ -129,7 +139,7 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
     private fun checkClientOrganization(clientUser: ClientUser, organizationAccount: ClientAccount) {
 
         if(clientUser.clientAccount.id != organizationAccount.id || clientUser.accountPrivilege == ClientUser.AccountPrivilege.USER) {
-            throw BusinessException("Only organization account owner can operate on it")
+            throw BusinessException("Only organization owner can perform this action")
         }
     }
 }
