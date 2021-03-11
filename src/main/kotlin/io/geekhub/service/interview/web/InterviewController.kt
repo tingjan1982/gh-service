@@ -134,6 +134,16 @@ class InterviewController(val interviewService: InterviewService,
         }
     }
 
+    @PostMapping("/{id}/owner")
+    fun changeInterviewOwner(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+                             @PathVariable id: String,
+                             @Valid @RequestBody request: ChangeOwnerRequest): InterviewResponse {
+
+        interviewService.getInterview(id).let {
+            return interviewService.updateInterviewOwner(it, request.userId).toDTO(clientUser)
+        }
+    }
+
     fun toSections(interview: Interview, sections: List<InterviewRequest.SectionRequest>): MutableList<Interview.Section> {
 
         // s@ is used to get rid of the warning of return@map as it detect return label clash.

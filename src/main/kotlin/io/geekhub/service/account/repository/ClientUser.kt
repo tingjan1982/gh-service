@@ -22,7 +22,17 @@ data class ClientUser(
     @DBRef
     var clientAccount: ClientAccount,
     @DBRef
+    var department: ClientDepartment? = null,
+    @DBRef
     var avatarBinary: BinaryFile? = null) {
+
+    fun individualAccount(): Boolean {
+        return clientAccount.accountType == ClientAccount.AccountType.INDIVIDUAL
+    }
+
+    fun isCorporateAccount(): Boolean {
+        return clientAccount.accountType == ClientAccount.AccountType.CORPORATE
+    }
 
     /**
      * UserType will allow the system to determine if user profile information can be updated and synced

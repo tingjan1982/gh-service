@@ -14,7 +14,7 @@ data class ClientAccount(
         var id: String? = null,
         var accountType: AccountType,
         var planType: PlanType, // todo: move plan to another class
-        var clientName: String, // e.g. corporate name
+        var clientName: String, // e.g. organization name
         val userInvitations: MutableSet<UserInvitation> = mutableSetOf()) {
 
     fun addUserInvitation(inviter: ClientUser, email: String): ClientAccount {

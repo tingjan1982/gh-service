@@ -71,6 +71,7 @@ class ApplicationConfig(val mongoTemplate: MongoTemplate,
         registrationBean.filter = clientAccountFilter;
         registrationBean.addUrlPatterns("/users/*",
             "/organizations/*",
+            "/departments/*",
             "/questions/*",
             "/interviews/*",
             "/publishedInterviews/*",

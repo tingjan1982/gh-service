@@ -14,6 +14,8 @@ interface InterviewService {
 
     fun publishInterview(id: String): PublishedInterview
 
+    fun updateInterviewOwner(interview: Interview, userId: String): Interview
+
     fun getPublishedInterviewByInterview(interviewId: String) : PublishedInterview
 
     fun getPublishedInterviewByPublishedId(publishedInterviewId: String?) : PublishedInterview

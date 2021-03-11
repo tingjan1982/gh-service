@@ -2,6 +2,7 @@ package io.geekhub.service.account.service
 
 import io.geekhub.service.account.repository.Auth0UserInfo
 import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientDepartment
 import io.geekhub.service.account.repository.ClientUser
 
 interface ClientUserService {
@@ -17,4 +18,6 @@ interface ClientUserService {
     fun getAuth0UserInfo(token: String): Auth0UserInfo
 
     fun getClientUsers(clientAccount: ClientAccount): List<ClientUser>
+
+    fun clientUsersExistInDepartment(department: ClientDepartment): Boolean
 }

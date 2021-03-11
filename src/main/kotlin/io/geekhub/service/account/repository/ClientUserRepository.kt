@@ -7,4 +7,6 @@ interface ClientUserRepository : MongoRepository<ClientUser, String> {
     fun findByClientAccountAndAccountPrivilege(clientAccount: ClientAccount, accountPrivilege: ClientUser.AccountPrivilege): ClientUser?
 
     fun findAllByClientAccount(clientAccount: ClientAccount): List<ClientUser>
+
+    fun existsByDepartment(department: ClientDepartment): Boolean
 }

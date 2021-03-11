@@ -1,6 +1,7 @@
 package io.geekhub.service.interview.service
 
 import io.geekhub.service.account.repository.ClientUser
+import io.geekhub.service.account.service.ClientUserService
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.PublishedInterview
 import io.geekhub.service.interview.repository.InterviewRepository
@@ -8,6 +9,7 @@ import io.geekhub.service.interview.repository.PublishedInterviewRepository
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
+import io.geekhub.service.shared.exception.OwnershipException
 import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.specialization.service.SpecializationService
 import org.bson.types.ObjectId
@@ -27,6 +29,7 @@ import javax.transaction.Transactional
 @Service
 @Transactional
 class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
+                           val clientUserService: ClientUserService,
                            val questionRepository: QuestionRepository,
                            val interviewRepository: InterviewRepository,
                            val publishedInterviewRepository: PublishedInterviewRepository,
@@ -70,6 +73,18 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
 
                 return published
             }
+        }
+    }
+
+    override fun updateInterviewOwner(interview: Interview, userId: String): Interview {
+
+        clientUserService.getClientUser(userId).let {
+            if (it.clientAccount.id != interview.clientUser.clientAccount.id) {
+                throw OwnershipException.notSameOrganization(interview.clientUser.clientAccount)
+            }
+
+            interview.clientUser = it
+            return this.saveInterview(interview)
         }
     }
 

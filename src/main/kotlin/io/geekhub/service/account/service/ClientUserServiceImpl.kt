@@ -1,9 +1,6 @@
 package io.geekhub.service.account.service
 
-import io.geekhub.service.account.repository.Auth0UserInfo
-import io.geekhub.service.account.repository.ClientAccount
-import io.geekhub.service.account.repository.ClientUser
-import io.geekhub.service.account.repository.ClientUserRepository
+import io.geekhub.service.account.repository.*
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -59,5 +56,9 @@ class ClientUserServiceImpl(val clientUserRepository: ClientUserRepository) : Cl
 
     override fun getClientUsers(clientAccount: ClientAccount): List<ClientUser> {
         return clientUserRepository.findAllByClientAccount(clientAccount)
+    }
+
+    override fun clientUsersExistInDepartment(department: ClientDepartment): Boolean {
+        return clientUserRepository.existsByDepartment(department)
     }
 }
