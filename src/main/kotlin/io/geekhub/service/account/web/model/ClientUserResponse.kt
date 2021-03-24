@@ -10,7 +10,10 @@ data class ClientUserResponse(
         val avatar: String?,
         val userType: ClientUser.UserType,
         val accountPrivilege: ClientUser.AccountPrivilege,
-        val organization: ClientOrganizationResponse?,
+        val organization: OrganizationResponse?,
+        val department: ClientDepartmentResponse?,
         val metadata: Map<String, Any>? = mapOf(),
         val invitations: List<UserInvitationResponse>
-)
+) {
+        data class OrganizationResponse(val id: String, val name: String)
+}

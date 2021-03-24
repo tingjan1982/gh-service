@@ -131,6 +131,11 @@ fun ClientAccount.toDTO() = ClientAccountResponse(
     this.userInvitations.map { it.toDTO() }.toSet()
 )
 
+fun ClientAccount.toOrganization() = ClientUserResponse.OrganizationResponse(
+        this.id.toString(),
+        this.clientName
+)
+
 fun ClientAccount.toOrganization(users: List<LightClientUserResponse> = listOf()) = ClientOrganizationResponse(
         this.id.toString(),
         this.clientName,
@@ -147,6 +152,7 @@ fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf(), invitations: List<Us
         userType = this.userType,
         accountPrivilege = this.accountPrivilege,
         organization = if (this.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) { this.clientAccount.toOrganization() } else { null },
+        department = this.department?.toDTO(),
         metadata = metadata,
         invitations = invitations
 )

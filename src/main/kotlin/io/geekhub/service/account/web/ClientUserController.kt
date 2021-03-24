@@ -118,13 +118,20 @@ class ClientUserController(val clientUserService: ClientUserService,
 
     @PostMapping("/me/department")
     fun assignUserToDepartment(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                           @Valid @RequestBody request: AssignDepartmentRequest): ClientUserResponse {
+                               @Valid @RequestBody request: AssignDepartmentRequest): ClientUserResponse {
 
 
         clientDepartmentService.getDepartment(request.departmentId).let {
             clientUser.department = it
             return clientUserService.saveClientUser(clientUser).toDTO()
         }
+    }
+
+    @DeleteMapping("/me/department")
+    fun removeUserFromDepartment(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser): ClientUserResponse {
+
+        clientUser.department = null
+        return clientUserService.saveClientUser(clientUser).toDTO()
     }
 
     @GetMapping("/me/avatar")

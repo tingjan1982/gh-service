@@ -4,6 +4,7 @@ import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.account.service.ClientAccountService
 import io.geekhub.service.account.service.ClientUserService
 import io.geekhub.service.account.web.model.ClientOrganizationResponse
+import io.geekhub.service.account.web.model.OrganizationRequest
 import io.geekhub.service.account.web.model.OrganizationUserRequest
 import io.geekhub.service.shared.extensions.toLightDTO
 import io.geekhub.service.shared.extensions.toOrganization
@@ -23,6 +24,20 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
             val users = clientUserService.getClientUsers(acc).map { it.toLightDTO() }.toList()
 
             acc.toOrganization(users)
+        }
+    }
+
+    @PostMapping("/{id:[\\w|]+}")
+    fun updateOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+                           @PathVariable id: String,
+                           @Valid @RequestBody request: OrganizationRequest): ClientOrganizationResponse {
+
+        clientAccountService.getClientOrganizationAccount(id).let { acc ->
+            acc.clientName = request.name
+            clientAccountService.saveClientAccount(acc)
+            val users = clientUserService.getClientUsers(acc).map { it.toLightDTO() }.toList()
+
+            return acc.toOrganization(users)
         }
     }
 

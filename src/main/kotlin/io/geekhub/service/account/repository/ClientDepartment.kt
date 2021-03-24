@@ -18,5 +18,5 @@ data class ClientDepartment(
 
     fun toDTO() = ClientDepartmentResponse(
         id = this.id.toString(),
-        departmentName = this.name)
+        name = this.name)
 }
