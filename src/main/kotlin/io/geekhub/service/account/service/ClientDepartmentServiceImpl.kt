@@ -1,5 +1,6 @@
 package io.geekhub.service.account.service
 
+import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientDepartment
 import io.geekhub.service.account.repository.ClientDepartmentRepository
 import io.geekhub.service.account.repository.ClientUser
@@ -26,6 +27,10 @@ class ClientDepartmentServiceImpl(val repository: ClientDepartmentRepository, va
                 return repository.save(it)
             }
         }
+    }
+
+    override fun getDepartments(clientAccount: ClientAccount): List<ClientDepartment> {
+        return repository.findAllByClientAccount(clientAccount)
     }
 
     override fun saveClientDepartment(department: ClientDepartment): ClientDepartment {

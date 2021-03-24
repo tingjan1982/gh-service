@@ -4,6 +4,7 @@ import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.account.service.ClientDepartmentService
 import io.geekhub.service.account.web.model.ClientDepartmentRequest
 import io.geekhub.service.account.web.model.ClientDepartmentResponse
+import io.geekhub.service.account.web.model.ClientDepartmentsResponse
 import io.geekhub.service.shared.web.filter.ClientAccountFilter
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -18,6 +19,14 @@ class ClientDepartmentController(val clientDepartmentService: ClientDepartmentSe
                          @Valid @RequestBody request: ClientDepartmentRequest): ClientDepartmentResponse {
 
         return clientDepartmentService.createClientDepartment(clientUser, request.departmentName).toDTO()
+    }
+
+    @GetMapping
+    fun getDepartments(@RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser): ClientDepartmentsResponse {
+
+        clientDepartmentService.getDepartments(clientUser.clientAccount).map { it.toDTO() }.let {
+            return ClientDepartmentsResponse(it)
+        }
     }
 
     @GetMapping("/{id}")
