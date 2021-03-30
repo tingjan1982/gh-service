@@ -116,22 +116,26 @@ class ClientUserController(val clientUserService: ClientUserService,
         clientAccountService.leaveOrganization(clientUser)
     }
 
-    @PostMapping("/me/department")
+    @PostMapping("/{id:[\\w|]+}/department")
     fun assignUserToDepartment(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+                               @PathVariable id: String,
                                @Valid @RequestBody request: AssignDepartmentRequest): ClientUserResponse {
 
-
+        val user = clientUserService.getClientUser(id)
         clientDepartmentService.getDepartment(request.departmentId).let {
-            clientUser.department = it
-            return clientUserService.saveClientUser(clientUser).toDTO()
+            user.department = it
+            return clientUserService.saveClientUser(user).toDTO()
         }
     }
 
-    @DeleteMapping("/me/department")
-    fun removeUserFromDepartment(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser): ClientUserResponse {
+    @DeleteMapping("/{id:[\\w|]+}/department")
+    fun removeUserFromDepartment(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+                                 @PathVariable id: String): ClientUserResponse {
 
-        clientUser.department = null
-        return clientUserService.saveClientUser(clientUser).toDTO()
+        clientUserService.getClientUser(id).let {
+            it.department = null
+            return clientUserService.saveClientUser(it).toDTO()
+        }
     }
 
     @GetMapping("/me/avatar")

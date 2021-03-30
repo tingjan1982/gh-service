@@ -161,6 +161,7 @@ fun ClientUser.toLightDTO() = LightClientUserResponse(
         id = this.id.toString(),
         name = this.name,
         email = this.email,
+        department = this.department?.toDTO(),
         accountPrivilege = this.accountPrivilege
 )
 

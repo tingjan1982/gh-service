@@ -9,4 +9,6 @@ interface ClientUserRepository : MongoRepository<ClientUser, String> {
     fun findAllByClientAccount(clientAccount: ClientAccount): List<ClientUser>
 
     fun existsByDepartment(department: ClientDepartment): Boolean
+
+    fun existsByClientAccountAndEmail(organization: ClientAccount, email: String): Boolean
 }

@@ -63,11 +63,15 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
         }.toList()
     }
 
-    override fun inviteOrganizationUser(clientUser: ClientUser, organizationAccount: ClientAccount, email: String): ClientAccount {
+    override fun inviteOrganizationUser(inviter: ClientUser, organizationAccount: ClientAccount, inviteeEmail: String): ClientAccount {
 
-        checkClientOrganization(clientUser, organizationAccount)
+        checkClientOrganization(inviter, organizationAccount)
 
-        organizationAccount.addUserInvitation(clientUser, email).let {
+        if (clientUserService.clientUserExists(organizationAccount, inviteeEmail)) {
+            throw BusinessException("Invited email is already used")
+        }
+
+        organizationAccount.addUserInvitation(inviter, inviteeEmail).let {
             return saveClientAccount(it)
         }
     }

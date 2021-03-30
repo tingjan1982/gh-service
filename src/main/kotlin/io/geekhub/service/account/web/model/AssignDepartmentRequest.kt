@@ -1,3 +1,5 @@
 package io.geekhub.service.account.web.model
 
-data class AssignDepartmentRequest(val departmentId: String)
+import javax.validation.constraints.NotBlank
+
+data class AssignDepartmentRequest(@field:NotBlank val departmentId: String)

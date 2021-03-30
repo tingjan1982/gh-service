@@ -61,4 +61,8 @@ class ClientUserServiceImpl(val clientUserRepository: ClientUserRepository) : Cl
     override fun clientUsersExistInDepartment(department: ClientDepartment): Boolean {
         return clientUserRepository.existsByDepartment(department)
     }
+
+    override fun clientUserExists(organization: ClientAccount, email: String): Boolean {
+        return clientUserRepository.existsByClientAccountAndEmail(organization, email)
+    }
 }

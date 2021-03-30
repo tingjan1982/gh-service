@@ -20,4 +20,6 @@ interface ClientUserService {
     fun getClientUsers(clientAccount: ClientAccount): List<ClientUser>
 
     fun clientUsersExistInDepartment(department: ClientDepartment): Boolean
+
+    fun clientUserExists(organization: ClientAccount, email: String): Boolean
 }
