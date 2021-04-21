@@ -25,6 +25,6 @@ data class InterviewSessionsResponse(@JsonIgnore val page: Page<LightInterviewSe
             val interviewSentDate: Date?,
             val interviewStartDate: Date?,
             val interviewEndDate: Date?,
-            val score: BigDecimal)
+            val totalScore: BigDecimal)
 
 }

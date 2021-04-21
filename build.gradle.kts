@@ -9,14 +9,14 @@
 
 plugins {
     // kotlin core
-    kotlin("jvm") version "1.3.70"
-    kotlin("kapt") version "1.3.70"
+    kotlin("jvm") version "1.4.32"
+    kotlin("kapt") version "1.4.32"
 
     // spring support
     id("org.springframework.boot") version "2.2.5.RELEASE"
-    kotlin("plugin.spring") version "1.3.70"
-    kotlin("plugin.noarg") version "1.3.70"
-    kotlin("plugin.allopen") version "1.3.70"
+    kotlin("plugin.spring") version "1.4.32"
+    kotlin("plugin.noarg") version "1.4.32"
+    kotlin("plugin.allopen") version "1.4.32"
 
     // build info
     id("com.gorylenko.gradle-git-properties") version "2.2.2"

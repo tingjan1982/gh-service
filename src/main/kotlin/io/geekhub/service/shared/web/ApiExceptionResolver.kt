@@ -1,9 +1,6 @@
 package io.geekhub.service.shared.web
 
-import io.geekhub.service.shared.exception.BusinessException
-import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
-import io.geekhub.service.shared.exception.FriendlyMethodArgumentNotValidException
-import io.geekhub.service.shared.exception.OwnershipException
+import io.geekhub.service.shared.exception.*
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -34,6 +31,12 @@ class ApiExceptionResolver : ResponseEntityExceptionHandler() {
     fun handleEntityNotFound(request: HttpServletRequest, exception: Exception): ResponseEntity<ApiError> {
 
         return this.logError(HttpStatus.NOT_FOUND, exception, request)
+    }
+
+    @ExceptionHandler(BusinessObjectAlreadyExistsException::class)
+    fun handleEntityAlreadyExists(request: HttpServletRequest, exception: Exception): ResponseEntity<ApiError> {
+
+        return this.logError(HttpStatus.BAD_REQUEST, exception, request)
     }
 
     @ExceptionHandler(SpringAccessDeniedException::class)

@@ -4,7 +4,7 @@ metadata:
   name: gh-ingress
 spec:
   tls:
-    - secretName: gh-secret-tls2
+    - secretName: gh-secret-tls
   backend:
     serviceName: gh-service-nodeport
     servicePort: 80

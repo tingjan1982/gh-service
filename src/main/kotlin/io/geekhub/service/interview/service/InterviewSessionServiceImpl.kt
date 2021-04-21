@@ -7,6 +7,7 @@ import io.geekhub.service.interview.repository.InterviewSessionRepository
 import io.geekhub.service.notification.service.NotificationService
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.exception.BusinessException
+import io.geekhub.service.shared.exception.BusinessObjectAlreadyExistsException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.shared.model.SearchCriteria
 import org.slf4j.Logger
@@ -37,6 +38,10 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
     }
 
     override fun createInterviewSession(interviewSession: InterviewSession): InterviewSession {
+
+        if (interviewSessionRepository.existsByPublishedInterviewAndUserEmail(interviewSession.publishedInterview, interviewSession.userEmail)) {
+            throw BusinessObjectAlreadyExistsException("Interview session is already created for ${interviewSession.userEmail}")
+        }
 
         return interviewSessionRepository.save(interviewSession).let {
             interviewService.getInterview(it.publishedInterview.referencedInterview.id.toString()).let {interview ->

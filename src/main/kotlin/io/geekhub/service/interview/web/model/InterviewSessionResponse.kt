@@ -18,7 +18,7 @@ data class InterviewSessionResponse(
         val interviewSentDate: Date?,
         val interviewStartDate: Date?,
         val interviewEndDate: Date?,
-        val score: BigDecimal,
+        val totalScore: BigDecimal,
         val answerAttemptSections: Map<String, InterviewSession.AnswerAttemptSection>,
         val followupInterviews: List<InterviewSession.FollowUpInterview>
 )
