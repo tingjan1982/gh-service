@@ -2,6 +2,7 @@ package io.geekhub.service.shared.extensions
 
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
+import io.geekhub.service.account.web.ClientOrganizationController
 import io.geekhub.service.account.web.ClientUserController
 import io.geekhub.service.account.web.model.*
 import io.geekhub.service.interview.model.Interview
@@ -124,12 +125,18 @@ fun ClientAccount.toOrganization() = ClientUserResponse.OrganizationResponse(
         this.clientName
 )
 
-fun ClientAccount.toOrganization(users: List<LightClientUserResponse> = listOf()) = ClientOrganizationResponse(
-        this.id.toString(),
-        this.clientName,
-        this.userInvitations,
-        users
-)
+fun ClientAccount.toOrganization(users: List<LightClientUserResponse> = listOf()): ClientOrganizationResponse {
+
+        val uriPrefix = MvcUriComponentsBuilder.fromController(ClientOrganizationController::class.java).toUriString()
+
+        return ClientOrganizationResponse(
+                this.id.toString(),
+                this.clientName,
+                if (this.avatarBinary != null) { "$uriPrefix/$id/avatar" } else { null },
+                this.userInvitations,
+                users
+        )
+}
 
 fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf(), invitations: List<UserInvitationResponse> = listOf()): ClientUserResponse {
 

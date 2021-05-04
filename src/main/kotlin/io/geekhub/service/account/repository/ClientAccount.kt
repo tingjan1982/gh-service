@@ -1,6 +1,8 @@
 package io.geekhub.service.account.repository
 
+import io.geekhub.service.binarystorage.data.BinaryFile
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 
 /**
@@ -10,12 +12,13 @@ import org.springframework.data.mongodb.core.mapping.Document
  */
 @Document
 data class ClientAccount(
-        @Id
-        var id: String? = null,
-        var accountType: AccountType,
-        var planType: PlanType, // todo: move plan to another class
-        var clientName: String, // e.g. organization name
-        val userInvitations: MutableSet<UserInvitation> = mutableSetOf()) {
+    @Id var id: String? = null,
+    var accountType: AccountType,
+    var planType: PlanType, // todo: move plan to another class
+    var clientName: String, // e.g. organization name
+    @DBRef
+    var avatarBinary: BinaryFile? = null,
+    val userInvitations: MutableSet<UserInvitation> = mutableSetOf()) {
 
     fun addUserInvitation(inviter: ClientUser, email: String): ClientAccount {
         userInvitations.add(UserInvitation(inviter.id.toString(), inviter.name, inviter.email, inviter.clientAccount.clientName, email))

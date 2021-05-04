@@ -1,6 +1,8 @@
 package io.geekhub.service.binarystorage.service
 
+import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
+import io.geekhub.service.account.service.ClientAccountService
 import io.geekhub.service.account.service.ClientUserService
 import io.geekhub.service.binarystorage.data.BinaryFile
 import io.geekhub.service.binarystorage.data.BinaryFileRepository
@@ -16,7 +18,8 @@ import javax.transaction.Transactional
 @Service
 @Transactional
 class BinaryStorageServiceImpl(val binaryFileRepository: BinaryFileRepository,
-                               val clientUserService: ClientUserService) : BinaryStorageService {
+                               val clientUserService: ClientUserService,
+                               val clientAccountService: ClientAccountService) : BinaryStorageService {
 
     /**
      * Encountered SSLHandshakeException: Received fatal alert: record_overflow while persisting BinaryFile.
@@ -30,12 +33,27 @@ class BinaryStorageServiceImpl(val binaryFileRepository: BinaryFileRepository,
         clientUser.avatarBinary?.let {
             deleteBinary(it)
         }
-        
+
         BinaryFile(title = multipartFile.name, binary = Binary(multipartFile.bytes)).let {
             saveBinaryFile(it).let { saved ->
                 clientUser.avatarBinary = saved
 
                 return clientUserService.saveClientUser(clientUser)
+            }
+        }
+    }
+
+    override fun saveClientAccountAvatar(clientAccount: ClientAccount, multipartFile: MultipartFile): ClientAccount {
+
+        clientAccount.avatarBinary?.let {
+            deleteBinary(it)
+        }
+
+        BinaryFile(title = multipartFile.name, binary = Binary(multipartFile.bytes)).let {
+            saveBinaryFile(it).let { saved ->
+                clientAccount.avatarBinary = saved
+
+                return clientAccountService.saveClientAccount(clientAccount)
             }
         }
     }
