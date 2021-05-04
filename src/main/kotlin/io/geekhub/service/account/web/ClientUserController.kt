@@ -143,6 +143,19 @@ class ClientUserController(val clientUserService: ClientUserService,
     fun getAvatar(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                   response: HttpServletResponse) {
 
+        renderUserAvatar(clientUser, response)
+    }
+
+    @GetMapping("/{id:[\\w|]+}/avatar")
+    fun getUserAvatar(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+                      @PathVariable id: String,
+                      response: HttpServletResponse) {
+
+        renderUserAvatar(clientUserService.getClientUser(id), response)
+    }
+
+    private fun renderUserAvatar(clientUser: ClientUser, response: HttpServletResponse) {
+
         clientUser.avatarBinary?.let {
             FileCopyUtils.copy(it.binary.data, response.outputStream);
         } ?: run {

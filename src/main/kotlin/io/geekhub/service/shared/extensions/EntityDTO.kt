@@ -2,6 +2,7 @@ package io.geekhub.service.shared.extensions
 
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
+import io.geekhub.service.account.web.ClientUserController
 import io.geekhub.service.account.web.model.*
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.web.model.InterviewRequest
@@ -13,6 +14,7 @@ import io.geekhub.service.questions.web.bean.QuestionResponse
 import io.geekhub.service.specialization.repository.Specialization
 import io.geekhub.service.specialization.web.model.SpecializationRequest
 import io.geekhub.service.specialization.web.model.SpecializationResponse
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
 
 
 fun QuestionRequest.toEntity(user: ClientUser, spec: Specialization?) = Question(
@@ -129,19 +131,24 @@ fun ClientAccount.toOrganization(users: List<LightClientUserResponse> = listOf()
         users
 )
 
-fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf(), invitations: List<UserInvitationResponse> = listOf()) = ClientUserResponse(
-        id = this.id.toString(),
-        email = this.email,
-        name = this.name,
-        nickname = this.nickname,
-        avatar = this.avatar,
-        userType = this.userType,
-        accountPrivilege = this.accountPrivilege,
-        organization = if (this.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) { this.clientAccount.toOrganization() } else { null },
-        department = this.department?.toDTO(),
-        metadata = metadata,
-        invitations = invitations
-)
+fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf(), invitations: List<UserInvitationResponse> = listOf()): ClientUserResponse {
+
+        val uriPrefix = MvcUriComponentsBuilder.fromController(ClientUserController::class.java).toUriString()
+
+        return ClientUserResponse(
+                id = this.id.toString(),
+                email = this.email,
+                name = this.name,
+                nickname = this.nickname,
+                avatar = if (this.avatarBinary != null) { "$uriPrefix/$id/avatar" } else { this.avatar },
+                userType = this.userType,
+                accountPrivilege = this.accountPrivilege,
+                organization = if (this.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) { this.clientAccount.toOrganization() } else { null },
+                department = this.department?.toDTO(),
+                metadata = metadata,
+                invitations = invitations
+        )
+}
 
 fun ClientUser.toLightDTO() = LightClientUserResponse(
         id = this.id.toString(),
