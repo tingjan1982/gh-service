@@ -6,7 +6,6 @@ import io.geekhub.service.account.web.model.*
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.web.model.InterviewRequest
 import io.geekhub.service.interview.web.model.InterviewResponse
-import io.geekhub.service.interview.web.model.InterviewsResponse
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.model.Question.PossibleAnswer
 import io.geekhub.service.questions.web.bean.QuestionRequest
@@ -40,6 +39,7 @@ fun Question.toDTO(liked: Boolean = false) = QuestionResponse(
         this.likeCount,
         liked,
         this.deleted,
+        this.createdDate,
         this.lastModifiedDate
 )
 
@@ -91,24 +91,10 @@ fun Interview.toDTO(currentUser: ClientUser): InterviewResponse {
             publishedInterviewId = this.latestPublishedInterviewId,
             likeCount = this.likeCount,
             deleted = this.deleted,
+            createdDate = this.createdDate,
             lastModifiedDate = this.lastModifiedDate
     )
 }
-
-fun Interview.toLightDTO(likedByClientUser: Boolean = false) = InterviewsResponse.LightInterviewResponse(
-        id = this.id.toString(),
-        title = this.title,
-        description = this.description,
-        jobTitle = this.jobTitle,
-        clientUser = this.clientUser.toDTO(),
-        specialization = this.specialization.toDTO(),
-        visibility = this.visibility,
-        defaultDuration = this.defaultDuration,
-        publishedInterviewId = this.latestPublishedInterviewId,
-        likeCount = this.likeCount,
-        liked = likedByClientUser,
-        interviewSessions = this.groupInterviewSessions().mapValues { it -> it.value.map { it.id.toString() }.toList() }
-)
 
 fun Interview.Section.toDTO(showAnswer: Boolean) = InterviewResponse.SectionResponse(
         id = this.id,

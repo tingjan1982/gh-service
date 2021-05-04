@@ -21,6 +21,7 @@ data class InterviewResponse(
         val publishedInterviewId: String?,
         val likeCount: Long,
         override val deleted: Boolean,
+        override val createdDate: Date?,
         override val lastModifiedDate: Date?
 ) : BaseResponse() {
 

@@ -11,6 +11,7 @@ import io.geekhub.service.binarystorage.service.BinaryStorageService
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.interview.web.model.InterviewsResponse
+import io.geekhub.service.interview.web.model.toLightDTO
 import io.geekhub.service.likes.service.LikeService
 import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.extensions.toDTO
