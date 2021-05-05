@@ -5,19 +5,19 @@ import org.hibernate.validator.constraints.Length
 data class UpdateClientUserRequest(
         val name: String,
         val nickname: String?,
-        @Length(min = 0, max = 100)
+        @field:Length(min = 0, max = 100)
         val companyName: String?,
-        @Length(min = 0, max = 1000)
+        @field:Length(min = 0, max = 1000)
         val note: String?,
-        @Length(min = 0, max = 200)
+        @field:Length(min = 0, max = 200)
         val linkedIn: String?,
-        @Length(min = 0, max = 200)
+        @field:Length(min = 0, max = 200)
         val github: String?,
-        @Length(min = 0, max = 200)
+        @field:Length(min = 0, max = 200)
         val facebook: String?,
-        @Length(min = 0, max = 200)
+        @field:Length(min = 0, max = 200)
         val ig: String?,
-        @Length(min = 0, max = 200)
+        @field:Length(min = 0, max = 200)
         val twitter: String?
 ) {
 

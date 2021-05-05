@@ -22,14 +22,15 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
 @Service
-class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApiProperties, val apiConfigProperties: Auth0ApiProperties) : Auth0ManagementService {
+class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApiProperties, val apiConfigProperties: Auth0ApiProperties) :
+    Auth0ManagementService {
 
     val restTemplate: RestTemplate
         get() {
             val httpClient: CloseableHttpClient = HttpClients.custom()
-                    .setSSLHostnameVerifier(NoopHostnameVerifier())
-                    .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-                    .build()
+                .setSSLHostnameVerifier(NoopHostnameVerifier())
+                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                .build()
             val requestFactory = HttpComponentsClientHttpRequestFactory()
             requestFactory.httpClient = httpClient
 
@@ -45,14 +46,14 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         val requestParams = mapOf("grant_type" to "client_credentials",
-                "client_id" to managementApiProperties.clientId,
-                "client_secret" to managementApiProperties.secret,
-                "audience" to managementApiProperties.audience)
+            "client_id" to managementApiProperties.clientId,
+            "client_secret" to managementApiProperties.secret,
+            "audience" to managementApiProperties.audience)
         val requestEntity = HttpEntity(requestParams, headers)
 
         restTemplate.postForEntity("https://geekhub.auth0.com/oauth/token", requestEntity, OAuthToken::class.java).let { response ->
             return response.body
-                    ?: throw BusinessException("Failed to obtain management token")
+                ?: throw BusinessException("Failed to obtain management token")
         }
     }
 
@@ -60,12 +61,12 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         val requestParams = mapOf("grant_type" to "password",
-                "username" to email,
-                "password" to password,
-                "client_id" to apiConfigProperties.clientId,
-                "client_secret" to apiConfigProperties.secret,
-                "audience" to apiConfigProperties.audience,
-                "scope" to "openid profile email read:profile")
+            "username" to email,
+            "password" to password,
+            "client_id" to apiConfigProperties.clientId,
+            "client_secret" to apiConfigProperties.secret,
+            "audience" to apiConfigProperties.audience,
+            "scope" to "openid profile email read:profile")
         val requestEntity = HttpEntity(requestParams, headers)
 
         try {
@@ -85,7 +86,7 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
         val requestEntity = HttpEntity(user, headers)
 
         restTemplate.postForEntity("https://geekhub.auth0.com/api/v2/users", requestEntity,
-                Auth0UserResponse::class.java).let { response ->
+            Auth0UserResponse::class.java).let { response ->
 
             if (response.statusCode == HttpStatus.CONFLICT) {
                 throw BusinessException("The user already exists")
@@ -106,7 +107,7 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
         val requestEntity = HttpEntity<Void>(headers)
 
         restTemplate.exchange("https://geekhub.auth0.com/api/v2/users/$userId", HttpMethod.GET, requestEntity,
-                Auth0UserResponse::class.java).let { response ->
+            Auth0UserResponse::class.java).let { response ->
 
             response.body?.let { userInfo ->
                 return userInfo
@@ -125,7 +126,7 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
         LOGGER.info("Updating user info, id=$userId")
 
         restTemplate.exchange("https://geekhub.auth0.com/api/v2/users/$userId", HttpMethod.PATCH, requestEntity,
-                Auth0UserResponse::class.java).let { response ->
+            Auth0UserResponse::class.java).let { response ->
 
             response.body?.let { userInfo ->
                 return userInfo
@@ -145,7 +146,7 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
 
             try {
                 restTemplate.exchange("https://geekhub.auth0.com/api/v2/users/${updateRequest.userId}", HttpMethod.PATCH, requestEntity,
-                        Auth0UserResponse::class.java).let { response ->
+                    Auth0UserResponse::class.java).let { response ->
 
                     println(response.statusCode)
 
@@ -166,11 +167,12 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
         headers.setBearerAuth(oAuthToken.accessToken)
         val requestEntity = HttpEntity<Void>(headers)
 
-        restTemplate.exchange("https://geekhub.auth0.com/api/v2/users/${userId}", HttpMethod.DELETE, requestEntity, String::class.java).let { response ->
-            if (response.statusCode != HttpStatus.NO_CONTENT) {
-                throw BusinessException("Error deleting the user")
+        restTemplate.exchange("https://geekhub.auth0.com/api/v2/users/${userId}", HttpMethod.DELETE, requestEntity, String::class.java)
+            .let { response ->
+                if (response.statusCode != HttpStatus.NO_CONTENT) {
+                    throw BusinessException("Error deleting the user")
+                }
             }
-        }
     }
 
     data class OAuthToken(@field:JsonAlias("access_token") val accessToken: String,
@@ -186,11 +188,15 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
 }
 
 fun UpdateClientUserRequest.toUpdateUserRequest() = Auth0ManagementServiceImpl.UpdateUserRequest(
-        name = this.name,
-        nickname = this.nickname,
-        userMetadata = mapOf(
-                "companyName" to (this.companyName ?: ""),
-                "note" to (this.note ?: ""),
-                "socialProfiles" to this.toSocialProfiles()
-        )
+    name = this.name,
+    nickname = this.nickname,
+    userMetadata = mapOf(
+        "companyName" to (this.companyName ?: ""),
+        "note" to (this.note ?: ""),
+        "linkedIn" to (this.linkedIn ?: ""),
+        "github" to (this.github ?: ""),
+        "facebook" to (this.facebook ?: ""),
+        "ig" to (this.ig ?: ""),
+        "twitter" to (this.twitter ?: "")
+    )
 )
