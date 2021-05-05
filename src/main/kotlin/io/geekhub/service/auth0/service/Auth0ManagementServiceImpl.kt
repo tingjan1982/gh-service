@@ -178,7 +178,7 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
                           @field:JsonAlias("expires_in") val expireInSeconds: Int)
 
     data class UpdateUserRequest(val name: String,
-                                 val nickname: String,
+                                 val nickname: String?,
                                  @field:JsonProperty("user_metadata") val userMetadata: Map<String, Any>,
                                  val connection: String = "Username-Password-Authentication")
 

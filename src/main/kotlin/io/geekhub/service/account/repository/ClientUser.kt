@@ -17,7 +17,7 @@ data class ClientUser(
     @Indexed(unique = true)
     var email: String,
     var name: String,
-    var nickname: String,
+    var nickname: String?,
     var avatar: String? = null,
     val userType: UserType,
     var accountPrivilege: AccountPrivilege = AccountPrivilege.OWNER,

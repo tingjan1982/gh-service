@@ -1,5 +1,6 @@
 package io.geekhub.service.notification.service
 
+import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.service.InterviewService
@@ -18,6 +19,9 @@ internal class NotificationServiceImplTest {
 
     @Autowired
     lateinit var interviewService: InterviewService
+
+    @Autowired
+    lateinit var clientAccount: ClientAccount
 
     @Autowired
     lateinit var clientUser: ClientUser
@@ -49,5 +53,18 @@ internal class NotificationServiceImplTest {
         InterviewSession(publishedInterview = publishedInterview, clientUser = clientUser, userEmail = "candidate@geekhub.tw", interviewMode = InterviewSession.InterviewMode.REAL).let {
             notificationService.sendInterviewResult(it)
         }
+    }
+
+    @Test
+    @WithMockUser
+    fun sendOrganizationInvitation() {
+
+        val invitation = ClientAccount.UserInvitation(clientUser.id.toString(),
+            clientUser.name,
+            clientUser.email,
+            clientAccount.clientName,
+            "joelin@geekhub.tw")
+        
+        notificationService.sendOrganizationInvitation(invitation, clientAccount)
     }
 }

@@ -5,6 +5,7 @@ import io.geekhub.service.account.repository.ClientAccountRepository
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.auth0.service.Auth0ManagementService
 import io.geekhub.service.interview.service.InterviewService
+import io.geekhub.service.notification.service.NotificationService
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
@@ -19,6 +20,7 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
                                val clientUserService: ClientUserService,
                                val questionService: QuestionService,
                                val interviewService: InterviewService,
+                               val notificationService: NotificationService,
                                val mongoTemplate: MongoTemplate,
                                val auth0ManagementService: Auth0ManagementService) : ClientAccountService {
 
@@ -72,8 +74,17 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
         }
 
         organizationAccount.addUserInvitation(inviter, inviteeEmail).let {
-            return saveClientAccount(it)
+            notificationService.sendOrganizationInvitation(it, organizationAccount)
+
+            return saveClientAccount(organizationAccount)
         }
+    }
+
+    override fun sendOrganizationInvitation(organizationAccount: ClientAccount, email: String) {
+
+        organizationAccount.getUserInvitation(email)?.let {
+            notificationService.sendOrganizationInvitation(it, organizationAccount)
+        } ?: throw BusinessException("User invitation is not found by the provided email")
     }
 
     override fun uninviteOrganizationUser(clientUser: ClientUser, organizationAccount: ClientAccount, email: String): ClientAccount {

@@ -4,7 +4,7 @@ import org.hibernate.validator.constraints.Length
 
 data class UpdateClientUserRequest(
         val name: String,
-        val nickname: String,
+        val nickname: String?,
         @Length(min = 0, max = 100)
         val companyName: String?,
         @Length(min = 0, max = 1000)

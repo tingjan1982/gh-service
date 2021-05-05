@@ -15,6 +15,8 @@ interface ClientAccountService {
 
     fun inviteOrganizationUser(inviter: ClientUser, organizationAccount: ClientAccount, inviteeEmail: String): ClientAccount
 
+    fun sendOrganizationInvitation(organizationAccount: ClientAccount, email: String)
+
     fun uninviteOrganizationUser(clientUser: ClientUser, organizationAccount: ClientAccount, email: String): ClientAccount
 
     fun joinOrganization(clientUser: ClientUser, organizationAccount: ClientAccount): ClientAccount

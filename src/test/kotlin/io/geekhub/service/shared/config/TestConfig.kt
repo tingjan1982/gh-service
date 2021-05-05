@@ -15,7 +15,7 @@ class TestConfig(val clientAccountService: ClientAccountService,
                  val clientUserService: ClientUserService,
                  val specializationService: SpecializationService) {
 
-    val clientAccount = DummyObject.dummyClient()
+    val clientAccount = DummyObject.dummyClientAccount()
 
     var clientUser: ClientUser? = null
 

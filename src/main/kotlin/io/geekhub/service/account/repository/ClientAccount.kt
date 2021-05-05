@@ -20,10 +20,17 @@ data class ClientAccount(
     var avatarBinary: BinaryFile? = null,
     val userInvitations: MutableSet<UserInvitation> = mutableSetOf()) {
 
-    fun addUserInvitation(inviter: ClientUser, email: String): ClientAccount {
-        userInvitations.add(UserInvitation(inviter.id.toString(), inviter.name, inviter.email, inviter.clientAccount.clientName, email))
+    fun addUserInvitation(inviter: ClientUser, email: String): UserInvitation {
 
-        return this
+        UserInvitation(inviter.id.toString(), inviter.name, inviter.email, inviter.clientAccount.clientName, email).let {
+            userInvitations.add(it)
+
+            return it
+        }
+    }
+
+    fun getUserInvitation(email: String): UserInvitation? {
+        return userInvitations.find { it.email == email }
     }
 
     fun removeUserInvitation(email: String): ClientAccount {

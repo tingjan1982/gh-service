@@ -1,5 +1,6 @@
 package io.geekhub.service.notification.service
 
+import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.interview.model.InterviewSession
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -38,6 +39,16 @@ class NotificationServiceImpl(@Value("\${spring.mail.password}") val apiKey: Str
                 SendGridRequest.EmailAddress("notification-noreply@geekhub.tw"),
                 listOf(interviewSession.toInterviewResultPersonalization()),
                 "d-9c6d72f8a66141de8e4b109c5aa9045f")
+
+        sendNotification(emailRequest)
+    }
+
+    override fun sendOrganizationInvitation(invitation: ClientAccount.UserInvitation, clientAccount: ClientAccount) {
+
+        val emailRequest = SendGridRequest(
+            SendGridRequest.EmailAddress("notification-noreply@geekhub.tw"),
+            listOf(clientAccount.toOrganizationInvitationPersonalization(invitation)),
+            "d-fcd16b5952294a9cba65ce563b952d99")
 
         sendNotification(emailRequest)
     }
@@ -89,4 +100,13 @@ fun InterviewSession.toInterviewResultPersonalization() = NotificationServiceImp
                 Pair("candidateName", this.name ?: this.userEmail),
                 Pair("interviewSessionLink", "https://geekhub.tw/interviewResult/${this.id}")
         )
+)
+
+fun ClientAccount.toOrganizationInvitationPersonalization(invitation: ClientAccount.UserInvitation) = NotificationServiceImpl.SendGridRequest.Personalization(
+    to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(invitation.email)),
+    dynamic_template_data = mapOf(
+        Pair("organization", invitation.inviterOrganization),
+        Pair("inviterName", invitation.inviterName),
+        Pair("invitationLink", "https://geekhub.tw/organization")
+    )
 )
