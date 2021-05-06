@@ -169,6 +169,7 @@ fun ClientAccount.UserInvitation.toDTO() = UserInvitationResponse(
         inviterId = this.inviterId,
         inviterName = this.inviterName,
         inviterEmail = this.inviterEmail,
+        inviterOrganization = this.inviterOrganization,
         email = this.email
 )
 

@@ -57,7 +57,9 @@ class ClientUserController(val clientUserService: ClientUserService,
         clientUserService.getClientUser(id).let {
             auth0ManagementService.getManagementToken().let { token ->
                 auth0ManagementService.getUser(id, token).let { auth0User ->
-                    return it.toDTO(auth0User.userMetadata)
+                    val invitations = clientAccountService.getInvitedCorporateAccounts(clientUser.email).map { it.toDTO() }.toList()
+
+                    return it.toDTO(auth0User.userMetadata, invitations)
                 }
             }
         }

@@ -13,6 +13,9 @@ data class ClientUserResponse(
         val organization: OrganizationResponse?,
         val department: ClientDepartmentResponse?,
         val metadata: Map<String, Any>? = mapOf(),
+        /**
+         * received organization invitations.
+         */
         val invitations: List<UserInvitationResponse>
 ) {
         data class OrganizationResponse(val id: String, val name: String)

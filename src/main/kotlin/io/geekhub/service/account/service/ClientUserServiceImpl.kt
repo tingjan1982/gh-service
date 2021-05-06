@@ -1,6 +1,7 @@
 package io.geekhub.service.account.service
 
 import io.geekhub.service.account.repository.*
+import io.geekhub.service.shared.annotation.TransactionSupport
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -8,10 +9,9 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
-import javax.transaction.Transactional
 
 @Service
-@Transactional
+@TransactionSupport
 class ClientUserServiceImpl(val clientUserRepository: ClientUserRepository) : ClientUserService {
 
     val restTemplate = RestTemplate()

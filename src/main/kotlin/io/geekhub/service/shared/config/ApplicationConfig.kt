@@ -1,20 +1,13 @@
 package io.geekhub.service.shared.config
 
 import io.geekhub.service.account.repository.ClientAccount
-import io.geekhub.service.account.repository.ClientAccountRepository
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.auth0.service.Auth0ApiProperties
 import io.geekhub.service.auth0.service.Auth0ManagementApiProperties
-import io.geekhub.service.binarystorage.data.BinaryFileRepository
 import io.geekhub.service.interview.model.Interview
-import io.geekhub.service.interview.repository.InterviewRepository
-import io.geekhub.service.interview.repository.InterviewSessionRepository
-import io.geekhub.service.likes.data.LikeRecordRepository
 import io.geekhub.service.questions.model.Question
-import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.auditing.DefaultAuditorProvider
 import io.geekhub.service.shared.web.filter.ClientAccountFilter
-import io.geekhub.service.specialization.repository.SpecializationRepository
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean
@@ -23,13 +16,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.EventListener
 import org.springframework.data.domain.AuditorAware
-import org.springframework.data.mongodb.config.EnableMongoAuditing
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.index.IndexOperations
 import org.springframework.data.mongodb.core.index.IndexResolver
 import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexResolver
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 import springfox.documentation.builders.PathSelectors
 import springfox.documentation.builders.RequestHandlerSelectors
 import springfox.documentation.service.ApiInfo
@@ -49,15 +40,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
  * https://springframework.guru/spring-boot-restful-api-documentation-with-swagger-2/
  */
 @Configuration
-@EnableMongoRepositories(basePackageClasses = [
-    QuestionRepository::class,
-    ClientAccountRepository::class,
-    SpecializationRepository::class,
-    InterviewRepository::class,
-    InterviewSessionRepository::class,
-    LikeRecordRepository::class,
-    BinaryFileRepository::class])
-@EnableMongoAuditing
 @EnableCaching
 @EnableSwagger2
 @EnableConfigurationProperties(Auth0ManagementApiProperties::class, Auth0ApiProperties::class)
