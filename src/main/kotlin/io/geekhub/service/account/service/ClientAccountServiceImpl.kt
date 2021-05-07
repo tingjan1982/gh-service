@@ -42,14 +42,14 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
     override fun enableOrganization(clientUser: ClientUser, organizationName: String): ClientAccount {
 
         if (clientUser.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) {
-            return clientUser.clientAccount
+            throw BusinessException("User is already part of an organization")
         }
 
         clientUser.clientAccount.apply {
             this.accountType = ClientAccount.AccountType.CORPORATE
             this.clientName = organizationName
-        }.let {
-            return saveClientAccount(it)
+
+            return saveClientAccount(this)
         }
     }
 
@@ -70,7 +70,7 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
         checkClientOrganization(inviter, organizationAccount)
 
         if (clientUserService.clientUserExists(organizationAccount, inviteeEmail)) {
-            throw BusinessException("User has alreadu joined the organization")
+            throw BusinessException("User has already joined the organization")
         }
 
         organizationAccount.addUserInvitation(inviter, inviteeEmail).let {
@@ -95,11 +95,7 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
 
     override fun joinOrganization(clientUser: ClientUser, organizationAccount: ClientAccount): ClientAccount {
 
-        checkClientUserAccess(clientUser)
-
-        clientUser.clientAccount.let {
-            repository.delete(it)
-        }
+        leaveOrganization(clientUser)
 
         clientUser.accountPrivilege = ClientUser.AccountPrivilege.USER
         clientUser.clientAccount = organizationAccount
@@ -119,12 +115,14 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
 
     override fun leaveOrganization(clientUser: ClientUser) {
 
-        if (clientUser.clientAccount.accountType != ClientAccount.AccountType.CORPORATE) {
-            throw BusinessException("User is not part of an organization")
+        if (clientUser.clientAccount.accountType == ClientAccount.AccountType.INDIVIDUAL) {
+            return
         }
 
         if (clientUser.accountPrivilege == ClientUser.AccountPrivilege.OWNER) {
-            throw BusinessException("Organization owner cannot leave organization")
+            if (clientUserService.getClientUsers(clientUser.clientAccount).size > 1) {
+                throw BusinessException("Your organization has more than 1 user. Please assign OWNER privilege to another user before leaving organization")
+            }
         }
 
         clientUserService.getClientAccountOwner(clientUser.clientAccount).let { owner ->
@@ -139,18 +137,12 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
             }
         }
 
-        ClientAccount(clientUser.id, ClientAccount.AccountType.INDIVIDUAL, ClientAccount.PlanType.FREE, clientUser.name).let {
-            this.saveClientAccount(it)
-            clientUser.accountPrivilege = ClientUser.AccountPrivilege.OWNER
+        // return to user's previous client account
+        this.getClientAccount(clientUser.id.toString()).let {
             clientUser.clientAccount = it
+            clientUser.accountPrivilege = ClientUser.AccountPrivilege.OWNER
+
             clientUserService.saveClientUser(clientUser)
-        }
-    }
-
-    private fun checkClientUserAccess(clientUser: ClientUser) {
-
-        if (clientUser.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) {
-            throw BusinessException("User is already part of an organization: ${clientUser.clientAccount.clientName}")
         }
     }
 

@@ -4,7 +4,10 @@ import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.account.service.ClientAccountService
 import io.geekhub.service.account.service.ClientDepartmentService
 import io.geekhub.service.account.service.ClientUserService
-import io.geekhub.service.account.web.model.*
+import io.geekhub.service.account.web.model.AssignDepartmentRequest
+import io.geekhub.service.account.web.model.ClientUserResponse
+import io.geekhub.service.account.web.model.UpdateClientUserRequest
+import io.geekhub.service.account.web.model.UpdateUserPasswordRequest
 import io.geekhub.service.auth0.service.Auth0ManagementService
 import io.geekhub.service.auth0.service.toUpdateUserRequest
 import io.geekhub.service.binarystorage.service.BinaryStorageService
@@ -15,8 +18,6 @@ import io.geekhub.service.interview.web.model.toLightDTO
 import io.geekhub.service.likes.service.LikeService
 import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.extensions.toDTO
-import io.geekhub.service.shared.extensions.toLightDTO
-import io.geekhub.service.shared.extensions.toOrganization
 import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_USER_KEY
 import org.springframework.data.domain.PageRequest
@@ -81,52 +82,6 @@ class ClientUserController(val clientUserService: ClientUserService,
                 }
             }
         }
-    }
-
-    @GetMapping("/me/organization")
-    fun getOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser): ClientOrganizationResponse {
-
-        clientUser.clientAccount.let { acc ->
-            val users = clientUserService.getClientUsers(acc).map { it.toLightDTO() }.toList()
-
-            return acc.toOrganization(users)
-        }
-    }
-
-    @PostMapping("/me/organization")
-    fun enableOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                           @Valid @RequestBody request: EnableOrganizationRequest): ClientUserResponse {
-
-        clientAccountService.enableOrganization(clientUser, request.organizationName)
-        return clientUser.toDTO()
-    }
-
-    @PostMapping("/me/organization/join")
-    fun joinOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                         @Valid @RequestBody request: JoinOrganizationRequest): ClientUserResponse {
-
-        clientAccountService.getClientAccount(request.organizationId).let {
-            clientAccountService.joinOrganization(clientUser, it)
-
-            return clientUser.toDTO()
-        }
-    }
-
-    @PostMapping("/me/organization/decline")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun declineOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                            @Valid @RequestBody request: JoinOrganizationRequest) {
-
-        clientAccountService.getClientAccount(request.organizationId).let {
-            clientAccountService.userDeclineOrganizationInvitation(clientUser, it)
-        }
-    }
-
-    @DeleteMapping("/me/organization")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun leaveOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser) {
-
-        clientAccountService.leaveOrganization(clientUser)
     }
 
     @PostMapping("/{id:[\\w|]+}/department")

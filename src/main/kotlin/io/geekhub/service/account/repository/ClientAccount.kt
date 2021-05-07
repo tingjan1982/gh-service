@@ -50,7 +50,7 @@ data class ClientAccount(
         }
     }
 
-    fun getUserInvitation(email: String): UserInvitation? {
+    private fun getUserInvitation(email: String): UserInvitation? {
         return userInvitations.find { it.email == email }
     }
 

@@ -120,7 +120,7 @@ fun ClientAccount.toDTO() = ClientAccountResponse(
     this.userInvitations.map { it.toDTO() }.toSet()
 )
 
-fun ClientAccount.toOrganization() = ClientUserResponse.OrganizationResponse(
+fun ClientAccount.toLightOrganization() = ClientUserResponse.OrganizationResponse(
         this.id.toString(),
         this.clientName
 )
@@ -150,7 +150,7 @@ fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf(), invitations: List<Us
                 avatar = if (this.avatarBinary != null) { "$uriPrefix/$id/avatar" } else { this.avatar },
                 userType = this.userType,
                 accountPrivilege = this.accountPrivilege,
-                organization = if (this.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) { this.clientAccount.toOrganization() } else { null },
+                organization = if (this.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) { this.clientAccount.toLightOrganization() } else { null },
                 department = this.department?.toDTO(),
                 metadata = metadata,
                 invitations = invitations
