@@ -58,7 +58,7 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
      */
     override fun getInvitedCorporateAccounts(email: String): List<ClientAccount.UserInvitation> {
 
-        val query = Query.query(where("userInvitations").elemMatch(where("email").isEqualTo(email)))
+        val query = Query.query(where("userInvitations").elemMatch(where("email").isEqualTo(email).and("status").isEqualTo(ClientAccount.InvitationStatus.INVITED)))
 
         return mongoTemplate.find(query, ClientAccount::class.java).map { acc ->
             return@map acc.userInvitations.find { it.email == email }!!
@@ -70,21 +70,18 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
         checkClientOrganization(inviter, organizationAccount)
 
         if (clientUserService.clientUserExists(organizationAccount, inviteeEmail)) {
-            throw BusinessException("Invited email is already used")
+            throw BusinessException("User has alreadu joined the organization")
         }
 
         organizationAccount.addUserInvitation(inviter, inviteeEmail).let {
+            if (it.status == ClientAccount.InvitationStatus.DECLINED) {
+                throw BusinessException("User has declined this invitation")
+            }
+
             notificationService.sendOrganizationInvitation(it, organizationAccount)
 
             return saveClientAccount(organizationAccount)
         }
-    }
-
-    override fun sendOrganizationInvitation(organizationAccount: ClientAccount, email: String) {
-
-        organizationAccount.getUserInvitation(email)?.let {
-            notificationService.sendOrganizationInvitation(it, organizationAccount)
-        } ?: throw BusinessException("User invitation is not found by the provided email")
     }
 
     override fun uninviteOrganizationUser(clientUser: ClientUser, organizationAccount: ClientAccount, email: String): ClientAccount {
@@ -112,6 +109,12 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
 
             return saveClientAccount(organizationAccount)
         }
+    }
+
+    override fun userDeclineOrganizationInvitation(clientUser: ClientUser, organizationAccount: ClientAccount) {
+
+        organizationAccount.userInvitationDeclined(clientUser.email)
+        saveClientAccount(organizationAccount)
     }
 
     override fun leaveOrganization(clientUser: ClientUser) {
@@ -153,7 +156,7 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
 
     private fun checkClientOrganization(clientUser: ClientUser, organizationAccount: ClientAccount) {
 
-        if(clientUser.clientAccount.id != organizationAccount.id || clientUser.accountPrivilege == ClientUser.AccountPrivilege.USER) {
+        if (clientUser.clientAccount.id != organizationAccount.id || clientUser.accountPrivilege == ClientUser.AccountPrivilege.USER) {
             throw BusinessException("Only organization owner can perform this action")
         }
     }

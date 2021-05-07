@@ -11,7 +11,6 @@ import io.geekhub.service.binarystorage.service.BinaryStorageService
 import io.geekhub.service.shared.extensions.toLightDTO
 import io.geekhub.service.shared.extensions.toOrganization
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_USER_KEY
-import org.springframework.http.HttpStatus
 import org.springframework.util.FileCopyUtils
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -53,19 +52,11 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
                          @Valid @RequestBody request: OrganizationUserRequest): ClientOrganizationResponse {
 
         clientAccountService.getClientOrganizationAccount(id).let { acc ->
-            val users = clientUserService.getClientUsers(acc).map { it.toLightDTO() }.toList()
-            return clientAccountService.inviteOrganizationUser(clientUser, acc, request.email).toOrganization(users)
-        }
-    }
+            clientAccountService.inviteOrganizationUser(clientUser, acc, request.email).let {
 
-    @PostMapping("/{id:[\\w|]+}/invitations/send")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun sendInvitationEmail(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                         @PathVariable id: String,
-                         @Valid @RequestBody request: OrganizationUserRequest) {
-
-        clientAccountService.getClientOrganizationAccount(id).let {
-            clientAccountService.sendOrganizationInvitation(it, request.email)
+                val users = clientUserService.getClientUsers(acc).map { it.toLightDTO() }.toList()
+                return it.toOrganization(users)
+            }
         }
     }
 

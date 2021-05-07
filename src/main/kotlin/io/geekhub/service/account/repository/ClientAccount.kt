@@ -22,15 +22,18 @@ data class ClientAccount(
 
     fun addUserInvitation(inviter: ClientUser, email: String): UserInvitation {
 
-        UserInvitation(inviter.id.toString(), inviter.name, inviter.email, inviter.clientAccount.clientName, email).let {
+        getUserInvitation(email)?.let {
+            return it
+
+        } ?: UserInvitation(inviter.id.toString(), inviter.name, inviter.email, inviter.clientAccount.clientName, email, InvitationStatus.INVITED).let {
             userInvitations.add(it)
 
             return it
         }
     }
 
-    fun getUserInvitation(email: String): UserInvitation? {
-        return userInvitations.find { it.email == email }
+    fun userInvitationJoined(email: String) {
+        removeUserInvitation(email)
     }
 
     fun removeUserInvitation(email: String): ClientAccount {
@@ -41,9 +44,14 @@ data class ClientAccount(
         return this
     }
 
-    fun userInvitationJoined(email: String) {
+    fun userInvitationDeclined(email: String) {
+        getUserInvitation(email)?.let {
+            it.status = InvitationStatus.DECLINED
+        }
+    }
 
-        removeUserInvitation(email)
+    fun getUserInvitation(email: String): UserInvitation? {
+        return userInvitations.find { it.email == email }
     }
 
     enum class AccountType {
@@ -59,6 +67,11 @@ data class ClientAccount(
         val inviterName: String,
         val inviterEmail: String,
         val inviterOrganization: String,
-        val email: String
+        val email: String,
+        var status: InvitationStatus = InvitationStatus.INVITED
     )
+
+    enum class InvitationStatus {
+        INVITED, DECLINED
+    }
 }

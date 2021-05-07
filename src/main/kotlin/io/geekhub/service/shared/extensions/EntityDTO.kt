@@ -170,7 +170,8 @@ fun ClientAccount.UserInvitation.toDTO() = UserInvitationResponse(
         inviterName = this.inviterName,
         inviterEmail = this.inviterEmail,
         inviterOrganization = this.inviterOrganization,
-        email = this.email
+        email = this.email,
+        status = this.status
 )
 
 fun SpecializationRequest.toEntity() = Specialization(

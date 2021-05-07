@@ -112,6 +112,16 @@ class ClientUserController(val clientUserService: ClientUserService,
         }
     }
 
+    @PostMapping("/me/organization/decline")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun declineOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+                            @Valid @RequestBody request: JoinOrganizationRequest) {
+
+        clientAccountService.getClientAccount(request.organizationId).let {
+            clientAccountService.userDeclineOrganizationInvitation(clientUser, it)
+        }
+    }
+
     @DeleteMapping("/me/organization")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun leaveOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser) {
@@ -209,9 +219,9 @@ class ClientUserController(val clientUserService: ClientUserService,
                            @RequestParam("pageSize", defaultValue = "20") pageSize: Int,
                            uriComponentsBuilder: UriComponentsBuilder): InterviewsResponse {
 
-        clientUserService.getClientUser(id).let {
+        clientUserService.getClientUser(id).let { user ->
             val requestMap = mapOf("owner" to "true", "page" to page.toString(), "pageSize" to pageSize.toString())
-            interviewService.getInterviews(SearchCriteria.fromRequestParameters(clientUser, requestMap)).let { result ->
+            interviewService.getInterviews(SearchCriteria.fromRequestParameters(user, requestMap)).let { result ->
                 val navigationLinkBuilder = uriComponentsBuilder.path("/interviews").let {
                     requestMap.forEach { entry ->
                         it.queryParam(entry.key, entry.value)
