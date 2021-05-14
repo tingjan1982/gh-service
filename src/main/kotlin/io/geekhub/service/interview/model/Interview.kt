@@ -5,6 +5,7 @@ import io.geekhub.service.likes.data.LikableObject
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.model.BaseMongoObject
 import io.geekhub.service.shared.model.Visibility
+import io.geekhub.service.shared.service.data.ClientUserObject
 import io.geekhub.service.specialization.repository.Specialization
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
@@ -14,26 +15,26 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 @Document
 data class Interview(
-        @Id
-        var id: String? = null,
-        @TextIndexed
-        var title: String,
-        @TextIndexed
-        var description: String? = null,
-        @TextIndexed
-        var jobTitle: String,
-        @DBRef
-        var clientUser: ClientUser,
-        @DBRef
-        var specialization: Specialization,
-        var defaultDuration: Int = -1,
-        var visibility: Visibility,
-        var sections: MutableList<Section> = mutableListOf(),
-        var latestPublishedInterviewId: String? = null,
-        override var likeCount: Long = 0,
-        @DBRef(lazy = true)
-        val interviewSessions: MutableList<InterviewSession> = mutableListOf()
-) : BaseMongoObject(), LikableObject {
+    @Id
+    var id: String? = null,
+    @TextIndexed
+    var title: String,
+    @TextIndexed
+    var description: String? = null,
+    @TextIndexed
+    var jobTitle: String,
+    @DBRef
+    override var clientUser: ClientUser,
+    @DBRef
+    var specialization: Specialization?,
+    var defaultDuration: Int = -1,
+    var visibility: Visibility,
+    var sections: MutableList<Section> = mutableListOf(),
+    var latestPublishedInterviewId: String? = null,
+    override var likeCount: Long = 0,
+    @DBRef(lazy = true)
+    val interviewSessions: MutableList<InterviewSession> = mutableListOf()
+) : BaseMongoObject(), LikableObject, ClientUserObject {
 
     fun addInterviewSession(interviewSession: InterviewSession) {
         interviewSessions.add(interviewSession)

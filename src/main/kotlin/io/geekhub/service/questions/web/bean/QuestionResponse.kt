@@ -4,7 +4,6 @@ import io.geekhub.service.account.web.model.ClientUserResponse
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.model.BaseResponse
 import io.geekhub.service.shared.model.Visibility
-import io.geekhub.service.specialization.web.model.SpecializationResponse
 import java.util.*
 
 data class QuestionResponse(
@@ -12,7 +11,6 @@ data class QuestionResponse(
         val question: String,
         val questionType: Question.QuestionType = Question.QuestionType.SHORT_ANSWER,
         val clientUser: ClientUserResponse,
-        val specialization: SpecializationResponse?,
         val jobTitle: String?,
         val possibleAnswers: List<PossibleAnswerResponse> = listOf(),
         val visibility: Visibility,

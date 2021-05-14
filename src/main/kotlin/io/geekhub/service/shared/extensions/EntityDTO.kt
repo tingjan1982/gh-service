@@ -35,7 +35,6 @@ fun Question.toDTO(liked: Boolean = false) = QuestionResponse(
         this.question,
         this.questionType,
         this.clientUser.toDTO(),
-        this.specialization?.toDTO(),
         this.jobTitle,
         this.possibleAnswers.map { it.toDTO(true) }.toList(),
         this.visibility,
@@ -48,7 +47,7 @@ fun Question.toDTO(liked: Boolean = false) = QuestionResponse(
 
 fun PossibleAnswer.toDTO(showAnswer: Boolean) = QuestionResponse.PossibleAnswerResponse(this.answerId, this.answer, if (showAnswer) this.correctAnswer else null)
 
-fun InterviewRequest.toEntity(user: ClientUser, spec: Specialization) = Interview(
+fun InterviewRequest.toEntity(user: ClientUser, spec: Specialization? = null) = Interview(
         title = this.title,
         description = this.description,
         jobTitle = this.jobTitle,
@@ -87,7 +86,6 @@ fun Interview.toDTO(currentUser: ClientUser): InterviewResponse {
             description = this.description,
             jobTitle = this.jobTitle,
             clientUser = this.clientUser.toDTO(),
-            specialization = this.specialization.toDTO(),
             sections = this.sections.map { it.toDTO(showAnswer) },
             visibility = this.visibility,
             defaultDuration = this.defaultDuration,

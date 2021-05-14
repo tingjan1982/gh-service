@@ -226,8 +226,7 @@ class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessi
     override fun getCurrentInterviewSession(interviewId: String, clientUser: ClientUser): InterviewSession {
 
         interviewService.getPublishedInterviewByInterview(interviewId).let {
-            interviewSessionRepository.findByPublishedInterviewAndCandidateUserAndStatusIn(it, clientUser,
-                    listOf(InterviewSession.Status.NOT_STARTED, InterviewSession.Status.STARTED))?.let { s ->
+            interviewSessionRepository.findByPublishedInterviewAndCandidateUser(it, clientUser)?.let { s ->
                 return s
 
             } ?: throw BusinessException("This interview $interviewId has no current interview session")

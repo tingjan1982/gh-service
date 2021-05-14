@@ -11,8 +11,7 @@ data class InterviewRequest(
         val description: String?,
         @field:NotBlank
         val jobTitle: String,
-        @field:NotBlank
-        val specializationId: String,
+        val specializationId: String?,
         val visibility: Visibility,
         val defaultDuration: Int = -1,
         val sections: List<SectionRequest> = listOf()

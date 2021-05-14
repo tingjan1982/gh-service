@@ -7,7 +7,6 @@ import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.model.PageableResponse
 import io.geekhub.service.shared.model.Visibility
-import io.geekhub.service.specialization.web.model.SpecializationResponse
 import org.springframework.data.domain.Page
 import org.springframework.web.util.UriComponentsBuilder
 import java.util.*
@@ -22,7 +21,6 @@ data class InterviewsResponse(@JsonIgnore val page: Page<LightInterviewResponse>
         val description: String?,
         val jobTitle: String,
         val clientUser: ClientUserResponse,
-        val specialization: SpecializationResponse,
         val visibility: Visibility,
         val defaultDuration: Int,
         val publishedInterviewId: String?,
@@ -40,7 +38,6 @@ fun Interview.toLightDTO(likedByClientUser: Boolean = false) = InterviewsRespons
     description = this.description,
     jobTitle = this.jobTitle,
     clientUser = this.clientUser.toDTO(),
-    specialization = this.specialization.toDTO(),
     visibility = this.visibility,
     defaultDuration = this.defaultDuration,
     publishedInterviewId = this.latestPublishedInterviewId,
