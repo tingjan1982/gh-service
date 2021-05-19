@@ -156,13 +156,19 @@ fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf(), invitations: List<Us
         )
 }
 
-fun ClientUser.toLightDTO() = LightClientUserResponse(
-        id = this.id.toString(),
-        name = this.name,
-        email = this.email,
-        department = this.department?.toDTO(),
-        accountPrivilege = this.accountPrivilege
-)
+fun ClientUser.toLightDTO(): LightClientUserResponse {
+
+        val uriPrefix = MvcUriComponentsBuilder.fromController(ClientUserController::class.java).toUriString()
+
+        return LightClientUserResponse(
+                id = this.id.toString(),
+                name = this.name,
+                email = this.email,
+                avatar = if (this.avatarBinary != null) { "$uriPrefix/$id/avatar" } else { this.avatar },
+                department = this.department?.toDTO(),
+                accountPrivilege = this.accountPrivilege
+        )
+}
 
 fun ClientAccount.UserInvitation.toDTO() = UserInvitationResponse(
         inviterId = this.inviterId,

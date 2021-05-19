@@ -6,6 +6,7 @@ data class LightClientUserResponse(
     val id: String,
     val name: String,
     val email: String,
+    val avatar: String?,
     val department: ClientDepartmentResponse?,
     val accountPrivilege: ClientUser.AccountPrivilege) {
 }
