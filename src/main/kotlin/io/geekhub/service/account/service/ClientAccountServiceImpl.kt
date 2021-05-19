@@ -53,6 +53,27 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
         }
     }
 
+    override fun changeOrganizationOwner(currentOwner: ClientUser, newOwner: ClientUser) {
+
+        if (currentOwner.accountPrivilege != ClientUser.AccountPrivilege.OWNER) {
+            throw BusinessException("Only owner can change organization ownership")
+        }
+
+        if (newOwner.clientAccount != currentOwner.clientAccount) {
+            throw BusinessException("New owner is not in the same organization")
+        }
+
+        if (currentOwner == newOwner) {
+            throw BusinessException("New owner is already the owner")
+        }
+
+        newOwner.accountPrivilege = ClientUser.AccountPrivilege.OWNER
+        clientUserService.saveClientUser(newOwner)
+
+        currentOwner.accountPrivilege = ClientUser.AccountPrivilege.ADMIN
+        clientUserService.saveClientUser(currentOwner)
+    }
+
     /**
      * User can be invited to many corporate accounts.
      */

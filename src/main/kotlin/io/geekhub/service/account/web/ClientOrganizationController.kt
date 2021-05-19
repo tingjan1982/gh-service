@@ -4,10 +4,7 @@ import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.account.service.ClientAccountService
 import io.geekhub.service.account.service.ClientUserService
-import io.geekhub.service.account.web.model.ClientOrganizationResponse
-import io.geekhub.service.account.web.model.EnableOrganizationRequest
-import io.geekhub.service.account.web.model.OrganizationRequest
-import io.geekhub.service.account.web.model.OrganizationUserRequest
+import io.geekhub.service.account.web.model.*
 import io.geekhub.service.binarystorage.service.BinaryStorageService
 import io.geekhub.service.shared.extensions.toLightDTO
 import io.geekhub.service.shared.extensions.toOrganization
@@ -66,6 +63,18 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
 
         clientAccountService.enableOrganization(clientUser, request.organizationName).let {
             return it.toOrganization()
+        }
+    }
+
+    @PostMapping("/me/owner")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun changeOrganizationOwner(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        @RequestBody request: ChangeOrganizationOwnerRequest
+    ) {
+
+        clientUserService.getClientUser(request.clientUserId).let {
+            clientAccountService.changeOrganizationOwner(clientUser, it)
         }
     }
 

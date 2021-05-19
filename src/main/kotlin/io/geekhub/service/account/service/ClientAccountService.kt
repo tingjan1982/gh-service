@@ -13,6 +13,8 @@ interface ClientAccountService {
 
     fun enableOrganization(clientUser: ClientUser, organizationName: String): ClientAccount
 
+    fun changeOrganizationOwner(currentOwner: ClientUser, newOwner: ClientUser)
+
     fun inviteOrganizationUser(inviter: ClientUser, organizationAccount: ClientAccount, inviteeEmail: String): ClientAccount
 
     fun uninviteOrganizationUser(clientUser: ClientUser, organizationAccount: ClientAccount, email: String): ClientAccount

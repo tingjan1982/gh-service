@@ -91,6 +91,7 @@ fun Interview.toDTO(currentUser: ClientUser): InterviewResponse {
             defaultDuration = this.defaultDuration,
             publishedInterviewId = this.latestPublishedInterviewId,
             likeCount = this.likeCount,
+            interviewSessions = this.groupInterviewSessions().mapValues { it -> it.value.map { it.id.toString() }.toList() },
             deleted = this.deleted,
             createdDate = this.createdDate,
             lastModifiedDate = this.lastModifiedDate
