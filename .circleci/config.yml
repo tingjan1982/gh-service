@@ -82,7 +82,7 @@ jobs:
       - run:
           name: push docker image
           command: |
-            docker push joelin/nextpos-service:latest
+            docker push joelin/gh-service:latest
   deploy:
     docker:
       - image: google/cloud-sdk:249.0.0-alpine
