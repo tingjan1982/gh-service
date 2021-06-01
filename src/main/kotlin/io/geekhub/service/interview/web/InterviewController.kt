@@ -39,7 +39,7 @@ class InterviewController(val interviewService: InterviewService,
             it.sections = toSections(it, request.sections)
 
             interviewService.saveInterview(it).let { created ->
-                return created.toDTO(clientUser)
+                return created.toDTO(clientUser, true)
             }
         }
     }
@@ -53,7 +53,7 @@ class InterviewController(val interviewService: InterviewService,
                 throw BusinessException("You are not the owner of this assessment")
             }
 
-            return it.toDTO(clientUser)
+            return it.toDTO(clientUser, it.clientUser == clientUser)
         }
     }
 
@@ -99,7 +99,7 @@ class InterviewController(val interviewService: InterviewService,
             it.sections.clear()
             it.sections = toSections(it, request.sections)
 
-            return interviewService.saveInterview(it).toDTO(clientUser)
+            return interviewService.saveInterview(it).toDTO(clientUser, true)
         }
     }
 

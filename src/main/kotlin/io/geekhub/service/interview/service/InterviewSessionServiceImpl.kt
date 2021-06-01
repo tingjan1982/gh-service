@@ -6,6 +6,7 @@ import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.repository.InterviewSessionRepository
 import io.geekhub.service.notification.service.NotificationService
 import io.geekhub.service.questions.model.Question
+import io.geekhub.service.shared.annotation.TransactionSupport
 import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectAlreadyExistsException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
@@ -24,10 +25,9 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
-import javax.transaction.Transactional
 
 @Service
-@Transactional
+@TransactionSupport
 class InterviewSessionServiceImpl(val interviewSessionRepository: InterviewSessionRepository,
                                   val mongoTemplate: MongoTemplate,
                                   val interviewService: InterviewService,

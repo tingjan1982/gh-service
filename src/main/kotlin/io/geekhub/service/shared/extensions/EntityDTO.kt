@@ -77,7 +77,7 @@ fun InterviewRequest.InterviewQuestionRequest.toSnapshot() = Interview.QuestionS
         possibleAnswers = this.possibleAnswers.map { it.toEntity() }.toMutableList()
 )
 
-fun Interview.toDTO(currentUser: ClientUser): InterviewResponse {
+fun Interview.toDTO(currentUser: ClientUser, showSection: Boolean = false): InterviewResponse {
     val showAnswer = currentUser.id == this.clientUser.id
 
     return InterviewResponse(
@@ -86,7 +86,7 @@ fun Interview.toDTO(currentUser: ClientUser): InterviewResponse {
             description = this.description,
             jobTitle = this.jobTitle,
             clientUser = this.clientUser.toDTO(),
-            sections = this.sections.map { it.toDTO(showAnswer) },
+            sections = if (showSection) { this.sections.map { it.toDTO(showAnswer) } } else { listOf() },
             visibility = this.visibility,
             defaultDuration = this.defaultDuration,
             publishedInterviewId = this.latestPublishedInterviewId,
