@@ -8,12 +8,10 @@ import io.geekhub.service.interview.toDTO
 import io.geekhub.service.interview.web.model.*
 import io.geekhub.service.likes.service.LikeService
 import io.geekhub.service.questions.service.QuestionService
-import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.shared.extensions.toSnapshot
 import io.geekhub.service.shared.model.SearchCriteria
-import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.shared.service.ObjectOwnershipService
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_USER_KEY
 import io.geekhub.service.specialization.service.SpecializationService
@@ -49,9 +47,9 @@ class InterviewController(val interviewService: InterviewService,
                      @PathVariable id: String): InterviewResponse {
 
         interviewService.getInterview(id).let {
-            if (it.visibility == Visibility.PRIVATE && it.clientUser != clientUser) {
-                throw BusinessException("You are not the owner of this assessment")
-            }
+//            if (it.visibility == Visibility.PRIVATE && it.clientUser != clientUser) {
+//                throw BusinessException("You are not the owner of this assessment")
+//            }
 
             return it.toDTO(clientUser, it.clientUser == clientUser)
         }

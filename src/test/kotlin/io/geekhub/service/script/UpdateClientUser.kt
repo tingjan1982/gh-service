@@ -88,7 +88,7 @@ class UpdateClientUser {
     fun updateName() {
 
         clientUserRepository.findAll().forEach {
-            it.name = it.nickname
+            it.name = it.nickname!!
             clientUserRepository.save(it)
 
             println("Updated client user ${it.id} name")

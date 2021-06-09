@@ -43,9 +43,7 @@ class TestConfig(val clientAccountService: ClientAccountService,
     @Bean
     fun defaultSpecialization(): Specialization {
 
-        return specialization.id?.let {
-            specialization
-        } ?: specializationService.saveSpecialization(specialization)
+        return specializationService.getSpecializationByName(specialization.name) ?: specializationService.saveSpecialization(specialization)
     }
 
 

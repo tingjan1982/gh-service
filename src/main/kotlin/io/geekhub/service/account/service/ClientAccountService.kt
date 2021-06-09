@@ -9,6 +9,8 @@ interface ClientAccountService {
 
     fun getClientAccount(id: String): ClientAccount
 
+    fun lookupClientAccount(id: String): ClientAccount?
+
     fun getClientOrganizationAccount(id: String): ClientAccount
 
     fun enableOrganization(clientUser: ClientUser, organizationName: String): ClientAccount

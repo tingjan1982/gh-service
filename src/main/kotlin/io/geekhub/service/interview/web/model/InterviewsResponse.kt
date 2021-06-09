@@ -45,5 +45,5 @@ fun Interview.toLightDTO(likedByClientUser: Boolean = false) = InterviewsRespons
     liked = likedByClientUser,
     createdDate = this.createdDate,
     lastModifiedDate = this.lastModifiedDate,
-    interviewSessions = this.groupInterviewSessions().mapValues { it -> it.value.map { it.id.toString() }.toList() }
+    interviewSessions = this.groupInterviewSessions()
 )

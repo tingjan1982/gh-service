@@ -77,6 +77,7 @@ internal class InterviewSessionAggregationServiceImplTest {
         }.let {
             InterviewSession(
                     publishedInterview = it,
+                    currentInterview = it.referencedInterview,
                     clientUser = clientUser,
                     userEmail = "joelin@geekhub.tw",
                     name = "Joe Lin",
@@ -104,7 +105,7 @@ internal class InterviewSessionAggregationServiceImplTest {
                 }
 
                 interviewSessionService.submitInterviewSession(session)
-                interviewSessionService.calculateScore(session.id.toString())
+                interviewSessionService.calculateScore(session)
             }
         }
 

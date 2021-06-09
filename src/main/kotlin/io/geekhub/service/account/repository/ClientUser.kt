@@ -2,7 +2,6 @@ package io.geekhub.service.account.repository
 
 import io.geekhub.service.binarystorage.data.BinaryFile
 import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 
@@ -14,7 +13,6 @@ import org.springframework.data.mongodb.core.mapping.Document
 data class ClientUser(
     @Id
     var id: String? = null,
-    @Indexed(unique = true)
     var email: String,
     var name: String,
     var nickname: String?,

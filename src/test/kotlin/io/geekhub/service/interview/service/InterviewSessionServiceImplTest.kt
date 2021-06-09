@@ -80,6 +80,7 @@ internal class InterviewSessionServiceImplTest {
 
         InterviewSession(
                 publishedInterview = publishedInterview,
+                currentInterview = publishedInterview.referencedInterview,
                 clientUser = interview.clientUser,
                 userEmail = "joelin@geekhub.tw",
                 name = "Joe Lin",
@@ -172,7 +173,7 @@ internal class InterviewSessionServiceImplTest {
 
             return@let it
         }.let {
-            interviewSessionService.calculateScore(it.id.toString()).run {
+            interviewSessionService.calculateScore(it).run {
                 assertThat(this.totalScore).isBetween(BigDecimal(0.6), BigDecimal(0.7))
             }
         }
@@ -184,6 +185,7 @@ internal class InterviewSessionServiceImplTest {
 
         InterviewSession(
                 publishedInterview = publishedInterview,
+                currentInterview = publishedInterview.referencedInterview,
                 clientUser = interview.clientUser,
                 userEmail = "joelin@geekhub.tw",
                 name = "Joe Lin",
@@ -219,6 +221,7 @@ internal class InterviewSessionServiceImplTest {
 
         InterviewSession(
                 publishedInterview = publishedInterview,
+                currentInterview = publishedInterview.referencedInterview,
                 clientUser = interview.clientUser,
                 userEmail = "joelin@geekhub.tw",
                 name = "Joe Lin",

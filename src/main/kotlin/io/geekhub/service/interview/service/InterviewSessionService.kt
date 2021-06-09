@@ -27,5 +27,5 @@ interface InterviewSessionService {
 
     fun getInterviewSessions(searchCriteria: SearchCriteria, status: InterviewSession.Status?): Page<InterviewSession>
 
-    fun calculateScore(id: String): InterviewSession
+    fun calculateScore(interviewSession: InterviewSession): InterviewSession
 }

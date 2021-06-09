@@ -20,5 +20,6 @@ data class InterviewSessionResponse(
         val interviewEndDate: Date?,
         val totalScore: BigDecimal,
         val answerAttemptSections: Map<String, InterviewSession.AnswerAttemptSection>,
+        val groupedInterviewSessions: Map<InterviewSession.Status, List<String>> = mapOf(),
         val followupInterviews: List<InterviewSession.FollowUpInterview>
 )

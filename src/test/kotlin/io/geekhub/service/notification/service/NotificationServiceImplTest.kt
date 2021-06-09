@@ -37,7 +37,13 @@ internal class NotificationServiceImplTest {
             interviewService.publishInterview(it.id.toString())
         }
 
-        InterviewSession(publishedInterview = publishedInterview, clientUser = clientUser, userEmail = "joelin@geekhub.tw", interviewMode = InterviewSession.InterviewMode.REAL).let {
+        InterviewSession(
+            publishedInterview = publishedInterview,
+            currentInterview = publishedInterview.referencedInterview,
+            clientUser = clientUser,
+            userEmail = "joelin@geekhub.tw",
+            interviewMode = InterviewSession.InterviewMode.REAL
+        ).let {
             notificationService.sendInterviewInvitation(it)
         }
     }
@@ -50,7 +56,13 @@ internal class NotificationServiceImplTest {
             interviewService.publishInterview(it.id.toString())
         }
 
-        InterviewSession(publishedInterview = publishedInterview, clientUser = clientUser, userEmail = "candidate@geekhub.tw", interviewMode = InterviewSession.InterviewMode.REAL).let {
+        InterviewSession(
+            publishedInterview = publishedInterview,
+            currentInterview = publishedInterview.referencedInterview,
+            clientUser = clientUser,
+            userEmail = "candidate@geekhub.tw",
+            interviewMode = InterviewSession.InterviewMode.REAL
+        ).let {
             notificationService.sendInterviewResult(it)
         }
     }
@@ -59,12 +71,14 @@ internal class NotificationServiceImplTest {
     @WithMockUser
     fun sendOrganizationInvitation() {
 
-        val invitation = ClientAccount.UserInvitation(clientUser.id.toString(),
+        val invitation = ClientAccount.UserInvitation(
+            clientUser.id.toString(),
             clientUser.name,
             clientUser.email,
             clientAccount.clientName,
-            "joelin@geekhub.tw")
-        
+            "joelin@geekhub.tw"
+        )
+
         notificationService.sendOrganizationInvitation(invitation, clientAccount)
     }
 }

@@ -89,7 +89,7 @@ fun InterviewSession.toInterviewInvitationPersonalization() = NotificationServic
         dynamic_template_data = mapOf(
                 Pair("name", this.name ?: this.userEmail),
                 Pair("companyName", this.clientUser.clientAccount.clientName),
-                Pair("interviewSessionLink", "https://geekhub.tw/interviewSessions/${this.id}")
+                Pair("interviewSessionLink", "https://geekhub.tw/interviews/${this.id}/test")
         )
 )
 
@@ -98,7 +98,7 @@ fun InterviewSession.toInterviewResultPersonalization() = NotificationServiceImp
         dynamic_template_data = mapOf(
                 Pair("companyName", this.clientUser.clientAccount.clientName),
                 Pair("candidateName", this.name ?: this.userEmail),
-                Pair("interviewSessionLink", "https://geekhub.tw/interviewResult/${this.id}")
+                Pair("interviewSessionLink", "https://geekhub.tw/interviews/${this.id}/test")
         )
 )
 

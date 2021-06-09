@@ -24,6 +24,7 @@ fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientUser: 
 
     return InterviewSession(
             publishedInterview = interview,
+            currentInterview = interview.referencedInterview,
             clientUser = clientUser,
             userEmail = this.userEmail,
             name = this.name,
@@ -77,6 +78,7 @@ fun InterviewSession.toDTO(currentUser: ClientUser): InterviewSessionResponse {
             this.interviewEndDate,
             this.totalScore,
             updatedAnswerAttemptSection,
+            this.currentInterview.groupInterviewSessions(),
             this.followupInterviews
     )
 }

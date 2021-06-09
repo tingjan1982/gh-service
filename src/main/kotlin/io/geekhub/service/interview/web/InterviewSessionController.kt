@@ -135,8 +135,8 @@ class InterviewSessionController(val interviewSessionService: InterviewSessionSe
     fun calculateScore(@RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser,
                        @PathVariable id: String): InterviewSessionResponse {
 
-        interviewSessionService.calculateScore(id).let {
-            return it.toDTO(clientUser)
+        interviewSessionService.getInterviewSession(id).let {
+            return interviewSessionService.calculateScore(it).toDTO(clientUser)
         }
     }
 }

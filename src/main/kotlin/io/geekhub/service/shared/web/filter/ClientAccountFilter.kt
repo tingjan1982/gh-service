@@ -4,6 +4,7 @@ import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.account.service.ClientAccountService
 import io.geekhub.service.account.service.ClientUserService
+import io.geekhub.service.shared.config.BootstrapConfig
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.context.SecurityContextHolder
@@ -19,18 +20,6 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService, val cl
 
     companion object {
         const val CLIENT_USER_KEY = "CLIENT_USER_KEY"
-
-        private val GUEST_CLIENT_ACCOUNT = ClientAccount("guest",
-                ClientAccount.AccountType.INDIVIDUAL,
-                ClientAccount.PlanType.FREE,
-                "guest")
-
-        private val GUEST_CLIENT_USER = ClientUser(id = "guest",
-                email = "guest@geekhub.tw",
-                name = "guest",
-                nickname = "guest",
-                userType = ClientUser.UserType.AUTH0,
-                clientAccount = GUEST_CLIENT_ACCOUNT)
 
         private val LOGGER: Logger = LoggerFactory.getLogger(ClientAccountFilter::class.java)
     }
@@ -58,7 +47,7 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService, val cl
             }
         }
 
-        return GUEST_CLIENT_USER
+        return clientUserService.getClientUser(BootstrapConfig.GUEST_CLIENT_USER.id.toString())
     }
 
     private fun syncClientUserInfo(jwt: Jwt): ClientUser {

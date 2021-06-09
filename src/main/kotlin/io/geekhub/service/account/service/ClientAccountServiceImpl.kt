@@ -16,13 +16,15 @@ import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Service
 
 @Service
-class ClientAccountServiceImpl(val repository: ClientAccountRepository,
-                               val clientUserService: ClientUserService,
-                               val questionService: QuestionService,
-                               val interviewService: InterviewService,
-                               val notificationService: NotificationService,
-                               val mongoTemplate: MongoTemplate,
-                               val auth0ManagementService: Auth0ManagementService) : ClientAccountService {
+class ClientAccountServiceImpl(
+    val repository: ClientAccountRepository,
+    val clientUserService: ClientUserService,
+    val questionService: QuestionService,
+    val interviewService: InterviewService,
+    val notificationService: NotificationService,
+    val mongoTemplate: MongoTemplate,
+    val auth0ManagementService: Auth0ManagementService
+) : ClientAccountService {
 
     override fun saveClientAccount(clientAccount: ClientAccount): ClientAccount {
         return repository.save(clientAccount)
@@ -32,6 +34,10 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
         return repository.findById(id).orElseThrow {
             throw BusinessObjectNotFoundException(ClientAccount::class, id)
         }
+    }
+
+    override fun lookupClientAccount(id: String): ClientAccount? {
+        return repository.findById(id).orElse(null)
     }
 
     override fun getClientOrganizationAccount(id: String): ClientAccount {
@@ -79,7 +85,11 @@ class ClientAccountServiceImpl(val repository: ClientAccountRepository,
      */
     override fun getInvitedCorporateAccounts(email: String): List<ClientAccount.UserInvitation> {
 
-        val query = Query.query(where("userInvitations").elemMatch(where("email").isEqualTo(email).and("status").isEqualTo(ClientAccount.InvitationStatus.INVITED)))
+        val query = Query.query(
+            where("userInvitations").elemMatch(
+                where("email").isEqualTo(email).and("status").isEqualTo(ClientAccount.InvitationStatus.INVITED)
+            )
+        )
 
         return mongoTemplate.find(query, ClientAccount::class.java).map { acc ->
             return@map acc.userInvitations.find { it.email == email }!!

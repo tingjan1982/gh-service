@@ -16,6 +16,8 @@ data class InterviewSession(
         @DBRef
         val publishedInterview: PublishedInterview,
         @DBRef
+        var currentInterview: Interview,
+        @DBRef
         var clientUser: ClientUser,
         var userEmail: String,
         var name: String? = null,

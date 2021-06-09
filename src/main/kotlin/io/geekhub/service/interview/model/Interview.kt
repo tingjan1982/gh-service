@@ -40,13 +40,13 @@ data class Interview(
         interviewSessions.add(interviewSession)
     }
 
-    fun groupInterviewSessions(): Map<InterviewSession.Status, List<InterviewSession>> {
+    fun groupInterviewSessions(): Map<InterviewSession.Status, List<String>> {
 
         return interviewSessions.groupBy({
             it.status
         }, {
             it
-        })
+        }).mapValues { it -> it.value.map { it.id.toString() }.toList() }
     }
 
     override fun getClientUserId(): String {
