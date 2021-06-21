@@ -96,6 +96,17 @@ class UpdateClientUser {
     }
 
     @Test
+    @WithMockUser("script.syncAccount")
+    fun syncClientUserAndClientAccount() {
+
+        clientUserRepository.findById("auth0|605ae0cc0ad0db006ec08a31").ifPresent {
+            ClientAccount(it.id, ClientAccount.AccountType.INDIVIDUAL, ClientAccount.PlanType.FREE, it.name).let { acc ->
+                clientAccountRepository.save(acc);
+            }
+        }
+    }
+
+    @Test
     @WithMockUser("script.UpdateClientUser")
     fun run() {
 //        `update client account's default plan type and create default client user`()

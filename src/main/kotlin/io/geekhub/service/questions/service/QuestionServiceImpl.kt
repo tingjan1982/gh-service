@@ -6,13 +6,16 @@ import io.geekhub.service.questions.model.Question.QuestionAttribute
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.shared.model.SearchCriteria
+import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.TextCriteria
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
@@ -47,7 +50,15 @@ class QuestionServiceImpl(val mongoTemplate: MongoTemplate,
      */
     override fun getQuestions(searchCriteria: SearchCriteria): Page<Question> {
 
-        searchCriteria.toQuery(specializationService).let {
+        searchCriteria.toQuery().let {
+            if (!searchCriteria.filterByClientAccount) {
+                it.addCriteria(Criteria.where("visibility").`in`(Visibility.PUBLIC, null))
+            }
+
+            searchCriteria.keyword?.let { keyword ->
+                it.addCriteria(TextCriteria.forDefaultLanguage().matching(keyword))
+            }
+
             val count = mongoTemplate.count(Query.of(it).limit(-1).skip(-1), Question::class.java)
             val results = mongoTemplate.find(it, Question::class.java)
 

@@ -251,11 +251,7 @@ class InterviewSessionServiceImpl(
 
     override fun getInterviewSessions(searchCriteria: SearchCriteria, status: InterviewSession.Status?): Page<InterviewSession> {
 
-        Query().with(searchCriteria.pageRequest).let {
-            if (searchCriteria.filterByClientAccount) {
-                it.addCriteria(Criteria.where("clientUser").`is`(searchCriteria.clientUser))
-            }
-
+        searchCriteria.toQuery().let {
             searchCriteria.interviewId?.let { id ->
                 interviewService.getPublishedInterviewByInterview(id).apply {
                     it.addCriteria(Criteria.where("publishedInterview").`is`(this))

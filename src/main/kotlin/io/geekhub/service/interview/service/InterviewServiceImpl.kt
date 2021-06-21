@@ -11,6 +11,7 @@ import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.shared.exception.OwnershipException
 import io.geekhub.service.shared.model.SearchCriteria
+import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.specialization.service.SpecializationService
 import org.bson.types.ObjectId
 import org.slf4j.Logger
@@ -20,6 +21,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.TextCriteria
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
@@ -114,9 +116,14 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
 
     override fun getInterviews(searchCriteria: SearchCriteria): Page<Interview> {
 
-        searchCriteria.toQuery(specializationService).let {
+        searchCriteria.toQuery().let {
             if (!searchCriteria.filterByClientAccount) {
+                it.addCriteria(Criteria.where("visibility").`in`(Visibility.PUBLIC, null))
                 it.addCriteria(Criteria.where("latestPublishedInterviewId").ne(null))
+            }
+
+            searchCriteria.keyword?.let { keyword ->
+                it.addCriteria(TextCriteria.forDefaultLanguage().matching(keyword))
             }
 
             val count = mongoTemplate.count(Query.of(it).limit(-1).skip(-1), Interview::class.java)
