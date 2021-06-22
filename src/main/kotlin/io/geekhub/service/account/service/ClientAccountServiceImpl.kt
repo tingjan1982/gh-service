@@ -170,8 +170,13 @@ class ClientAccountServiceImpl(
 
         // return to user's previous client account
         this.getClientAccount(clientUser.id.toString()).let {
+
+            // convert corporate to individual
+
             clientUser.clientAccount = it
             clientUser.accountPrivilege = ClientUser.AccountPrivilege.OWNER
+
+
 
             clientUserService.saveClientUser(clientUser)
         }

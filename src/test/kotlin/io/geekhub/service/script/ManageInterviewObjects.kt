@@ -56,4 +56,15 @@ class ManageInterviewObjects {
 
         println("Total updated interviews: $count")
     }
+
+    @Test
+    @WithMockUser("script@geekhub.tw")
+    fun `get interview status`() {
+
+        interviewRepository.findAll().forEach {
+            it.interviewSessions.clear()
+
+            interviewRepository.save(it)
+        }
+    }
 }

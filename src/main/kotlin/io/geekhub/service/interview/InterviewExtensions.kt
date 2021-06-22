@@ -7,7 +7,6 @@ import io.geekhub.service.interview.model.PublishedInterview
 import io.geekhub.service.interview.service.bean.SectionAverageStats
 import io.geekhub.service.interview.web.model.*
 import io.geekhub.service.shared.extensions.toDTO
-import io.geekhub.service.shared.model.Visibility
 import java.math.BigDecimal
 
 fun PublishedInterview.toDTO(currentUser: ClientUser) = PublishedInterviewResponse(
@@ -36,15 +35,14 @@ fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientUser: 
 
 fun InterviewSession.showCorrectAnswer(currentUser: ClientUser): Boolean {
 
-    val (isOwner, isPublicInterview, releaseResult) = this.publishedInterview.referencedInterview.let {
+    val (isOwner, releaseResult) = this.publishedInterview.referencedInterview.let {
         val interviewOwner = it.clientUser.id == currentUser.id
-        val publicInterview = it.visibility == Visibility.PUBLIC
         val releaseResult = it.releaseResult == Interview.ReleaseResult.YES
 
-        return@let Triple(interviewOwner, publicInterview, releaseResult)
+        return@let Pair(interviewOwner, releaseResult)
     }
 
-    return isOwner || releaseResult || isPublicInterview && this.status == InterviewSession.Status.ENDED
+    return isOwner || releaseResult
 }
 
 fun InterviewSession.toDTO(currentUser: ClientUser): InterviewSessionResponse {

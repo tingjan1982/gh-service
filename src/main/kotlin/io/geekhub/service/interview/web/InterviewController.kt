@@ -15,6 +15,7 @@ import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.service.ObjectOwnershipService
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_USER_KEY
 import io.geekhub.service.specialization.service.SpecializationService
+import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.util.UriComponentsBuilder
@@ -64,12 +65,21 @@ class InterviewController(val interviewService: InterviewService,
 
     @GetMapping
     fun listInterviews(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                       @RequestParam map: Map<String, String>,
+                       @RequestParam params: Map<String, String>,
                        uriComponentsBuilder: UriComponentsBuilder): InterviewsResponse {
 
-        interviewService.getInterviews(SearchCriteria.fromRequestParameters(clientUser, map)).let { result ->
+        val searchCriteria = SearchCriteria.fromRequestParameters(clientUser, params)
+        val interviews: Page<Interview> = if (searchCriteria.invited) {
+            interviewSessionService.getInterviewSessions(searchCriteria, null).map {
+                it.publishedInterview.referencedInterview
+            }
+        } else {
+            interviewService.getInterviews(searchCriteria)
+        }
+
+        interviews.let { result ->
             val navigationLinkBuilder = uriComponentsBuilder.path("/interviews").let {
-                map.forEach { entry ->
+                params.forEach { entry ->
                     it.queryParam(entry.key, entry.value)
                 }
 
