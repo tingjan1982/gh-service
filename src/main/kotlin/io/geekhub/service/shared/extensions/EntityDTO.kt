@@ -54,7 +54,8 @@ fun InterviewRequest.toEntity(user: ClientUser, spec: Specialization? = null) = 
         clientUser = user,
         specialization = spec,
         visibility = this.visibility,
-        defaultDuration = this.defaultDuration
+        defaultDuration = this.defaultDuration,
+        releaseResult = this.releaseResult
 )
 
 fun InterviewRequest.SectionRequest.toEntity() = Interview.Section(
@@ -89,6 +90,7 @@ fun Interview.toDTO(currentUser: ClientUser, showSection: Boolean = false): Inte
             sections = if (showSection) { this.sections.map { it.toDTO(showAnswer) } } else { listOf() },
             visibility = this.visibility,
             defaultDuration = this.defaultDuration,
+            releaseResult = this.releaseResult,
             publishedInterviewId = this.latestPublishedInterviewId,
             likeCount = this.likeCount,
             interviewSessions = this.groupInterviewSessions(),

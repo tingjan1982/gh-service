@@ -41,28 +41,40 @@ internal class InterviewSessionServiceImplTest {
 
     @BeforeEach
     fun prepareInterview() {
-        Interview(title = "dummy interview",
-                jobTitle = "Engineer",
-                clientUser = clientUser,
-                specialization = specialization,
-                visibility = Visibility.PUBLIC).apply {
+        Interview(
+            title = "dummy interview",
+            jobTitle = "Engineer",
+            clientUser = clientUser,
+            specialization = specialization,
+            visibility = Visibility.PUBLIC,
+            releaseResult = Interview.ReleaseResult.YES
+        ).apply {
             Interview.Section(title = "default").apply {
                 this.questions.add(
-                        Interview.QuestionSnapshot(id = "qid-1",
-                                question = "question 1",
-                                questionType = Question.QuestionType.MULTI_CHOICE,
-                                possibleAnswers = listOf(Question.PossibleAnswer("answer-1", "answer", true))))
+                    Interview.QuestionSnapshot(
+                        id = "qid-1",
+                        question = "question 1",
+                        questionType = Question.QuestionType.MULTI_CHOICE,
+                        possibleAnswers = listOf(Question.PossibleAnswer("answer-1", "answer", true))
+                    )
+                )
 
                 this.questions.add(
-                        Interview.QuestionSnapshot(id = "qid-2",
-                                question = "question that will be answered",
-                                questionType = Question.QuestionType.SHORT_ANSWER,
-                                possibleAnswers = listOf(Question.PossibleAnswer("answer-1", "answer", true))))
+                    Interview.QuestionSnapshot(
+                        id = "qid-2",
+                        question = "question that will be answered",
+                        questionType = Question.QuestionType.SHORT_ANSWER,
+                        possibleAnswers = listOf(Question.PossibleAnswer("answer-1", "answer", true))
+                    )
+                )
 
                 this.questions.add(
-                        Interview.QuestionSnapshot(id = "qid-3",
-                                question = "question left unanswered",
-                                questionType = Question.QuestionType.SHORT_ANSWER))
+                    Interview.QuestionSnapshot(
+                        id = "qid-3",
+                        question = "question left unanswered",
+                        questionType = Question.QuestionType.SHORT_ANSWER
+                    )
+                )
             }.let {
                 this.sections.add(it)
                 interview = interviewService.saveInterview(this)
@@ -79,13 +91,13 @@ internal class InterviewSessionServiceImplTest {
         val sectionId = interview.sections[0].id
 
         InterviewSession(
-                publishedInterview = publishedInterview,
-                currentInterview = publishedInterview.referencedInterview,
-                clientUser = interview.clientUser,
-                userEmail = "joelin@geekhub.tw",
-                name = "Joe Lin",
-                interviewMode = InterviewSession.InterviewMode.REAL,
-                duration = 1
+            publishedInterview = publishedInterview,
+            currentInterview = publishedInterview.referencedInterview,
+            clientUser = interview.clientUser,
+            userEmail = "joelin@geekhub.tw",
+            name = "Joe Lin",
+            interviewMode = InterviewSession.InterviewMode.REAL,
+            duration = 1
         ).let {
             interviewSessionService.createInterviewSession(it)
 
@@ -104,7 +116,10 @@ internal class InterviewSessionServiceImplTest {
 
             it
         }.let {
-            interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = "qid-1", answerIds = listOf("answer-1"))).run {
+            interviewSessionService.addAnswerAttempt(
+                it,
+                InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = "qid-1", answerIds = listOf("answer-1"))
+            ).run {
                 assertThat(this.id).isNotNull()
                 assertThat(this.answerAttemptSections).hasSize(1)
 
@@ -184,18 +199,21 @@ internal class InterviewSessionServiceImplTest {
     fun `verify failed add answer attempts`() {
 
         InterviewSession(
-                publishedInterview = publishedInterview,
-                currentInterview = publishedInterview.referencedInterview,
-                clientUser = interview.clientUser,
-                userEmail = "joelin@geekhub.tw",
-                name = "Joe Lin",
-                interviewMode = InterviewSession.InterviewMode.REAL,
-                duration = 1
+            publishedInterview = publishedInterview,
+            currentInterview = publishedInterview.referencedInterview,
+            clientUser = interview.clientUser,
+            userEmail = "joelin@geekhub.tw",
+            name = "Joe Lin",
+            interviewMode = InterviewSession.InterviewMode.REAL,
+            duration = 1
         ).let { it ->
             interviewSessionService.createInterviewSession(it)
         }.let {
             assertThat {
-                interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = "whatever", questionSnapshotId = "whatever", answerIds = listOf("whatever")))
+                interviewSessionService.addAnswerAttempt(
+                    it,
+                    InterviewSession.QuestionAnswerAttempt(sectionId = "whatever", questionSnapshotId = "whatever", answerIds = listOf("whatever"))
+                )
             }.isFailure().isInstanceOf(BusinessException::class)
 
             return@let it
@@ -204,7 +222,10 @@ internal class InterviewSessionServiceImplTest {
             interviewSessionService.saveInterviewSession(it)
         }.let {
             assertThat {
-                interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = "whatever", questionSnapshotId = "whatever", answerIds = listOf("whatever")))
+                interviewSessionService.addAnswerAttempt(
+                    it,
+                    InterviewSession.QuestionAnswerAttempt(sectionId = "whatever", questionSnapshotId = "whatever", answerIds = listOf("whatever"))
+                )
             }.isFailure().isInstanceOf(BusinessException::class)
 
             return@let it
@@ -220,13 +241,13 @@ internal class InterviewSessionServiceImplTest {
     fun `check interview's interviewSessions reference`() {
 
         InterviewSession(
-                publishedInterview = publishedInterview,
-                currentInterview = publishedInterview.referencedInterview,
-                clientUser = interview.clientUser,
-                userEmail = "joelin@geekhub.tw",
-                name = "Joe Lin",
-                interviewMode = InterviewSession.InterviewMode.REAL,
-                duration = 1
+            publishedInterview = publishedInterview,
+            currentInterview = publishedInterview.referencedInterview,
+            clientUser = interview.clientUser,
+            userEmail = "joelin@geekhub.tw",
+            name = "Joe Lin",
+            interviewMode = InterviewSession.InterviewMode.REAL,
+            duration = 1
         ).let {
             interviewSessionService.createInterviewSession(it)
         }.let {

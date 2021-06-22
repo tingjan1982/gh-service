@@ -93,6 +93,7 @@ class InterviewController(val interviewService: InterviewService,
             it.jobTitle = request.jobTitle
             it.visibility = request.visibility
             it.defaultDuration = request.defaultDuration
+            it.releaseResult = request.releaseResult
 
             it.sections.clear()
             it.sections = toSections(it, request.sections)

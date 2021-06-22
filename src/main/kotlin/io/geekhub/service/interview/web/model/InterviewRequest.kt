@@ -1,5 +1,6 @@
 package io.geekhub.service.interview.web.model
 
+import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.web.bean.QuestionRequest
 import io.geekhub.service.shared.model.Visibility
@@ -14,6 +15,7 @@ data class InterviewRequest(
         val specializationId: String?,
         val visibility: Visibility,
         val defaultDuration: Int = -1,
+        val releaseResult: Interview.ReleaseResult = Interview.ReleaseResult.YES,
         val sections: List<SectionRequest> = listOf()
 ) {
     data class SectionRequest(

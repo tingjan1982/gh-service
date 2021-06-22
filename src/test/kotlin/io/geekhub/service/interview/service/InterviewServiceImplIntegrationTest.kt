@@ -34,11 +34,14 @@ internal class InterviewServiceImplIntegrationTest {
     @WithMockUser("dummy-user")
     fun createInterview() {
 
-        Interview(title = "sample interview",
-                jobTitle = "Engineer",
-                clientUser = clientUser,
-                specialization = specialization,
-                visibility = Visibility.PUBLIC).let {
+        Interview(
+            title = "sample interview",
+            jobTitle = "Engineer",
+            clientUser = clientUser,
+            specialization = specialization,
+            visibility = Visibility.PUBLIC,
+            releaseResult = Interview.ReleaseResult.YES
+        ).let {
             this.interviewService.saveInterview(it)
 
         }.let {
@@ -60,11 +63,14 @@ internal class InterviewServiceImplIntegrationTest {
             it
         }.let {
             val section = Interview.Section(title = "foundation").apply {
-                questions.add(Interview.QuestionSnapshot("qid",
+                questions.add(
+                    Interview.QuestionSnapshot(
+                        "qid",
                         "dummy question",
                         Question.QuestionType.MULTI_CHOICE,
                         listOf(Question.PossibleAnswer(answer = "dummy answer", correctAnswer = true))
-                ))
+                    )
+                )
             }
 
             it.sections = mutableListOf(section)

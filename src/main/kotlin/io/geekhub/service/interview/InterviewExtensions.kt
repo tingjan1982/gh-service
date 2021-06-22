@@ -1,6 +1,7 @@
 package io.geekhub.service.interview
 
 import io.geekhub.service.account.repository.ClientUser
+import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.model.PublishedInterview
 import io.geekhub.service.interview.service.bean.SectionAverageStats
@@ -35,14 +36,15 @@ fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientUser: 
 
 fun InterviewSession.showCorrectAnswer(currentUser: ClientUser): Boolean {
 
-    val (isPublicInterview, isOwner) = this.publishedInterview.referencedInterview.let {
-        val publicInterview = it.visibility == Visibility.PUBLIC
+    val (isOwner, isPublicInterview, releaseResult) = this.publishedInterview.referencedInterview.let {
         val interviewOwner = it.clientUser.id == currentUser.id
+        val publicInterview = it.visibility == Visibility.PUBLIC
+        val releaseResult = it.releaseResult == Interview.ReleaseResult.YES
 
-        return@let Pair(publicInterview, interviewOwner)
+        return@let Triple(interviewOwner, publicInterview, releaseResult)
     }
 
-    return isOwner || isPublicInterview && this.status == InterviewSession.Status.ENDED
+    return isOwner || releaseResult || isPublicInterview && this.status == InterviewSession.Status.ENDED
 }
 
 fun InterviewSession.toDTO(currentUser: ClientUser): InterviewSessionResponse {

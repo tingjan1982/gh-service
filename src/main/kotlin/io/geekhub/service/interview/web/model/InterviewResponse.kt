@@ -1,6 +1,7 @@
 package io.geekhub.service.interview.web.model
 
 import io.geekhub.service.account.web.model.ClientUserResponse
+import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.web.bean.QuestionResponse
@@ -17,6 +18,7 @@ data class InterviewResponse(
         val sections: List<SectionResponse>,
         val visibility: Visibility,
         val defaultDuration: Int,
+        val releaseResult: Interview.ReleaseResult,
         val publishedInterviewId: String?,
         val likeCount: Long,
         val interviewSessions: Map<InterviewSession.Status, List<String>>,

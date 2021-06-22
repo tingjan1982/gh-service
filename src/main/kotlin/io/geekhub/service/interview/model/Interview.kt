@@ -30,6 +30,7 @@ data class Interview(
     var specialization: Specialization?,
     var defaultDuration: Int = -1,
     var visibility: Visibility,
+    var releaseResult: ReleaseResult,
     var sections: MutableList<Section> = mutableListOf(),
     var latestPublishedInterviewId: String? = null,
     override var likeCount: Long = 0,
@@ -77,8 +78,7 @@ data class Interview(
                                 val possibleAnswers: List<Question.PossibleAnswer> = listOf()
     )
 
-    enum class ViewResult {
-
+    enum class ReleaseResult {
         YES, NO
     }
 }
