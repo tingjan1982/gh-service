@@ -126,8 +126,9 @@ fun ClientAccount.toLightOrganization() = ClientUserResponse.OrganizationRespons
         this.clientName
 )
 
-fun ClientAccount.toOrganization(users: List<LightClientUserResponse> = listOf()): ClientOrganizationResponse {
+fun ClientAccount.toOrganization(): ClientOrganizationResponse {
 
+        val users = this.users.map { it.toLightDTO() }.toList()
         val uriPrefix = MvcUriComponentsBuilder.fromController(ClientOrganizationController::class.java).toUriString()
 
         return ClientOrganizationResponse(

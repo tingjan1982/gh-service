@@ -74,6 +74,9 @@ class ClientUserController(val clientUserService: ClientUserService,
             updateClientUserRequest.toUpdateUserRequest().let { updateRequest ->
                 val updatedUser = auth0ManagementService.updateUser(clientUser.id.toString(), updateRequest, it)
 
+                clientUser.clientAccount.clientName = updateClientUserRequest.name
+                clientAccountService.saveClientAccount(clientUser.clientAccount)
+
                 clientUser.apply {
                     this.name = updateClientUserRequest.name
                     this.nickname = updateClientUserRequest.nickname

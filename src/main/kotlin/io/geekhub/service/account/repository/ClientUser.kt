@@ -26,6 +26,10 @@ data class ClientUser(
     @DBRef
     var avatarBinary: BinaryFile? = null) {
 
+    fun isOrgOwner(): Boolean {
+        return isCorporateAccount() && accountPrivilege == AccountPrivilege.OWNER
+    }
+
     fun individualAccount(): Boolean {
         return clientAccount.accountType == ClientAccount.AccountType.INDIVIDUAL
     }

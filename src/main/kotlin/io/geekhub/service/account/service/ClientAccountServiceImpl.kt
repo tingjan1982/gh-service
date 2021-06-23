@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service
 class ClientAccountServiceImpl(
     val repository: ClientAccountRepository,
     val clientUserService: ClientUserService,
-    val clientDepartmentService: ClientDepartmentService,
     val questionService: QuestionService,
     val interviewService: InterviewService,
     val notificationService: NotificationService,
@@ -50,17 +49,24 @@ class ClientAccountServiceImpl(
             throw BusinessException("User is already part of an organization")
         }
 
-        clientUser.clientAccount.apply {
-            this.accountType = ClientAccount.AccountType.CORPORATE
-            this.clientName = organizationName
+        ClientAccount(
+            accountType = ClientAccount.AccountType.CORPORATE,
+            planType = ClientAccount.PlanType.FREE,
+            clientName = organizationName
+        ).apply {
+            this.addUser(clientUser)
+            saveClientAccount(this)
 
-            return saveClientAccount(this)
+            clientUser.clientAccount = this
+            clientUserService.saveClientUser(clientUser)
+
+            return this
         }
     }
 
     override fun changeOrganizationOwner(currentOwner: ClientUser, newOwner: ClientUser) {
 
-        if (currentOwner.accountPrivilege != ClientUser.AccountPrivilege.OWNER) {
+        if (!currentOwner.isOrgOwner()) {
             throw BusinessException("Only owner can change organization ownership")
         }
 
@@ -125,13 +131,13 @@ class ClientAccountServiceImpl(
 
     override fun joinOrganization(clientUser: ClientUser, organizationAccount: ClientAccount): ClientAccount {
 
-        leaveOrganization(clientUser)
+        leaveOrganization(clientUser, organizationAccount)
 
         clientUser.accountPrivilege = ClientUser.AccountPrivilege.USER
         clientUser.clientAccount = organizationAccount
 
         clientUserService.saveClientUser(clientUser).let {
-            organizationAccount.userInvitationJoined(clientUser.email)
+            organizationAccount.userInvitationJoined(clientUser)
 
             return saveClientAccount(organizationAccount)
         }
@@ -143,19 +149,19 @@ class ClientAccountServiceImpl(
         saveClientAccount(organizationAccount)
     }
 
-    override fun leaveOrganization(clientUser: ClientUser) {
+    override fun leaveOrganization(clientUser: ClientUser, organizationAccount: ClientAccount) {
 
         if (clientUser.clientAccount.accountType == ClientAccount.AccountType.INDIVIDUAL) {
             return
         }
 
-        if (clientUser.accountPrivilege == ClientUser.AccountPrivilege.OWNER) {
-            if (clientUserService.getClientUsers(clientUser.clientAccount).size > 1) {
+        if (clientUser.isOrgOwner()) {
+            if (organizationAccount.users.size > 1) {
                 throw BusinessException("Your organization has more than 1 user. Please remove all organization users before leaving organization")
             }
         }
 
-        clientUserService.getClientAccountOwner(clientUser.clientAccount).let { owner ->
+        clientUserService.getClientAccountOwner(organizationAccount).let { owner ->
             questionService.getQuestions(clientUser).forEach { q ->
                 q.clientUser = owner
                 questionService.saveQuestion(q)
@@ -167,31 +173,16 @@ class ClientAccountServiceImpl(
             }
         }
 
+        organizationAccount.removeUser(clientUser)
+        this.saveClientAccount(organizationAccount)
+
         // return to user's previous client account
         this.getClientAccount(clientUser.id.toString()).let {
-
-            if (it == clientUser.clientAccount) {
-                cleanupClientAccount(it, clientUser)
-            }
-
             clientUser.department = null
             clientUser.clientAccount = it
             clientUser.accountPrivilege = ClientUser.AccountPrivilege.OWNER
 
             clientUserService.saveClientUser(clientUser)
-        }
-    }
-
-    fun cleanupClientAccount(clientAccount: ClientAccount, clientUser: ClientUser) {
-
-        if (clientAccount.accountType == ClientAccount.AccountType.CORPORATE) {
-            clientAccount.accountType = ClientAccount.AccountType.INDIVIDUAL
-            clientAccount.clientName = clientUser.name
-
-            clientAccount.clearUserInvitations()
-            clientDepartmentService.deleteClientAccountDepartments(clientAccount)
-
-            this.saveClientAccount(clientAccount)
         }
     }
 

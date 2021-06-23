@@ -4,13 +4,9 @@ import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.account.service.ClientAccountService
 import io.geekhub.service.account.service.ClientUserService
-import io.geekhub.service.account.web.model.ClientOrganizationResponse
-import io.geekhub.service.account.web.model.EnableOrganizationRequest
-import io.geekhub.service.account.web.model.OrganizationRequest
-import io.geekhub.service.account.web.model.OrganizationUserRequest
+import io.geekhub.service.account.web.model.*
 import io.geekhub.service.binarystorage.service.BinaryStorageService
 import io.geekhub.service.shared.exception.BusinessException
-import io.geekhub.service.shared.extensions.toLightDTO
 import io.geekhub.service.shared.extensions.toOrganization
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_USER_KEY
 import org.springframework.http.HttpStatus
@@ -30,11 +26,7 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
     fun getOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                         @PathVariable id: String): ClientOrganizationResponse {
 
-        return clientAccountService.getClientOrganizationAccount(id).let { acc ->
-            val users = clientUserService.getClientUsers(acc).map { it.toLightDTO() }.toList()
-
-            acc.toOrganization(users)
-        }
+        return clientAccountService.getClientOrganizationAccount(id).toOrganization()
     }
 
     @GetMapping("/me")
@@ -44,11 +36,7 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
             throw BusinessException("User has no organization")
         }
 
-        clientUser.clientAccount.let { acc ->
-            val users = clientUserService.getClientUsers(acc).map { it.toLightDTO() }.toList()
-
-            return acc.toOrganization(users)
-        }
+        return clientUser.clientAccount.toOrganization()
     }
 
     @PostMapping("/{id:[\\w|]+}")
@@ -58,10 +46,8 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
 
         clientAccountService.getClientOrganizationAccount(id).let { acc ->
             acc.clientName = request.name
-            clientAccountService.saveClientAccount(acc)
-            val users = clientUserService.getClientUsers(acc).map { it.toLightDTO() }.toList()
-
-            return acc.toOrganization(users)
+            
+            return clientAccountService.saveClientAccount(acc).toOrganization()
         }
     }
 
@@ -74,23 +60,23 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
         }
     }
 
-//    @PostMapping("/me/owner")
-//    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    fun changeOrganizationOwner(
-//        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-//        @RequestBody request: ChangeOrganizationOwnerRequest
-//    ) {
-//
-//        clientUserService.getClientUser(request.clientUserId).let {
-//            clientAccountService.changeOrganizationOwner(clientUser, it)
-//        }
-//    }
+    @PostMapping("/me/owner")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun changeOrganizationOwner(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        @RequestBody request: ChangeOrganizationOwnerRequest
+    ) {
+
+        clientUserService.getClientUser(request.clientUserId).let {
+            clientAccountService.changeOrganizationOwner(clientUser, it)
+        }
+    }
 
     @DeleteMapping("/me/leave")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun leaveOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser) {
 
-        clientAccountService.leaveOrganization(clientUser)
+        clientAccountService.leaveOrganization(clientUser, clientUser.clientAccount)
     }
 
     @PostMapping("/{id:[\\w|]+}/invitations")
@@ -101,8 +87,7 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
         clientAccountService.getClientOrganizationAccount(id).let { acc ->
             clientAccountService.inviteOrganizationUser(clientUser, acc, request.email).let {
 
-                val users = clientUserService.getClientUsers(acc).map { it.toLightDTO() }.toList()
-                return it.toOrganization(users)
+                return it.toOrganization()
             }
         }
     }
@@ -113,8 +98,10 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
                      @Valid @RequestBody request: OrganizationUserRequest): ClientOrganizationResponse {
 
         clientAccountService.getClientOrganizationAccount(id).let { acc ->
-            val users = clientUserService.getClientUsers(acc).map { it.toLightDTO() }.toList()
-            return clientAccountService.uninviteOrganizationUser(clientUser, acc, request.email).toOrganization(users)
+            clientAccountService.uninviteOrganizationUser(clientUser, acc, request.email).let {
+
+                return it.toOrganization()
+            }
         }
     }
 
@@ -144,7 +131,7 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
                                          @PathVariable userId: String) {
 
         clientUserService.getClientUser(userId).let {
-            clientAccountService.leaveOrganization(it)
+            clientAccountService.leaveOrganization(it, clientUser.clientAccount)
         }
     }
 
@@ -171,9 +158,8 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
                                  @RequestParam("file") multipartFile: MultipartFile): ClientOrganizationResponse {
 
         clientAccountService.getClientOrganizationAccount(id).let {
-            val users = clientUserService.getClientUsers(it).map { it.toLightDTO() }.toList()
 
-            return binaryStorageService.saveClientAccountAvatar(it, multipartFile).toOrganization(users)
+            return binaryStorageService.saveClientAccountAvatar(it, multipartFile).toOrganization()
         }
     }
 }

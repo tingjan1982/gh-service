@@ -18,7 +18,20 @@ data class ClientAccount(
     var clientName: String, // e.g. organization name
     @DBRef
     var avatarBinary: BinaryFile? = null,
+    @DBRef(lazy = true)
+    val users: MutableSet<ClientUser> = mutableSetOf(),
     val userInvitations: MutableSet<UserInvitation> = mutableSetOf()) {
+
+
+    fun addUser(clientUser: ClientUser) {
+        users.add(clientUser)
+    }
+
+    fun removeUser(clientUser: ClientUser) {
+        users.removeIf {
+            it.id == clientUser.id
+        }
+    }
 
     fun addUserInvitation(inviter: ClientUser, email: String): UserInvitation {
 
@@ -32,8 +45,9 @@ data class ClientAccount(
         }
     }
 
-    fun userInvitationJoined(email: String) {
-        removeUserInvitation(email)
+    fun userInvitationJoined(clientUser: ClientUser) {
+        addUser(clientUser)
+        removeUserInvitation(clientUser.email)
     }
 
     fun removeUserInvitation(email: String): ClientAccount {

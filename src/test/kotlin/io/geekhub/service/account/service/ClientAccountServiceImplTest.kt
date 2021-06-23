@@ -110,7 +110,7 @@ internal class ClientAccountServiceImplTest(@Autowired val clientAccountService:
             assertThat(it.accountPrivilege).isEqualTo(ClientUser.AccountPrivilege.USER)
         }
 
-        clientAccountService.leaveOrganization(user)
+        clientAccountService.leaveOrganization(user, user.clientAccount)
 
         clientUserService.getClientUser(user.id.toString()).also {
             assertThat(it.clientAccount.accountType).isEqualTo(ClientAccount.AccountType.INDIVIDUAL)
