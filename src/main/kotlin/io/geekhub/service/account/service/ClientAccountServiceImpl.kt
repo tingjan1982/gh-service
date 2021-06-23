@@ -3,7 +3,6 @@ package io.geekhub.service.account.service
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientAccountRepository
 import io.geekhub.service.account.repository.ClientUser
-import io.geekhub.service.auth0.service.Auth0ManagementService
 import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.notification.service.NotificationService
 import io.geekhub.service.questions.service.QuestionService
@@ -19,11 +18,11 @@ import org.springframework.stereotype.Service
 class ClientAccountServiceImpl(
     val repository: ClientAccountRepository,
     val clientUserService: ClientUserService,
+    val clientDepartmentService: ClientDepartmentService,
     val questionService: QuestionService,
     val interviewService: InterviewService,
     val notificationService: NotificationService,
-    val mongoTemplate: MongoTemplate,
-    val auth0ManagementService: Auth0ManagementService
+    val mongoTemplate: MongoTemplate
 ) : ClientAccountService {
 
     override fun saveClientAccount(clientAccount: ClientAccount): ClientAccount {
@@ -152,7 +151,7 @@ class ClientAccountServiceImpl(
 
         if (clientUser.accountPrivilege == ClientUser.AccountPrivilege.OWNER) {
             if (clientUserService.getClientUsers(clientUser.clientAccount).size > 1) {
-                throw BusinessException("Your organization has more than 1 user. Please assign OWNER privilege to another user before leaving organization")
+                throw BusinessException("Your organization has more than 1 user. Please remove all organization users before leaving organization")
             }
         }
 
@@ -171,14 +170,28 @@ class ClientAccountServiceImpl(
         // return to user's previous client account
         this.getClientAccount(clientUser.id.toString()).let {
 
-            // convert corporate to individual
+            if (it == clientUser.clientAccount) {
+                cleanupClientAccount(it, clientUser)
+            }
 
+            clientUser.department = null
             clientUser.clientAccount = it
             clientUser.accountPrivilege = ClientUser.AccountPrivilege.OWNER
 
-
-
             clientUserService.saveClientUser(clientUser)
+        }
+    }
+
+    fun cleanupClientAccount(clientAccount: ClientAccount, clientUser: ClientUser) {
+
+        if (clientAccount.accountType == ClientAccount.AccountType.CORPORATE) {
+            clientAccount.accountType = ClientAccount.AccountType.INDIVIDUAL
+            clientAccount.clientName = clientUser.name
+
+            clientAccount.clearUserInvitations()
+            clientDepartmentService.deleteClientAccountDepartments(clientAccount)
+
+            this.saveClientAccount(clientAccount)
         }
     }
 

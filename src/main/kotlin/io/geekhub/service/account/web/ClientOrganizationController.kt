@@ -4,8 +4,12 @@ import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.account.service.ClientAccountService
 import io.geekhub.service.account.service.ClientUserService
-import io.geekhub.service.account.web.model.*
+import io.geekhub.service.account.web.model.ClientOrganizationResponse
+import io.geekhub.service.account.web.model.EnableOrganizationRequest
+import io.geekhub.service.account.web.model.OrganizationRequest
+import io.geekhub.service.account.web.model.OrganizationUserRequest
 import io.geekhub.service.binarystorage.service.BinaryStorageService
+import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.extensions.toLightDTO
 import io.geekhub.service.shared.extensions.toOrganization
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_USER_KEY
@@ -35,6 +39,10 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
 
     @GetMapping("/me")
     fun getOrganization(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser): ClientOrganizationResponse {
+
+        if (clientUser.clientAccount.accountType == ClientAccount.AccountType.INDIVIDUAL) {
+            throw BusinessException("User has no organization")
+        }
 
         clientUser.clientAccount.let { acc ->
             val users = clientUserService.getClientUsers(acc).map { it.toLightDTO() }.toList()
@@ -66,17 +74,17 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
         }
     }
 
-    @PostMapping("/me/owner")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun changeOrganizationOwner(
-        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-        @RequestBody request: ChangeOrganizationOwnerRequest
-    ) {
-
-        clientUserService.getClientUser(request.clientUserId).let {
-            clientAccountService.changeOrganizationOwner(clientUser, it)
-        }
-    }
+//    @PostMapping("/me/owner")
+//    @ResponseStatus(HttpStatus.NO_CONTENT)
+//    fun changeOrganizationOwner(
+//        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+//        @RequestBody request: ChangeOrganizationOwnerRequest
+//    ) {
+//
+//        clientUserService.getClientUser(request.clientUserId).let {
+//            clientAccountService.changeOrganizationOwner(clientUser, it)
+//        }
+//    }
 
     @DeleteMapping("/me/leave")
     @ResponseStatus(HttpStatus.NO_CONTENT)

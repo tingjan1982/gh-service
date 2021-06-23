@@ -15,4 +15,6 @@ interface ClientDepartmentService {
     fun getDepartment(id: String): ClientDepartment
 
     fun deleteClientDepartment(department: ClientDepartment)
+
+    fun deleteClientAccountDepartments(clientAccount: ClientAccount)
 }

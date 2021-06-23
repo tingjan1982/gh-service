@@ -150,6 +150,7 @@ fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf(), invitations: List<Us
                 nickname = this.nickname,
                 avatar = if (this.avatarBinary != null) { "$uriPrefix/$id/avatar" } else { this.avatar },
                 userType = this.userType,
+                accountType = this.clientAccount.accountType,
                 accountPrivilege = this.accountPrivilege,
                 organization = if (this.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) { this.clientAccount.toLightOrganization() } else { null },
                 department = this.department?.toDTO(),

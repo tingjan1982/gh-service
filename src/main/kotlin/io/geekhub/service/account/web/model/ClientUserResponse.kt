@@ -1,5 +1,6 @@
 package io.geekhub.service.account.web.model
 
+import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
 
 data class ClientUserResponse(
@@ -9,6 +10,7 @@ data class ClientUserResponse(
         val nickname: String?,
         val avatar: String?,
         val userType: ClientUser.UserType,
+        val accountType: ClientAccount.AccountType,
         val accountPrivilege: ClientUser.AccountPrivilege,
         val organization: OrganizationResponse?,
         val department: ClientDepartmentResponse?,

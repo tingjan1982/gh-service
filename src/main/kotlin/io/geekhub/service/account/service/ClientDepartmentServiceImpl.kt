@@ -52,4 +52,9 @@ class ClientDepartmentServiceImpl(val repository: ClientDepartmentRepository, va
 
         repository.delete(department)
     }
+
+    override fun deleteClientAccountDepartments(clientAccount: ClientAccount) {
+
+        repository.deleteAllByClientAccount(clientAccount)
+    }
 }

@@ -54,6 +54,10 @@ data class ClientAccount(
         return userInvitations.find { it.email == email }
     }
 
+    fun clearUserInvitations() {
+        userInvitations.clear()
+    }
+
     enum class AccountType {
         CORPORATE, INDIVIDUAL
     }

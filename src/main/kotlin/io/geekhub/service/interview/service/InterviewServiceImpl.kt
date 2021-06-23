@@ -44,7 +44,7 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
     override fun saveInterview(interview: Interview): Interview {
 
         this.interviewRepository.save(interview).also {
-            logger.info("Created interview: $it")
+            logger.info("Saved interview: $it")
             return it
         }
     }
