@@ -42,6 +42,8 @@ internal class Auth0ManagementServiceImplTest(@Autowired val auth0ManagementServ
                 println(user)
                 this.user = user
 
+                auth0ManagementService.addRoleToUser(user.userId, "rol_2kVbpqyNmJ0qGYRs", it)
+
                 Auth0ManagementServiceImpl.UpdateUserRequest(name = "integration-test",
                         nickname = "int",
                         userMetadata = mapOf(
@@ -73,6 +75,8 @@ internal class Auth0ManagementServiceImplTest(@Autowired val auth0ManagementServ
 
                     assertThat(this.accessToken).isNotNull()
                 }
+
+                auth0ManagementService.removeRoleFromUser(user.userId, "rol_2kVbpqyNmJ0qGYRs", it)
             }
         }
     }

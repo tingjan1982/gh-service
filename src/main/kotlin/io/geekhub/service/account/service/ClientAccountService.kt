@@ -25,6 +25,8 @@ interface ClientAccountService {
 
     fun userDeclineOrganizationInvitation(clientUser: ClientUser, organizationAccount: ClientAccount)
 
+    fun removeUserFromOrganization(clientUser: ClientUser, userToRemove: ClientUser)
+
     fun leaveOrganization(clientUser: ClientUser, organizationAccount: ClientAccount)
 
     fun getInvitedCorporateAccounts(email: String): List<ClientAccount.UserInvitation>

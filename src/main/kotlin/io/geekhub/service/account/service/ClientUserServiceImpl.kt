@@ -1,8 +1,10 @@
 package io.geekhub.service.account.service
 
 import io.geekhub.service.account.repository.*
+import io.geekhub.service.auth0.service.Auth0ManagementService
 import io.geekhub.service.shared.annotation.TransactionSupport
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
+import io.geekhub.service.shared.token.NeedToRefreshTokenHolder
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -12,7 +14,7 @@ import org.springframework.web.client.RestTemplate
 
 @Service
 @TransactionSupport
-class ClientUserServiceImpl(val clientUserRepository: ClientUserRepository) : ClientUserService {
+class ClientUserServiceImpl(val clientUserRepository: ClientUserRepository, val auth0ManagementService: Auth0ManagementService) : ClientUserService {
 
     val restTemplate = RestTemplate()
 
@@ -64,5 +66,23 @@ class ClientUserServiceImpl(val clientUserRepository: ClientUserRepository) : Cl
 
     override fun clientUserExists(organization: ClientAccount, email: String): Boolean {
         return clientUserRepository.existsByClientAccountAndEmail(organization, email)
+    }
+
+    override fun addOwnerRole(clientUser: ClientUser) {
+
+        auth0ManagementService.getManagementToken().let { token ->
+            auth0ManagementService.addRoleToUser(clientUser.id.toString(), "rol_2kVbpqyNmJ0qGYRs", token)
+
+            NeedToRefreshTokenHolder.addSecurityContextToken()
+        }
+    }
+
+    override fun removeOwnerRole(clientUser: ClientUser) {
+
+        auth0ManagementService.getManagementToken().let { token ->
+            auth0ManagementService.removeRoleFromUser(clientUser.id.toString(), "rol_2kVbpqyNmJ0qGYRs", token)
+
+            NeedToRefreshTokenHolder.addSecurityContextToken()
+        }
     }
 }

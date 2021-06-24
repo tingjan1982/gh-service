@@ -22,4 +22,8 @@ interface ClientUserService {
     fun clientUsersExistInDepartment(department: ClientDepartment): Boolean
 
     fun clientUserExists(organization: ClientAccount, email: String): Boolean
+
+    fun addOwnerRole(clientUser: ClientUser)
+
+    fun removeOwnerRole(clientUser: ClientUser)
 }

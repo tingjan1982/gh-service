@@ -6,7 +6,6 @@ import io.geekhub.service.account.repository.ClientDepartmentRepository
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
-import io.geekhub.service.shared.exception.OwnershipException
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,10 +15,6 @@ class ClientDepartmentServiceImpl(val repository: ClientDepartmentRepository, va
 
         if (!user.isCorporateAccount()) {
             throw BusinessException("Only corporate account can have department")
-        }
-        
-        if (user.accountPrivilege == ClientUser.AccountPrivilege.USER) {
-            throw OwnershipException.notOwner()
         }
 
         user.clientAccount.let { acc ->

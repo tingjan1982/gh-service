@@ -17,6 +17,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.*
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
@@ -131,6 +132,49 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
             response.body?.let { userInfo ->
                 return userInfo
             } ?: throw BusinessObjectNotFoundException(Auth0UserResponse::class, userId)
+        }
+    }
+
+    override fun addRoleToUser(userId: String, roleId: String, oAuthToken: OAuthToken) {
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers.setBearerAuth(oAuthToken.accessToken)
+        val requestEntity = HttpEntity(object {
+            val roles: List<String> = listOf(roleId)
+        }, headers)
+
+        LOGGER.info("Adding role $roleId to user, id=$userId")
+
+        restTemplate.exchange("https://geekhub.auth0.com/api/v2/users/$userId/roles", HttpMethod.POST, requestEntity,
+            Auth0UserResponse::class.java).let { response ->
+
+            if (response.statusCode != HttpStatus.NO_CONTENT) {
+                throw BusinessException("Error adding role to user")
+            }
+
+            SecurityContextHolder.getContext().authentication
+
+        }
+    }
+
+    override fun removeRoleFromUser(userId: String, roleId: String, oAuthToken: OAuthToken) {
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers.setBearerAuth(oAuthToken.accessToken)
+        val requestEntity = HttpEntity(object {
+            val roles: List<String> = listOf(roleId)
+        }, headers)
+
+        LOGGER.info("Removing role $roleId to user, id=$userId")
+
+        restTemplate.exchange("https://geekhub.auth0.com/api/v2/users/$userId/roles", HttpMethod.DELETE, requestEntity,
+            Auth0UserResponse::class.java).let { response ->
+
+            if (response.statusCode != HttpStatus.NO_CONTENT) {
+                throw BusinessException("Error removiing role from user")
+            }
         }
     }
 

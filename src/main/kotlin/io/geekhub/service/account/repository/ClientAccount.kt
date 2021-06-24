@@ -15,12 +15,15 @@ data class ClientAccount(
     @Id var id: String? = null,
     var accountType: AccountType,
     var planType: PlanType, // todo: move plan to another class
-    var clientName: String, // e.g. organization name
+    var clientName: String) {
+
     @DBRef
-    var avatarBinary: BinaryFile? = null,
+    var avatarBinary: BinaryFile? = null
+
     @DBRef(lazy = true)
-    val users: MutableSet<ClientUser> = mutableSetOf(),
-    val userInvitations: MutableSet<UserInvitation> = mutableSetOf()) {
+    var users: MutableSet<ClientUser> = mutableSetOf()
+
+    var userInvitations: MutableSet<UserInvitation> = mutableSetOf()
 
 
     fun addUser(clientUser: ClientUser) {
@@ -28,9 +31,7 @@ data class ClientAccount(
     }
 
     fun removeUser(clientUser: ClientUser) {
-        users.removeIf {
-            it.id == clientUser.id
-        }
+        users.remove(clientUser)
     }
 
     fun addUserInvitation(inviter: ClientUser, email: String): UserInvitation {

@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 
 @Service
@@ -45,7 +46,7 @@ class ClientAccountServiceImpl(
 
     override fun enableOrganization(clientUser: ClientUser, organizationName: String): ClientAccount {
 
-        if (clientUser.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) {
+        if (clientUser.isCorporateAccount()) {
             throw BusinessException("User is already part of an organization")
         }
 
@@ -60,15 +61,15 @@ class ClientAccountServiceImpl(
             clientUser.clientAccount = this
             clientUserService.saveClientUser(clientUser)
 
-            return this
+        }.let {
+            clientUserService.addOwnerRole(clientUser)
+
+            return it
         }
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_update:organization')")
     override fun changeOrganizationOwner(currentOwner: ClientUser, newOwner: ClientUser) {
-
-        if (!currentOwner.isOrgOwner()) {
-            throw BusinessException("Only owner can change organization ownership")
-        }
 
         if (newOwner.clientAccount != currentOwner.clientAccount) {
             throw BusinessException("New owner is not in the same organization")
@@ -77,6 +78,9 @@ class ClientAccountServiceImpl(
         if (currentOwner == newOwner) {
             throw BusinessException("New owner is already the owner")
         }
+
+        clientUserService.addOwnerRole(newOwner)
+        clientUserService.removeOwnerRole(currentOwner)
 
         newOwner.accountPrivilege = ClientUser.AccountPrivilege.OWNER
         clientUserService.saveClientUser(newOwner)
@@ -101,6 +105,7 @@ class ClientAccountServiceImpl(
         }.toList()
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_update:organization')")
     override fun inviteOrganizationUser(inviter: ClientUser, organizationAccount: ClientAccount, inviteeEmail: String): ClientAccount {
 
         checkClientOrganization(inviter, organizationAccount)
@@ -120,6 +125,7 @@ class ClientAccountServiceImpl(
         }
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_update:organization')")
     override fun uninviteOrganizationUser(clientUser: ClientUser, organizationAccount: ClientAccount, email: String): ClientAccount {
 
         checkClientOrganization(clientUser, organizationAccount)
@@ -149,6 +155,12 @@ class ClientAccountServiceImpl(
         saveClientAccount(organizationAccount)
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_update:organization')")
+    override fun removeUserFromOrganization(clientUser: ClientUser, userToRemove: ClientUser) {
+
+        leaveOrganization(userToRemove, clientUser.clientAccount)
+    }
+
     override fun leaveOrganization(clientUser: ClientUser, organizationAccount: ClientAccount) {
 
         if (clientUser.clientAccount.accountType == ClientAccount.AccountType.INDIVIDUAL) {
@@ -176,6 +188,10 @@ class ClientAccountServiceImpl(
         organizationAccount.removeUser(clientUser)
         this.saveClientAccount(organizationAccount)
 
+        if (clientUser.isOrgOwner()) {
+            clientUserService.removeOwnerRole(clientUser)
+        }
+
         // return to user's previous client account
         this.getClientAccount(clientUser.id.toString()).let {
             clientUser.department = null
@@ -188,7 +204,7 @@ class ClientAccountServiceImpl(
 
     private fun checkClientOrganization(clientUser: ClientUser, organizationAccount: ClientAccount) {
 
-        if (clientUser.clientAccount.id != organizationAccount.id || clientUser.accountPrivilege == ClientUser.AccountPrivilege.USER) {
+        if (clientUser.clientAccount.id != organizationAccount.id) {
             throw BusinessException("Only organization owner can perform this action")
         }
     }

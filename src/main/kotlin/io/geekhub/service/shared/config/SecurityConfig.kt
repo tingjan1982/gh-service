@@ -7,6 +7,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.core.Ordered
 import org.springframework.http.HttpMethod
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
@@ -15,12 +16,19 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
 import org.springframework.security.oauth2.core.OAuth2TokenValidator
 import org.springframework.security.oauth2.jwt.*
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
 
 
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(
+    prePostEnabled = true,
+    securedEnabled = true,
+    jsr250Enabled = true
+)
 class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     companion object {
@@ -45,19 +53,30 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         http.csrf().disable().cors()
 
         http.authorizeRequests()
-                .mvcMatchers(HttpMethod.POST, "/specializations/**").authenticated()
-                .mvcMatchers(HttpMethod.DELETE, "/specializations/**").authenticated()
-                .mvcMatchers(HttpMethod.POST, "/questions/**").authenticated()
-                .mvcMatchers(HttpMethod.DELETE, "/questions/**").authenticated()
-                .mvcMatchers(HttpMethod.POST, "/interviews/**").authenticated()
-                .mvcMatchers(HttpMethod.DELETE, "/interviews/**").authenticated()
-                .mvcMatchers(HttpMethod.POST, "/interviewSessions/**").authenticated()
-                .mvcMatchers("/**").permitAll()
-                //.mvcMatchers("/api/private-scoped").hasAuthority("SCOPE_read:messages")
-                .and()
-                .oauth2ResourceServer().jwt()
+            .mvcMatchers(HttpMethod.POST, "/specializations/**").authenticated()
+            .mvcMatchers(HttpMethod.DELETE, "/specializations/**").authenticated()
+            .mvcMatchers(HttpMethod.POST, "/questions/**").authenticated()
+            .mvcMatchers(HttpMethod.DELETE, "/questions/**").authenticated()
+            .mvcMatchers(HttpMethod.POST, "/interviews/**").authenticated()
+            .mvcMatchers(HttpMethod.DELETE, "/interviews/**").authenticated()
+            .mvcMatchers(HttpMethod.POST, "/interviewSessions/**").authenticated()
+            .mvcMatchers(HttpMethod.POST, "/organizations/**").authenticated()
+            .mvcMatchers("/**").permitAll()
+            .and()
+            .oauth2ResourceServer().jwt {
+                it.jwtAuthenticationConverter(jwtAuthenticationConverter())
+            }
 
+    }
 
+    fun jwtAuthenticationConverter(): JwtAuthenticationConverter {
+        val grantedAuthoritiesConverter = JwtGrantedAuthoritiesConverter()
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("permissions")
+
+        val jwtAuthenticationConverter = JwtAuthenticationConverter()
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter)
+
+        return jwtAuthenticationConverter
     }
 
     @Bean

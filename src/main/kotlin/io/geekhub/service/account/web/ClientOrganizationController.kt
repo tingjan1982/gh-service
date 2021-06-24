@@ -131,7 +131,7 @@ class ClientOrganizationController(val clientAccountService: ClientAccountServic
                                          @PathVariable userId: String) {
 
         clientUserService.getClientUser(userId).let {
-            clientAccountService.leaveOrganization(it, clientUser.clientAccount)
+            clientAccountService.removeUserFromOrganization(clientUser, it)
         }
     }
 
