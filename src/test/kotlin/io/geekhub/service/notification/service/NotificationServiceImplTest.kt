@@ -44,7 +44,7 @@ internal class NotificationServiceImplTest {
             userEmail = "joelin@geekhub.tw",
             interviewMode = InterviewSession.InterviewMode.REAL
         ).let {
-            notificationService.sendInterviewInvitation(it)
+            notificationService.sendInterviewInvitation(clientUser, it)
         }
     }
 

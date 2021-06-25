@@ -15,6 +15,7 @@ import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.*
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.security.core.context.SecurityContextHolder
@@ -42,7 +43,7 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
         val LOGGER: Logger = LoggerFactory.getLogger(Auth0ManagementServiceImpl::class.java)
     }
 
-    //@Cacheable("managementToken")
+    @Cacheable("managementToken")
     override fun getManagementToken(): OAuthToken {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON

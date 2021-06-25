@@ -9,6 +9,9 @@ import org.springframework.data.mongodb.core.mapping.Document
  * Represents an account within the system. Account differentiates from User in the sense that
  * it tracks account related information such as account type, which can used for reporting,
  * plan type, which indicates the plan that the user is on.
+ *
+ * Data class behavior:
+ * https://kotlinlang.org/docs/data-classes.html
  */
 @Document
 data class ClientAccount(

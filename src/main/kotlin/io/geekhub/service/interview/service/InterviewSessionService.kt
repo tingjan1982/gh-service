@@ -11,7 +11,7 @@ interface InterviewSessionService {
 
     fun saveInterviewSession(interviewSession: InterviewSession): InterviewSession
 
-    fun sendInterviewSession(interviewSession: InterviewSession): InterviewSession
+    fun sendInterviewSession(sender: ClientUser, interviewSession: InterviewSession): InterviewSession
 
     fun startInterviewSession(interviewSession: InterviewSession, candidateUser: ClientUser): InterviewSession
 

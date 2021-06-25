@@ -1,6 +1,7 @@
 package io.geekhub.service.notification.service
 
 import io.geekhub.service.account.repository.ClientAccount
+import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.InterviewSession
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -23,11 +24,11 @@ class NotificationServiceImpl(@Value("\${spring.mail.password}") val apiKey: Str
         val LOGGER: Logger = LoggerFactory.getLogger(NotificationServiceImpl::class.java)
     }
 
-    override fun sendInterviewInvitation(interviewSession: InterviewSession) {
+    override fun sendInterviewInvitation(sender: ClientUser, interviewSession: InterviewSession) {
 
         val emailRequest = SendGridRequest(
                 SendGridRequest.EmailAddress("notification-noreply@geekhub.tw"),
-                listOf(interviewSession.toInterviewInvitationPersonalization()),
+                listOf(interviewSession.toInterviewInvitationPersonalization(sender)),
                 "d-60c9ba1a412a4281aa633136408f7185")
 
         sendNotification(emailRequest)
@@ -84,10 +85,11 @@ class NotificationServiceImpl(@Value("\${spring.mail.password}") val apiKey: Str
     }
 }
 
-fun InterviewSession.toInterviewInvitationPersonalization() = NotificationServiceImpl.SendGridRequest.Personalization(
+fun InterviewSession.toInterviewInvitationPersonalization(sender: ClientUser) = NotificationServiceImpl.SendGridRequest.Personalization(
         to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(this.userEmail)),
         dynamic_template_data = mapOf(
-                Pair("name", this.name ?: this.userEmail),
+                Pair("candidateName", this.name ?: this.userEmail),
+                Pair("senderName", sender.name),
                 Pair("companyName", this.clientUser.clientAccount.clientName),
                 Pair("interviewSessionLink", "https://geekhub.tw/interviews/${this.id}/test")
         )
@@ -96,8 +98,8 @@ fun InterviewSession.toInterviewInvitationPersonalization() = NotificationServic
 fun InterviewSession.toInterviewResultPersonalization() = NotificationServiceImpl.SendGridRequest.Personalization(
         to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(this.clientUser.email)),
         dynamic_template_data = mapOf(
-                Pair("companyName", this.clientUser.clientAccount.clientName),
                 Pair("candidateName", this.name ?: this.userEmail),
+                Pair("companyName", this.clientUser.clientAccount.clientName),
                 Pair("interviewSessionLink", "https://geekhub.tw/interviews/${this.id}/test")
         )
 )

@@ -9,6 +9,7 @@ import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.specialization.repository.SpecializationRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.data.mongodb.MongoDbFactory
 import org.springframework.data.mongodb.MongoTransactionManager
 import org.springframework.data.mongodb.config.EnableMongoAuditing
@@ -28,6 +29,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 class DataSourceConfig {
 
     @Bean
+    @Profile("!test")
     fun transactionManager(dbFactory: MongoDbFactory): MongoTransactionManager {
         return MongoTransactionManager(dbFactory)
     }

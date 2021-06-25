@@ -63,10 +63,10 @@ class InterviewSessionServiceImpl(
         return interviewSessionRepository.save(interviewSession)
     }
 
-    override fun sendInterviewSession(interviewSession: InterviewSession): InterviewSession {
+    override fun sendInterviewSession(sender: ClientUser, interviewSession: InterviewSession): InterviewSession {
 
         interviewSession.interviewSentDate = Date()
-        notificationService.sendInterviewInvitation(interviewSession)
+        notificationService.sendInterviewInvitation(sender, interviewSession)
 
         return saveInterviewSession(interviewSession)
     }

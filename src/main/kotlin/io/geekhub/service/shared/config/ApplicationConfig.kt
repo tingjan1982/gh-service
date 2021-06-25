@@ -11,7 +11,9 @@ import io.geekhub.service.shared.web.filter.ClientAccountFilter
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean
+import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.EventListener
@@ -29,6 +31,7 @@ import springfox.documentation.service.Contact
 import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spring.web.plugins.Docket
 import springfox.documentation.swagger2.annotations.EnableSwagger2
+import java.util.*
 
 
 /**
@@ -46,6 +49,14 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
 class ApplicationConfig(val mongoTemplate: MongoTemplate,
                         val mongoMappingContext: MongoMappingContext,
                         val clientAccountFilter: ClientAccountFilter) {
+
+    @Bean
+    fun cacheManager(): CacheManager? {
+        val cacheManager = ConcurrentMapCacheManager()
+        cacheManager.setCacheNames(listOf("managementToken", "test"))
+
+        return cacheManager
+    }
 
     @Bean
     fun loggingFilter(): FilterRegistrationBean<ClientAccountFilter> {
