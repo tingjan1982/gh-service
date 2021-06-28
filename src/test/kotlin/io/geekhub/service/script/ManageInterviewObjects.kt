@@ -3,6 +3,7 @@ package io.geekhub.service.script
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.interview.repository.InterviewSessionRepository
+import io.geekhub.service.interview.repository.PublishedInterviewRepository
 import io.geekhub.service.shared.annotation.IntegrationTest
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -18,6 +19,9 @@ class ManageInterviewObjects {
 
     @Autowired
     private lateinit var interviewRepository: InterviewRepository
+
+    @Autowired
+    private lateinit var publishedInterviewRepository: PublishedInterviewRepository
 
     @Autowired
     private lateinit var interviewSessionRepository: InterviewSessionRepository
@@ -55,6 +59,12 @@ class ManageInterviewObjects {
         }
 
         println("Total updated interviews: $count")
+
+        publishedInterviewRepository.findAll().forEach {
+            it.referencedInterview.releaseResult = Interview.ReleaseResult.YES
+
+            publishedInterviewRepository.save(it)
+        }
     }
 
     @Test

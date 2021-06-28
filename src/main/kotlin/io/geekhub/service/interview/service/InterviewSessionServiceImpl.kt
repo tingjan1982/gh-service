@@ -224,11 +224,13 @@ class InterviewSessionServiceImpl(
             .flatMap { sections -> sections.value.answerStats.values }
             .sumBy { stats -> stats.questionTotal }
 
-        val totalCorrectAnswers = interviewSession.answerAttemptSections
-            .flatMap { sections -> sections.value.answerStats.values }
-            .sumBy { stats -> stats.correct }
+        if (totalQuestions > 0) {
+            val totalCorrectAnswers = interviewSession.answerAttemptSections
+                .flatMap { sections -> sections.value.answerStats.values }
+                .sumBy { stats -> stats.correct }
 
-        interviewSession.totalScore = BigDecimal(totalCorrectAnswers).divide(BigDecimal(totalQuestions), 2, RoundingMode.CEILING)
+            interviewSession.totalScore = BigDecimal(totalCorrectAnswers).divide(BigDecimal(totalQuestions), 2, RoundingMode.CEILING)
+        }
 
         return saveInterviewSession(interviewSession)
     }
@@ -256,6 +258,10 @@ class InterviewSessionServiceImpl(
                 interviewService.getPublishedInterviewByInterview(id).apply {
                     it.addCriteria(Criteria.where("publishedInterview").`is`(this))
                 }
+            }
+
+            if (searchCriteria.invited) {
+                it.addCriteria(Criteria.where("userEmail").`is`(searchCriteria.clientUser.email))
             }
 
             status?.let { s ->
