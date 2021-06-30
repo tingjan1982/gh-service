@@ -1,6 +1,5 @@
 package io.geekhub.service.script
 
-import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.interview.repository.InterviewSessionRepository
 import io.geekhub.service.interview.repository.PublishedInterviewRepository
@@ -44,27 +43,17 @@ class ManageInterviewObjects {
 
     @Test
     @WithMockUser("script@geekhub.tw")
-    fun `populate releaseResult field in Interview`() {
+    fun `populate field in Interview`() {
 
         val count = AtomicInteger()
 
         interviewRepository.findAll().forEach {
-
-            if (it.releaseResult == null) {
-                it.releaseResult = Interview.ReleaseResult.YES
-                count.incrementAndGet()
-
-                interviewRepository.save(it)
-            }
+            count.incrementAndGet()
+            it.clientAccount = it.clientUser.clientAccount.id
+            interviewRepository.save(it)
         }
 
         println("Total updated interviews: $count")
-
-        publishedInterviewRepository.findAll().forEach {
-            it.referencedInterview.releaseResult = Interview.ReleaseResult.YES
-
-            publishedInterviewRepository.save(it)
-        }
     }
 
     @Test

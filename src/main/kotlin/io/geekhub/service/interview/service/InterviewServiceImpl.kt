@@ -117,7 +117,7 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
     override fun getInterviews(searchCriteria: SearchCriteria): Page<Interview> {
 
         searchCriteria.toQuery().let {
-            if (!searchCriteria.filterByClientAccount) {
+            if (!searchCriteria.filterByMine && !searchCriteria.filterByClientAccount) {
                 it.addCriteria(Criteria.where("visibility").`in`(Visibility.PUBLIC, null))
                 it.addCriteria(Criteria.where("latestPublishedInterviewId").ne(null))
             }

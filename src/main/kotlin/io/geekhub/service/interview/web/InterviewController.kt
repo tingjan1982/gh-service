@@ -1,20 +1,19 @@
 package io.geekhub.service.interview.web
 
 import io.geekhub.service.account.repository.ClientUser
+import io.geekhub.service.account.service.ClientAccountService
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.interview.service.InterviewSessionService
 import io.geekhub.service.interview.toDTO
 import io.geekhub.service.interview.web.model.*
 import io.geekhub.service.likes.service.LikeService
-import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.shared.extensions.toSnapshot
 import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.service.ObjectOwnershipService
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_USER_KEY
-import io.geekhub.service.specialization.service.SpecializationService
 import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -25,8 +24,7 @@ import javax.validation.Valid
 @RequestMapping("/interviews")
 class InterviewController(val interviewService: InterviewService,
                           val interviewSessionService: InterviewSessionService,
-                          val questionService: QuestionService,
-                          val specializationService: SpecializationService,
+                          val clientAccountService: ClientAccountService,
                           val likeService: LikeService,
                           val objectOwnershipService: ObjectOwnershipService) {
 
@@ -34,7 +32,12 @@ class InterviewController(val interviewService: InterviewService,
     fun createInterview(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                         @Valid @RequestBody request: InterviewRequest): InterviewResponse {
 
-        request.toEntity(clientUser).let {
+        val owningAccount = when (request.accountType) {
+            InterviewRequest.OwnershipType.DEFAULT -> clientUser.clientAccount
+            InterviewRequest.OwnershipType.PERSONAL -> clientAccountService.getClientAccount(clientUser.id.toString())
+        }
+
+        request.toEntity(clientUser, owningAccount).let {
             it.sections = toSections(it, request.sections)
 
             interviewService.saveInterview(it).let { created ->
@@ -161,7 +164,7 @@ class InterviewController(val interviewService: InterviewService,
                 val questionSnapshots = it.questions.map { qRequest ->
                     if (qRequest.id == null && qRequest.questionId == null) {
                         qRequest.toEntity(interview).let { q ->
-                            questionService.saveQuestion(q)
+                            //questionService.saveQuestion(q)
                         }
                     }
 

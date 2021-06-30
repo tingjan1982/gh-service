@@ -51,7 +51,7 @@ class QuestionServiceImpl(val mongoTemplate: MongoTemplate,
     override fun getQuestions(searchCriteria: SearchCriteria): Page<Question> {
 
         searchCriteria.toQuery().let {
-            if (!searchCriteria.filterByClientAccount) {
+            if (!searchCriteria.filterByMine && !searchCriteria.filterByClientAccount) {
                 it.addCriteria(Criteria.where("visibility").`in`(Visibility.PUBLIC, null))
             }
 

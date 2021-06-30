@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.query.Query
 
 data class SearchCriteria(
         val interviewId: String?,
+        val filterByMine: Boolean,
         val filterByClientAccount: Boolean,
         val clientUser: ClientUser,
         val invited: Boolean,
@@ -22,6 +23,7 @@ data class SearchCriteria(
 
             val interviewId = if (map["interviewId"].isNullOrEmpty()) null else map["interviewId"]
             val owner = map["owner"]?.toBoolean() ?: false
+            val organization = map["organization"]?.toBoolean() ?: false
             val invited = map["invited"]?.toBoolean() ?: false
             val keyword = if (map["keyword"].isNullOrEmpty()) null else map["keyword"]
             val specialization = map["specialization"]
@@ -34,15 +36,19 @@ data class SearchCriteria(
             val pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Order.desc(sortField)))
             val decoratedKeyword = if (keyword.isNullOrEmpty()) null else keyword
 
-            return SearchCriteria(interviewId, owner, clientUser, invited, decoratedKeyword, specialization, userKey, pageRequest)
+            return SearchCriteria(interviewId, owner, organization, clientUser, invited, decoratedKeyword, specialization, userKey, pageRequest)
         }
     }
 
     fun toQuery(): Query {
 
         Query().with(pageRequest).let {
-            if (filterByClientAccount) {
+            if (filterByMine) {
                 it.addCriteria(Criteria.where("clientUser").`is`(clientUser))
+            }
+
+            if (filterByClientAccount) {
+                it.addCriteria(Criteria.where("clientAccount").`is`(clientUser.clientAccount.id))
             }
 
             userKey?.let { key ->

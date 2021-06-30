@@ -47,11 +47,12 @@ fun Question.toDTO(liked: Boolean = false) = QuestionResponse(
 
 fun PossibleAnswer.toDTO(showAnswer: Boolean) = QuestionResponse.PossibleAnswerResponse(this.answerId, this.answer, if (showAnswer) this.correctAnswer else null)
 
-fun InterviewRequest.toEntity(user: ClientUser, spec: Specialization? = null) = Interview(
+fun InterviewRequest.toEntity(user: ClientUser, owningAccount: ClientAccount, spec: Specialization? = null) = Interview(
         title = this.title,
         description = this.description,
         jobTitle = this.jobTitle,
         clientUser = user,
+        clientAccount = owningAccount.id,
         specialization = spec,
         visibility = this.visibility,
         defaultDuration = this.defaultDuration,

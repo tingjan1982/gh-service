@@ -261,7 +261,9 @@ class InterviewSessionServiceImpl(
             }
 
             if (searchCriteria.invited) {
-                it.addCriteria(Criteria.where("userEmail").`is`(searchCriteria.clientUser.email))
+                it.addCriteria(Criteria.where("userEmail").`is`(searchCriteria.clientUser.email)
+                    .and("status").`is`(InterviewSession.Status.NOT_STARTED)
+                )
             }
 
             status?.let { s ->

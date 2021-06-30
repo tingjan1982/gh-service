@@ -26,6 +26,7 @@ data class Interview(
     var jobTitle: String,
     @DBRef
     override var clientUser: ClientUser,
+    var clientAccount: String? = null,
     @DBRef
     var specialization: Specialization?,
     var defaultDuration: Int = -1,
