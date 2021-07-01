@@ -1,7 +1,7 @@
 package io.geekhub.service.interview.web.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import io.geekhub.service.account.web.model.ClientUserResponse
+import io.geekhub.service.account.web.model.LightClientUserResponse
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.shared.model.PageableResponse
 import org.springframework.data.domain.Page
@@ -15,10 +15,9 @@ data class InterviewSessionsResponse(@JsonIgnore val page: Page<LightInterviewSe
     data class LightInterviewSessionResponse(
             val id: String,
             val interview: InterviewsResponse.LightInterviewResponse,
-            val clientUser: ClientUserResponse,
             val userEmail: String,
             val name: String?,
-            val candidateUser: ClientUserResponse?,
+            val candidateUser: LightClientUserResponse?,
             val interviewMode: InterviewSession.InterviewMode,
             val duration: Int,
             val status: InterviewSession.Status,

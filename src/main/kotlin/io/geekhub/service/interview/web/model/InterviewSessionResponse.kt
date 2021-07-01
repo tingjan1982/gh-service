@@ -1,6 +1,6 @@
 package io.geekhub.service.interview.web.model
 
-import io.geekhub.service.account.web.model.ClientUserResponse
+import io.geekhub.service.account.web.model.LightClientUserResponse
 import io.geekhub.service.interview.model.InterviewSession
 import java.math.BigDecimal
 import java.util.*
@@ -8,10 +8,10 @@ import java.util.*
 data class InterviewSessionResponse(
         val id: String,
         val interview: InterviewResponse,
-        val clientUser: ClientUserResponse,
+        val clientUser: LightClientUserResponse,
         val userEmail: String,
         val name: String?,
-        val candidateUser: ClientUserResponse?,
+        val candidateUser: LightClientUserResponse?,
         val interviewMode: InterviewSession.InterviewMode,
         val duration: Int,
         val status: InterviewSession.Status,

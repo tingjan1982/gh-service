@@ -4,8 +4,6 @@ import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.auth0.service.Auth0ApiProperties
 import io.geekhub.service.auth0.service.Auth0ManagementApiProperties
-import io.geekhub.service.interview.model.Interview
-import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.auditing.DefaultAuditorProvider
 import io.geekhub.service.shared.web.filter.ClientAccountFilter
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -19,10 +17,12 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.EventListener
 import org.springframework.data.domain.AuditorAware
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.index.IndexOperations
+import org.springframework.data.mongodb.core.index.IndexDefinition
 import org.springframework.data.mongodb.core.index.IndexResolver
 import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexResolver
+import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext
+import org.springframework.data.mongodb.core.mapping.MongoPersistentEntity
 import springfox.documentation.builders.PathSelectors
 import springfox.documentation.builders.RequestHandlerSelectors
 import springfox.documentation.service.ApiInfo
@@ -46,9 +46,11 @@ import java.util.*
 @EnableCaching
 @EnableSwagger2
 @EnableConfigurationProperties(Auth0ManagementApiProperties::class, Auth0ApiProperties::class)
-class ApplicationConfig(val mongoTemplate: MongoTemplate,
-                        val mongoMappingContext: MongoMappingContext,
-                        val clientAccountFilter: ClientAccountFilter) {
+class ApplicationConfig(
+    val mongoTemplate: MongoTemplate,
+    val mongoMappingContext: MongoMappingContext,
+    val clientAccountFilter: ClientAccountFilter
+) {
 
     @Bean
     fun cacheManager(): CacheManager? {
@@ -62,13 +64,15 @@ class ApplicationConfig(val mongoTemplate: MongoTemplate,
     fun loggingFilter(): FilterRegistrationBean<ClientAccountFilter> {
         val registrationBean = FilterRegistrationBean<ClientAccountFilter>();
         registrationBean.filter = clientAccountFilter;
-        registrationBean.addUrlPatterns("/users/*",
+        registrationBean.addUrlPatterns(
+            "/users/*",
             "/organizations/*",
             "/departments/*",
             "/questions/*",
             "/interviews/*",
             "/publishedInterviews/*",
-            "/interviewSessions/*");
+            "/interviewSessions/*"
+        )
 
         return registrationBean;
     }
@@ -82,15 +86,18 @@ class ApplicationConfig(val mongoTemplate: MongoTemplate,
     fun initIndicesAfterStartup() {
 
         val resolver: IndexResolver = MongoPersistentEntityIndexResolver(mongoMappingContext)
-
-        listOf(Question::class.java, Interview::class.java).forEach { domainType ->
-            val indexOps: IndexOperations = mongoTemplate.indexOps(domainType)
-
-            resolver.resolveIndexFor(domainType).forEach {
-                indexOps.ensureIndex(it)
+        // consider only entities that are annotated with @Document
+        mongoMappingContext.persistentEntities
+            .stream()
+            .filter {
+                it.isAnnotationPresent(Document::class.java)
             }
-
-        }
+            .forEach { it: MongoPersistentEntity<*>? ->
+                val indexOps = mongoTemplate.indexOps(it!!.type)
+                resolver.resolveIndexFor(it.type).forEach { indexDefinition: IndexDefinition ->
+                    indexOps.ensureIndex(indexDefinition)
+                }
+            }
     }
 
     /**
@@ -127,6 +134,7 @@ class ApplicationConfig(val mongoTemplate: MongoTemplate,
             "Terms of service",
             Contact("Joe Lin", "www.geekhub.io", "tingjan1982@geekhub.io"),
             "Copyright (c) 2018 Joe Lin", "",
-            setOf())
+            setOf()
+        )
     }
 }

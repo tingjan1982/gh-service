@@ -35,22 +35,28 @@ data class Interview(
     var sections: MutableList<Section> = mutableListOf(),
     var latestPublishedInterviewId: String? = null,
     override var likeCount: Long = 0,
-    override var userKey: String? = null,
-    @DBRef(lazy = true)
-    val interviewSessions: MutableList<InterviewSession> = mutableListOf()
+    override var userKey: String? = null
 ) : BaseMongoObject(), LikableObject, ClientUserObject, UserKeyObject {
 
-    fun addInterviewSession(interviewSession: InterviewSession) {
-        interviewSessions.add(interviewSession)
+    @Deprecated("uses lightInterviewSessions instead")
+    @DBRef(lazy = true)
+    var interviewSessions: MutableList<InterviewSession> = mutableListOf()
+
+    @DBRef
+    var lightInterviewSessions: MutableList<LightInterviewSession> = mutableListOf()
+
+
+    fun addInterviewSession(interviewSession: LightInterviewSession) {
+        lightInterviewSessions.add(interviewSession)
     }
 
     fun groupInterviewSessions(): Map<InterviewSession.Status, List<String>> {
 
-        return interviewSessions.groupBy({
+        return lightInterviewSessions.groupBy({
             it.status
         }, {
             it
-        }).mapValues { it -> it.value.map { it.id.toString() }.toList() }
+        }).mapValues { it -> it.value.map { it.id }.toList() }
     }
 
     override fun getClientUserId(): String {

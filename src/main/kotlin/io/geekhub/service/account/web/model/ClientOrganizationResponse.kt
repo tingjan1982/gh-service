@@ -7,5 +7,5 @@ data class ClientOrganizationResponse(
     val name: String,
     val avatar: String?,
     val userInvitations: Set<ClientAccount.UserInvitation>,
-    val users: List<LightClientUserResponse>
+    val users: List<OrganizationClientUserResponse>
 )

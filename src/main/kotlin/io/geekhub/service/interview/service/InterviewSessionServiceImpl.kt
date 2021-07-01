@@ -3,7 +3,9 @@ package io.geekhub.service.interview.service
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.InterviewSession
+import io.geekhub.service.interview.model.LightInterviewSession
 import io.geekhub.service.interview.repository.InterviewSessionRepository
+import io.geekhub.service.interview.repository.LightInterviewSessionRepository
 import io.geekhub.service.notification.service.NotificationService
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.annotation.TransactionSupport
@@ -30,9 +32,10 @@ import java.util.*
 @TransactionSupport
 class InterviewSessionServiceImpl(
     val interviewSessionRepository: InterviewSessionRepository,
-    val mongoTemplate: MongoTemplate,
+    val lightInterviewSessionRepository: LightInterviewSessionRepository,
     val interviewService: InterviewService,
-    val notificationService: NotificationService
+    val notificationService: NotificationService,
+    val mongoTemplate: MongoTemplate
 ) : InterviewSessionService {
 
     companion object {
@@ -41,17 +44,18 @@ class InterviewSessionServiceImpl(
 
     override fun createInterviewSession(interviewSession: InterviewSession): InterviewSession {
 
-        if (interviewSessionRepository.existsByPublishedInterviewAndUserEmail(
-                interviewSession.publishedInterview,
-                interviewSession.userEmail
-            )
+        if (interviewSessionRepository.existsByPublishedInterviewAndUserEmail(interviewSession.publishedInterview, interviewSession.userEmail)
         ) {
             throw BusinessObjectAlreadyExistsException("Interview session is already created for ${interviewSession.userEmail}")
         }
 
         return interviewSessionRepository.save(interviewSession).let {
+            val lightSession = lightInterviewSessionRepository.findById(it.id.toString()).orElseThrow {
+                throw BusinessObjectNotFoundException(LightInterviewSession::class, it.id.toString())
+            }
+
             interviewService.getInterview(it.publishedInterview.referencedInterview.id.toString()).let { interview ->
-                interview.addInterviewSession(it)
+                interview.addInterviewSession(lightSession)
                 interviewService.saveInterview(interview)
             }
 
@@ -261,8 +265,9 @@ class InterviewSessionServiceImpl(
             }
 
             if (searchCriteria.invited) {
-                it.addCriteria(Criteria.where("userEmail").`is`(searchCriteria.clientUser.email)
-                    .and("status").`is`(InterviewSession.Status.NOT_STARTED)
+                it.addCriteria(
+                    Criteria.where("userEmail").`is`(searchCriteria.clientUser.email)
+                        .and("status").`in`(InterviewSession.Status.NOT_STARTED, InterviewSession.Status.STARTED)
                 )
             }
 

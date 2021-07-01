@@ -16,7 +16,7 @@ plugins {
     id("org.springframework.boot") version "2.2.5.RELEASE"
     kotlin("plugin.spring") version "1.4.32"
     kotlin("plugin.noarg") version "1.4.32"
-//    kotlin("plugin.allopen") version "1.4.32"
+//    kotlin("plugin.allopen") version "1.4.32" // plugin.spring offers the same functionality - https://kotlinlang.org/docs/all-open-plugin.html#spring-support
 
     // build info
     id("com.gorylenko.gradle-git-properties") version "2.2.2"

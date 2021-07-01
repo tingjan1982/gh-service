@@ -94,7 +94,7 @@ fun Interview.toDTO(currentUser: ClientUser, showSection: Boolean = false): Inte
             releaseResult = this.releaseResult,
             publishedInterviewId = this.latestPublishedInterviewId,
             likeCount = this.likeCount,
-            interviewSessions = this.groupInterviewSessions(),
+            groupedInterviewSessions = this.groupInterviewSessions(),
             deleted = this.deleted,
             createdDate = this.createdDate,
             lastModifiedDate = this.lastModifiedDate
@@ -129,7 +129,7 @@ fun ClientAccount.toLightOrganization() = ClientUserResponse.OrganizationRespons
 
 fun ClientAccount.toOrganization(): ClientOrganizationResponse {
 
-        val users = this.users.map { it.toLightDTO() }.toList()
+        val users = this.users.map { it.toOrgUserDTO() }.toList()
         val uriPrefix = MvcUriComponentsBuilder.fromController(ClientOrganizationController::class.java).toUriString()
 
         return ClientOrganizationResponse(
@@ -166,6 +166,20 @@ fun ClientUser.toLightDTO(): LightClientUserResponse {
         val uriPrefix = MvcUriComponentsBuilder.fromController(ClientUserController::class.java).toUriString()
 
         return LightClientUserResponse(
+                id = this.id.toString(),
+                name = this.name,
+                nickname = this.nickname,
+                email = this.email,
+                avatar = if (this.avatarBinary != null) { "$uriPrefix/$id/avatar" } else { this.avatar },
+                organization = if (this.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) { this.clientAccount.toLightOrganization() } else { null },
+        )
+}
+
+fun ClientUser.toOrgUserDTO(): OrganizationClientUserResponse {
+
+        val uriPrefix = MvcUriComponentsBuilder.fromController(ClientUserController::class.java).toUriString()
+
+        return OrganizationClientUserResponse(
                 id = this.id.toString(),
                 name = this.name,
                 email = this.email,

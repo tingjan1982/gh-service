@@ -7,6 +7,7 @@ import io.geekhub.service.interview.model.PublishedInterview
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.interview.repository.PublishedInterviewRepository
 import io.geekhub.service.questions.repository.QuestionRepository
+import io.geekhub.service.shared.annotation.TransactionSupport
 import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.shared.exception.OwnershipException
@@ -23,13 +24,12 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.TextCriteria
 import org.springframework.stereotype.Service
-import javax.transaction.Transactional
 
 /**
  * todo: revisit this at some point: https://www.baeldung.com/kotlin-logging
  */
 @Service
-@Transactional
+@TransactionSupport
 class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
                            val clientUserService: ClientUserService,
                            val questionRepository: QuestionRepository,

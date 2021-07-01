@@ -32,10 +32,12 @@ data class InterviewSession(
         var interviewEndDate: Date? = null,
         var totalScore: BigDecimal = BigDecimal.ZERO,
         override var userKey: String? = null,
-        var answerAttemptSections: MutableMap<String, AnswerAttemptSection> = mutableMapOf(),
-        val followupInterviews: MutableList<FollowUpInterview> = mutableListOf()
-
 ) : BaseMongoObject(), UserKeyObject {
+
+    var answerAttemptSections: MutableMap<String, AnswerAttemptSection> = mutableMapOf()
+
+    var followupInterviews: MutableList<FollowUpInterview> = mutableListOf()
+
 
     data class AnswerAttemptSection(
             val id: String,

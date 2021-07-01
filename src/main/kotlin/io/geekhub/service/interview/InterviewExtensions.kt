@@ -7,6 +7,7 @@ import io.geekhub.service.interview.model.PublishedInterview
 import io.geekhub.service.interview.service.bean.SectionAverageStats
 import io.geekhub.service.interview.web.model.*
 import io.geekhub.service.shared.extensions.toDTO
+import io.geekhub.service.shared.extensions.toLightDTO
 import java.math.BigDecimal
 
 fun PublishedInterview.toDTO(currentUser: ClientUser) = PublishedInterviewResponse(
@@ -66,10 +67,10 @@ fun InterviewSession.toDTO(currentUser: ClientUser): InterviewSessionResponse {
     return InterviewSessionResponse(
             this.id.toString(),
             this.publishedInterview.referencedInterview.toDTO(currentUser, true),
-            this.clientUser.toDTO(),
+            this.clientUser.toLightDTO(),
             this.userEmail,
             this.name,
-            this.candidateUser?.toDTO(),
+            this.candidateUser?.toLightDTO(),
             this.interviewMode,
             this.duration,
             this.status,
@@ -86,10 +87,9 @@ fun InterviewSession.toDTO(currentUser: ClientUser): InterviewSessionResponse {
 fun InterviewSession.toLightDTO() = InterviewSessionsResponse.LightInterviewSessionResponse(
         this.id.toString(),
         this.publishedInterview.referencedInterview.toLightDTO(),
-        this.clientUser.toDTO(),
         this.userEmail,
         this.name,
-        this.candidateUser?.toDTO(),
+        this.candidateUser?.toLightDTO(),
         this.interviewMode,
         this.duration,
         this.status,

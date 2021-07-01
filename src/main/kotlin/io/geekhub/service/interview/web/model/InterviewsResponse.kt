@@ -1,10 +1,10 @@
 package io.geekhub.service.interview.web.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import io.geekhub.service.account.web.model.ClientUserResponse
+import io.geekhub.service.account.web.model.LightClientUserResponse
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.InterviewSession
-import io.geekhub.service.shared.extensions.toDTO
+import io.geekhub.service.shared.extensions.toLightDTO
 import io.geekhub.service.shared.model.PageableResponse
 import io.geekhub.service.shared.model.Visibility
 import org.springframework.data.domain.Page
@@ -20,7 +20,7 @@ data class InterviewsResponse(@JsonIgnore val page: Page<LightInterviewResponse>
         val title: String,
         val description: String?,
         val jobTitle: String,
-        val clientUser: ClientUserResponse,
+        val clientUser: LightClientUserResponse,
         val visibility: Visibility,
         val defaultDuration: Int,
         val publishedInterviewId: String?,
@@ -28,7 +28,7 @@ data class InterviewsResponse(@JsonIgnore val page: Page<LightInterviewResponse>
         val liked: Boolean,
         val createdDate: Date?,
         val lastModifiedDate: Date?,
-        val interviewSessions: Map<InterviewSession.Status, List<String>>
+        val groupedInterviewSessions: Map<InterviewSession.Status, List<String>>
     )
 }
 
@@ -37,7 +37,7 @@ fun Interview.toLightDTO(likedByClientUser: Boolean = false) = InterviewsRespons
     title = this.title,
     description = this.description,
     jobTitle = this.jobTitle,
-    clientUser = this.clientUser.toDTO(),
+    clientUser = this.clientUser.toLightDTO(),
     visibility = this.visibility,
     defaultDuration = this.defaultDuration,
     publishedInterviewId = this.latestPublishedInterviewId,
@@ -45,5 +45,5 @@ fun Interview.toLightDTO(likedByClientUser: Boolean = false) = InterviewsRespons
     liked = likedByClientUser,
     createdDate = this.createdDate,
     lastModifiedDate = this.lastModifiedDate,
-    interviewSessions = this.groupInterviewSessions()
+    groupedInterviewSessions = this.groupInterviewSessions()
 )

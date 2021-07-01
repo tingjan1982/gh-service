@@ -21,7 +21,7 @@ data class InterviewResponse(
         val releaseResult: Interview.ReleaseResult,
         val publishedInterviewId: String?,
         val likeCount: Long,
-        val interviewSessions: Map<InterviewSession.Status, List<String>>,
+        val groupedInterviewSessions: Map<InterviewSession.Status, List<String>>,
         override val deleted: Boolean,
         override val createdDate: Date?,
         override val lastModifiedDate: Date?
