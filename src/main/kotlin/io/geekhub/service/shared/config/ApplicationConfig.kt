@@ -23,6 +23,7 @@ import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexRes
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext
 import org.springframework.data.mongodb.core.mapping.MongoPersistentEntity
+import org.springframework.scheduling.annotation.EnableScheduling
 import springfox.documentation.builders.PathSelectors
 import springfox.documentation.builders.RequestHandlerSelectors
 import springfox.documentation.service.ApiInfo
@@ -43,6 +44,7 @@ import java.util.*
  * https://springframework.guru/spring-boot-restful-api-documentation-with-swagger-2/
  */
 @Configuration
+@EnableScheduling
 @EnableCaching
 @EnableSwagger2
 @EnableConfigurationProperties(Auth0ManagementApiProperties::class, Auth0ApiProperties::class)
