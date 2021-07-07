@@ -10,18 +10,24 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.Duration
 
+/**
+ * Spring @Value:
+ *
+ * https://www.baeldung.com/spring-value-annotation
+ */
 @Component
-class CacheEvictionScheduler(val cacheManager: CacheManager) {
-
-    @Value("\${app.cache.evictionInterval}")
-    lateinit var evictionInterval: Duration
+class CacheEvictionScheduler(val cacheManager: CacheManager, @Value("\${app.cache.evictionInterval}") val evictionInterval: Duration) {
 
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(CacheEvictionScheduler::class.java)
     }
 
-    //@Scheduled(fixedDelayString = "#{evictionInterval.toMillis()}")
-    @Scheduled(fixedDelay = 12 * 60 * 60 * 1000)
+    /**
+     * Reference current bean by bean name in SpEL.
+     *
+     * https://stackoverflow.com/questions/59771574/how-to-reference-a-bean-by-type-in-a-spel
+     */
+    @Scheduled(fixedDelayString = "#{@cacheEvictionScheduler.evictionInterval.toMillis()}")
     fun evictManagementTokenCache() {
         LOGGER.info("Evicting management token cache after the specified delay")
 

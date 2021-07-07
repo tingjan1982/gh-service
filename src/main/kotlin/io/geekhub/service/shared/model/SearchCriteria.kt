@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.isEqualTo
 
 data class SearchCriteria(
         val interviewId: String?,
@@ -53,7 +54,7 @@ data class SearchCriteria(
 
             userKey?.let { key ->
                 it.addCriteria(Criteria.where("userKey").`is`(key))
-            }
+            } ?: it.addCriteria(Criteria.where("userKey").isEqualTo(null))
             
             it.addCriteria(Criteria.where("deleted").`is`(false))
 
