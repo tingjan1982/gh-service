@@ -96,6 +96,14 @@ class InterviewSessionServiceImpl(
         checkInterviewSessionTime(interviewSession)
         validateSectionAndQuestion(interviewSession, answerAttempt.sectionId, answerAttempt.questionSnapshotId)
 
+        answerAttempt.let {
+            it.questionType = if (it.answer != null) {
+                Question.QuestionType.SHORT_ANSWER
+            } else {
+                Question.QuestionType.MULTI_CHOICE
+            }
+        }
+
         interviewSession.answerAttemptSections.getOrPut(answerAttempt.sectionId) { initializeAnswerAttemptSection(interviewSession, answerAttempt.sectionId) }.let {
             it.answerAttempts[answerAttempt.questionSnapshotId] = answerAttempt
         }
@@ -111,22 +119,25 @@ class InterviewSessionServiceImpl(
         correct: Boolean
     ): InterviewSession {
 
+        if (interviewSession.status != InterviewSession.Status.ENDED) {
+            throw BusinessException("You can only mark answer on a submitted interview: ${interviewSession.id}")
+        }
+
         validateSectionAndQuestion(interviewSession, sectionId, questionSnapshotId)
 
         interviewSession.answerAttemptSections.getOrPut(sectionId) { initializeAnswerAttemptSection(interviewSession, sectionId) }.let {
 
-            val incorrectAttempt = InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = questionSnapshotId, correct = false)
+            val incorrectAttempt = InterviewSession.QuestionAnswerAttempt(
+                sectionId = sectionId,
+                questionSnapshotId = questionSnapshotId,
+                questionType = Question.QuestionType.SHORT_ANSWER,
+                correct = false)
+
             it.answerAttempts.getOrPut(questionSnapshotId) { incorrectAttempt }.let { attempt ->
                 attempt.correct = correct
             }
 
-            it.answerStats[Question.QuestionType.SHORT_ANSWER]?.run {
-                this.answered++
-
-                if (correct) {
-                    this.correct++
-                }
-            }
+            it.computeAnswerStats(Question.QuestionType.SHORT_ANSWER)
         }
 
         return saveInterviewSession(interviewSession)
@@ -149,7 +160,7 @@ class InterviewSessionServiceImpl(
         sectionId: String
     ): InterviewSession.AnswerAttemptSection {
 
-        LOGGER.info("Initialize AnswerAttemptSection for section: ${sectionId}")
+        LOGGER.info("Initialize AnswerAttemptSection for section: $sectionId")
 
         interviewSession.publishedInterview.referencedInterview.sections
             .find { it.id == sectionId }?.let {
@@ -178,6 +189,10 @@ class InterviewSessionServiceImpl(
     }
 
     override fun submitInterviewSession(interviewSession: InterviewSession): InterviewSession {
+
+        if (interviewSession.status != InterviewSession.Status.STARTED) {
+            throw BusinessException("You can only submit a started interview: ${interviewSession.id}")
+        }
 
         if (interviewSession.interviewEndDate == null) {
             interviewSession.status = InterviewSession.Status.ENDED

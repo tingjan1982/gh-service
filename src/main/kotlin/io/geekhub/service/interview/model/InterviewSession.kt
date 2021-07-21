@@ -49,11 +49,29 @@ data class InterviewSession(
                 var answered: Int = 0,
                 var correct: Int = 0
         )
+
+        fun computeAnswerStats(questionType: Question.QuestionType) {
+
+            val stats = answerAttempts.filter { it.value.questionType == questionType }
+                .map { it.value }.let {
+
+                    val answered = it.size
+                    val correctAnswers = it.filter { qaa -> qaa.correct == true }.size
+
+                    return@let Pair(answered, correctAnswers)
+                }
+
+            answerStats[questionType]?.apply {
+                this.answered = stats.first
+                this.correct = stats.second
+            }
+        }
     }
 
     data class QuestionAnswerAttempt(
             val sectionId: String,
             val questionSnapshotId: String,
+            var questionType: Question.QuestionType? = null,
             var answerIds: List<String>? = null,
             var answer: String? = null,
             var correct: Boolean? = null

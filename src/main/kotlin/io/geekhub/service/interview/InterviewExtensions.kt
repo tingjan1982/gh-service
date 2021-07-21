@@ -100,10 +100,10 @@ fun InterviewSession.toLightDTO() = InterviewSessionsResponse.LightInterviewSess
 )
 
 fun AnswerAttemptRequest.toEntity() = InterviewSession.QuestionAnswerAttempt(
-        sectionId = this.sectionId,
-        questionSnapshotId = this.questionSnapshotId,
-        answerIds = this.answerId,
-        answer = this.answer
+    sectionId = this.sectionId,
+    questionSnapshotId = this.questionSnapshotId,
+    answerIds = this.answerId,
+    answer = this.answer
 )
 
 fun SectionAverageStats.toDTO() = InterviewSessionAverageStatsResponse(

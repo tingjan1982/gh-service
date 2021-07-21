@@ -168,6 +168,7 @@ internal class InterviewSessionServiceImplTest {
                 }
             }
 
+            interviewSessionService.markInterviewSessionAnswer(it, sectionId, "qid-2", false)
             interviewSessionService.markInterviewSessionAnswer(it, sectionId, "qid-2", true).run {
                 this.answerAttemptSections.getValue(sectionId).run {
                     assertThat(this.answerStats.getValue(Question.QuestionType.SHORT_ANSWER).answered).isEqualTo(1)
@@ -206,7 +207,7 @@ internal class InterviewSessionServiceImplTest {
             name = "Joe Lin",
             interviewMode = InterviewSession.InterviewMode.REAL,
             duration = 1
-        ).let { it ->
+        ).let {
             interviewSessionService.createInterviewSession(it)
         }.let {
             assertThat {
