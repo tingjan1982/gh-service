@@ -3,6 +3,7 @@ package io.geekhub.service.interview.model
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.model.BaseMongoObject
+import io.geekhub.service.shared.service.data.ClientUserObject
 import io.geekhub.service.shared.userkey.UserKeyObject
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.DBRef
@@ -19,7 +20,7 @@ data class InterviewSession(
         @DBRef
         var currentInterview: Interview,
         @DBRef
-        var clientUser: ClientUser,
+        override var clientUser: ClientUser,
         var userEmail: String,
         var name: String? = null,
         @DBRef
@@ -32,7 +33,7 @@ data class InterviewSession(
         var interviewEndDate: Date? = null,
         var totalScore: BigDecimal = BigDecimal.ZERO,
         override var userKey: String? = null,
-) : BaseMongoObject(), UserKeyObject {
+) : BaseMongoObject(), UserKeyObject, ClientUserObject {
 
     var answerAttemptSections: MutableMap<String, AnswerAttemptSection> = mutableMapOf()
 

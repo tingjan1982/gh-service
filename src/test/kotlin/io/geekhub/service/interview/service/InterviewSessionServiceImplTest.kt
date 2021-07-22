@@ -253,7 +253,7 @@ internal class InterviewSessionServiceImplTest {
             interviewSessionService.createInterviewSession(it)
         }.let {
             interviewService.getInterview(interview.id.toString()).run {
-                assertThat(this.interviewSessions).hasSize(1)
+                assertThat(this.lightInterviewSessions).hasSize(1)
 
                 assertThat(this.groupInterviewSessions()).all {
                     hasSize(1)
@@ -265,7 +265,7 @@ internal class InterviewSessionServiceImplTest {
         }.let {
             interviewSessionService.startInterviewSession(it, clientUser).also {
                 interviewService.getInterview(interview.id.toString()).run {
-                    assertThat(this.interviewSessions).hasSize(1)
+                    assertThat(this.lightInterviewSessions).hasSize(1)
 
                     assertThat(this.groupInterviewSessions()).all {
                         hasSize(1)

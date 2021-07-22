@@ -44,8 +44,7 @@ class InterviewSessionServiceImpl(
 
     override fun createInterviewSession(interviewSession: InterviewSession): InterviewSession {
 
-        if (interviewSessionRepository.existsByPublishedInterviewAndUserEmail(interviewSession.publishedInterview, interviewSession.userEmail)
-        ) {
+        if (interviewSessionRepository.existsByPublishedInterviewAndUserEmail(interviewSession.publishedInterview, interviewSession.userEmail)) {
             throw BusinessObjectAlreadyExistsException("Interview session is already created for ${interviewSession.userEmail}")
         }
 
@@ -77,7 +76,7 @@ class InterviewSessionServiceImpl(
 
     override fun startInterviewSession(interviewSession: InterviewSession, candidateUser: ClientUser): InterviewSession {
 
-        if (interviewSession.status == InterviewSession.Status.STARTED) {
+        if (interviewSession.status != InterviewSession.Status.NOT_STARTED) {
             throw BusinessException("Interview has already started at ${interviewSession.interviewStartDate}")
         }
 
@@ -92,6 +91,10 @@ class InterviewSessionServiceImpl(
         interviewSession: InterviewSession,
         answerAttempt: InterviewSession.QuestionAnswerAttempt
     ): InterviewSession {
+
+        if (interviewSession.status != InterviewSession.Status.STARTED) {
+            throw BusinessException("You can only add answer attempt to a started interview session: ${interviewSession.id}")
+        }
 
         checkInterviewSessionTime(interviewSession)
         validateSectionAndQuestion(interviewSession, answerAttempt.sectionId, answerAttempt.questionSnapshotId)
@@ -131,7 +134,8 @@ class InterviewSessionServiceImpl(
                 sectionId = sectionId,
                 questionSnapshotId = questionSnapshotId,
                 questionType = Question.QuestionType.SHORT_ANSWER,
-                correct = false)
+                correct = false
+            )
 
             it.answerAttempts.getOrPut(questionSnapshotId) { incorrectAttempt }.let { attempt ->
                 attempt.correct = correct
@@ -214,26 +218,16 @@ class InterviewSessionServiceImpl(
             .filter { it.questionType == Question.QuestionType.MULTI_CHOICE }
             .associate { Pair(it.id, it.possibleAnswers.filter { ans -> ans.correctAnswer }.map { ans -> ans.answerId }.toList()) }
 
-        interviewSession.answerAttemptSections.forEach {
-            LOGGER.info("Scoring answers for section: ${it.key}")
+        interviewSession.answerAttemptSections.forEach { (sid, sec) ->
+            LOGGER.info("Scoring answers for section: $sid")
 
-            val answerAttemptSection = it.value
-            answerAttemptSection.answerStats[Question.QuestionType.MULTI_CHOICE]?.let { multiChoiceStats ->
-
-                answerAttemptSection.answerAttempts.forEach { ans ->
-                    correctAnswers[ans.key]?.let { correctAnswerIds ->
-                        multiChoiceStats.answered++
-
-                        val answerAttempt = ans.value
-
-                        answerAttempt.correct = correctAnswerIds.containsAll(answerAttempt.answerIds.orEmpty())
-
-                        if (answerAttempt.correct!!) {
-                            multiChoiceStats.correct++
-                        }
-                    }
+            sec.answerAttempts.forEach { (qid, ans) ->
+                correctAnswers[qid]?.let { correctAnswerIds ->
+                    ans.correct = correctAnswerIds.containsAll(ans.answerIds.orEmpty())
                 }
             }
+
+            sec.computeAnswerStats(Question.QuestionType.MULTI_CHOICE)
         }
     }
 
