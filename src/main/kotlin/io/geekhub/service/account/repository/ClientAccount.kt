@@ -18,7 +18,8 @@ data class ClientAccount(
     @Id var id: String? = null,
     var accountType: AccountType,
     var planType: PlanType, // todo: move plan to another class
-    var clientName: String) {
+    var clientName: String
+) {
 
     @DBRef
     var avatarBinary: BinaryFile? = null
@@ -42,7 +43,15 @@ data class ClientAccount(
         getUserInvitation(email)?.let {
             return it
 
-        } ?: UserInvitation(inviter.id.toString(), inviter.name, inviter.email, inviter.clientAccount.clientName, email, InvitationStatus.INVITED).let {
+        } ?: UserInvitation(
+            inviter.id.toString(),
+            inviter.name,
+            inviter.email,
+            inviter.clientAccount.clientName,
+            inviter.clientAccount.id,
+            email,
+            InvitationStatus.INVITED
+        ).let {
             userInvitations.add(it)
 
             return it
@@ -89,6 +98,7 @@ data class ClientAccount(
         val inviterName: String,
         val inviterEmail: String,
         val inviterOrganization: String,
+        var inviterOrganizationId: String?,
         val email: String,
         var status: InvitationStatus = InvitationStatus.INVITED
     )
