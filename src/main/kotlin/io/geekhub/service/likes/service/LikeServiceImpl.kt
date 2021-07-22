@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.TextCriteria
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
@@ -17,8 +18,10 @@ import kotlin.reflect.KClass
 
 @Service
 @Transactional
-class LikeServiceImpl(val likeRecordRepository: LikeRecordRepository,
-                      val mongoTemplate: MongoTemplate) : LikeService {
+class LikeServiceImpl(
+    val likeRecordRepository: LikeRecordRepository,
+    val mongoTemplate: MongoTemplate
+) : LikeService {
 
     /**
      * Use MongoDB's $inc modifier operation for atomicity.
@@ -30,10 +33,12 @@ class LikeServiceImpl(val likeRecordRepository: LikeRecordRepository,
 
         likableObject.id(clientUser).let {
             return likeRecordRepository.findById(it).orElseGet {
-                LikeRecord(id = it,
-                        likedClientUserId = clientUser.id.toString(),
-                        objectId = likableObject.getObjectId(),
-                        objectType = likableObject.getObjectType()).let { likeRecord ->
+                LikeRecord(
+                    id = it,
+                    likedClientUserId = clientUser.id.toString(),
+                    objectId = likableObject.getObjectId(),
+                    objectType = likableObject.getObjectType()
+                ).let { likeRecord ->
 
                     likeRecordRepository.save(likeRecord).also {
                         updateLikeCount(likableObject, 1)
@@ -63,17 +68,20 @@ class LikeServiceImpl(val likeRecordRepository: LikeRecordRepository,
         return likeRecordRepository.findAllByLikedClientUserIdAndObjectType(clientUser.id.toString(), likableObjectType.toString())
     }
 
-    override fun <T : LikableObject> getLikedObjectsAsType(clientUser: ClientUser, likableObjectType: KClass<T>, pageRequest: PageRequest): Page<T> {
+    override fun <T : LikableObject> getLikedObjectsAsType(clientUser: ClientUser, likableObjectType: KClass<T>, pageRequest: PageRequest, keyword: String?): Page<T> {
 
         this.getLikedObjects(clientUser, likableObjectType).map { it.objectId }.toList().let {
-            Query().with(pageRequest)
-            //.addCriteria(TextCriteria.forDefaultLanguage().matching(keyword))
-                    .addCriteria(where("id").`in`(it)).let { query ->
-                        val count = mongoTemplate.count(Query.of(query).limit(-1).skip(-1), likableObjectType.java)
-                        val results = mongoTemplate.find(query, likableObjectType.java)
+            val query = Query().with(pageRequest)
+                .addCriteria(where("id").`in`(it))
 
-                        return PageImpl(results, pageRequest, count)
-                    }
+            keyword?.let {
+                query.addCriteria(TextCriteria.forDefaultLanguage().matching(keyword))
+            }
+
+            val count = mongoTemplate.count(Query.of(query).limit(-1).skip(-1), likableObjectType.java)
+            val results = mongoTemplate.find(query, likableObjectType.java)
+
+            return PageImpl(results, pageRequest, count)
         }
     }
 }

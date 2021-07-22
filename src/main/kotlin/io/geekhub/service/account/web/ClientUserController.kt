@@ -198,11 +198,12 @@ class ClientUserController(val clientUserService: ClientUserService,
                            @PathVariable id: String,
                            @RequestParam("page", defaultValue = "0") page: Int,
                            @RequestParam("pageSize", defaultValue = "20") pageSize: Int,
+                           @RequestParam("keyword", required = false) keyword: String?,
                            uriComponentsBuilder: UriComponentsBuilder): InterviewsResponse {
 
         clientUserService.getClientUser(id).let {
             val pageRequest = PageRequest.of(page, pageSize)
-            likeService.getLikedObjectsAsType(it, Interview::class, pageRequest).let { result ->
+            likeService.getLikedObjectsAsType(it, Interview::class, pageRequest, keyword).let { result ->
                 val navigationLinkBuilder = uriComponentsBuilder.path("/interviews").let { uriBuilder ->
                     uriBuilder.queryParam("page", page)
                     uriBuilder.queryParam("pageSize", pageSize)

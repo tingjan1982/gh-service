@@ -15,5 +15,5 @@ interface LikeService {
 
     fun getLikedObjects(clientUser: ClientUser, likableObjectType: KClass<out LikableObject>): List<LikeRecord>
 
-    fun <T : LikableObject> getLikedObjectsAsType(clientUser: ClientUser, likableObjectType: KClass<T>, pageRequest: PageRequest): Page<T>
+    fun <T : LikableObject> getLikedObjectsAsType(clientUser: ClientUser, likableObjectType: KClass<T>, pageRequest: PageRequest, keyword: String? = null): Page<T>
 }
