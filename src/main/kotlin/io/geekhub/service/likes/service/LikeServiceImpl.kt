@@ -67,6 +67,7 @@ class LikeServiceImpl(val likeRecordRepository: LikeRecordRepository,
 
         this.getLikedObjects(clientUser, likableObjectType).map { it.objectId }.toList().let {
             Query().with(pageRequest)
+            //.addCriteria(TextCriteria.forDefaultLanguage().matching(keyword))
                     .addCriteria(where("id").`in`(it)).let { query ->
                         val count = mongoTemplate.count(Query.of(query).limit(-1).skip(-1), likableObjectType.java)
                         val results = mongoTemplate.find(query, likableObjectType.java)

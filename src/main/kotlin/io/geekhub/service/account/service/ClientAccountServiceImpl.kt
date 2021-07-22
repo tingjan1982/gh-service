@@ -173,7 +173,7 @@ class ClientAccountServiceImpl(
             }
         }
 
-        clientUserService.getClientAccountOwner(organizationAccount).let { owner ->
+        clientUserService.getClientAccountOwner(organizationAccount)?.let { owner ->
             questionService.getQuestions(clientUser).forEach { q ->
                 q.clientUser = owner
                 questionService.saveQuestion(q)

@@ -32,9 +32,8 @@ class ClientUserServiceImpl(val clientUserRepository: ClientUserRepository, val 
         return clientUserRepository.findById(id).orElse(null)
     }
 
-    override fun getClientAccountOwner(clientAccount: ClientAccount): ClientUser {
+    override fun getClientAccountOwner(clientAccount: ClientAccount): ClientUser? {
         return clientUserRepository.findByClientAccountAndAccountPrivilege(clientAccount, ClientUser.AccountPrivilege.OWNER)
-            ?: throw BusinessObjectNotFoundException(ClientUser::class, "owner")
     }
 
     /**

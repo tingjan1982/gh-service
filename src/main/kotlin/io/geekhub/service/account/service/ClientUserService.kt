@@ -13,7 +13,7 @@ interface ClientUserService {
 
     fun getClientUser(id: String): ClientUser
 
-    fun getClientAccountOwner(clientAccount: ClientAccount): ClientUser
+    fun getClientAccountOwner(clientAccount: ClientAccount): ClientUser?
 
     fun getAuth0UserInfo(token: String): Auth0UserInfo
 
