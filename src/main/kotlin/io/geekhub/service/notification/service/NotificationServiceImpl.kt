@@ -39,7 +39,7 @@ class NotificationServiceImpl(@Value("\${spring.mail.password}") val apiKey: Str
         val emailRequest = SendGridRequest(
                 SendGridRequest.EmailAddress("notification-noreply@geekhub.tw"),
                 listOf(interviewSession.toInterviewResultPersonalization()),
-                "d-9c6d72f8a66141de8e4b109c5aa9045f")
+                "d-bbd50935af584855b0c45f4057f185df")
 
         sendNotification(emailRequest)
     }
@@ -49,7 +49,7 @@ class NotificationServiceImpl(@Value("\${spring.mail.password}") val apiKey: Str
         val emailRequest = SendGridRequest(
             SendGridRequest.EmailAddress("notification-noreply@geekhub.tw"),
             listOf(clientAccount.toOrganizationInvitationPersonalization(invitation)),
-            "d-fcd16b5952294a9cba65ce563b952d99")
+            "d-dd747e161f77482c8bf94ba3479dfd95")
 
         sendNotification(emailRequest)
     }
@@ -90,7 +90,7 @@ fun InterviewSession.toInterviewInvitationPersonalization(sender: ClientUser) = 
         dynamic_template_data = mapOf(
                 Pair("candidateName", this.name ?: this.userEmail),
                 Pair("senderName", sender.name),
-                Pair("companyName", this.clientUser.clientAccount.clientName),
+                Pair("clientAccountName", this.clientUser.clientAccount.clientName),
                 Pair("interviewSessionLink", "https://geekhub.tw/interviews/${this.id}/test")
         )
 )
@@ -99,7 +99,7 @@ fun InterviewSession.toInterviewResultPersonalization() = NotificationServiceImp
         to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(this.clientUser.email)),
         dynamic_template_data = mapOf(
                 Pair("candidateName", this.name ?: this.userEmail),
-                Pair("companyName", this.clientUser.clientAccount.clientName),
+                Pair("clientAccountName", this.clientUser.clientAccount.clientName),
                 Pair("interviewSessionLink", "https://geekhub.tw/interviews/${this.id}/test")
         )
 )

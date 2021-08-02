@@ -4,6 +4,8 @@ import org.springframework.data.mongodb.repository.MongoRepository
 
 interface ClientUserRepository : MongoRepository<ClientUser, String> {
 
+    fun findByEmail(email: String): ClientUser?
+
     fun findByClientAccountAndAccountPrivilege(clientAccount: ClientAccount, accountPrivilege: ClientUser.AccountPrivilege): ClientUser?
 
     fun findAllByClientAccount(clientAccount: ClientAccount): List<ClientUser>

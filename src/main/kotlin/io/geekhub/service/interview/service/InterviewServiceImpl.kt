@@ -122,6 +122,12 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
                 it.addCriteria(Criteria.where("latestPublishedInterviewId").ne(null))
             }
 
+            if (searchCriteria.template) {
+                clientUserService.getClientUserByEmail("template@geekhub.tw")?.let { templateUser ->
+                    it.addCriteria(Criteria.where("clientUser").`is`(templateUser))
+                } ?: it.addCriteria(Criteria.where("clientUser").`is`(null))
+            }
+
             searchCriteria.keyword?.let { keyword ->
                 it.addCriteria(TextCriteria.forDefaultLanguage().matching(keyword))
             }

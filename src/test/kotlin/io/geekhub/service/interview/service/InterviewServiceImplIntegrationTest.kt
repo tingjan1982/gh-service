@@ -9,6 +9,7 @@ import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.shared.exception.BusinessException
+import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.specialization.repository.Specialization
 import org.junit.jupiter.api.Test
@@ -93,5 +94,15 @@ internal class InterviewServiceImplIntegrationTest {
         }
 
         assertThat(interviewRepository.countBySpecialization(specialization)).isEqualTo(1)
+
+
+        interviewService.getInterviews(SearchCriteria.fromRequestParameters(clientUser, mapOf())).let {
+            assertThat(it.totalElements).isNotZero()
+        }
+
+
+        interviewService.getInterviews(SearchCriteria.fromRequestParameters(clientUser, mapOf("template" to "true"))).let {
+            assertThat(it.totalElements).isZero()
+        }
     }
 }

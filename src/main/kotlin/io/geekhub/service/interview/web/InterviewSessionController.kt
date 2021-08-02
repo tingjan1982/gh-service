@@ -149,7 +149,9 @@ class InterviewSessionController(
         @PathVariable id: String,
         @Valid @RequestBody request: MarkAnswerRequest
     ) {
-        ownershipService.checkObjectOwnership(clientUser) { interviewSessionService.getInterviewSession(id) }.let {
+        interviewSessionService.getInterviewSession(id).let {
+            ownershipService.checkObjectOwnership(clientUser) { it.currentInterview }
+
             interviewSessionService.markInterviewSessionAnswer(it, request.sectionId, request.questionSnapshotId, request.correct)
         }
     }

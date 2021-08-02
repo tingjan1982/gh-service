@@ -28,6 +28,10 @@ class ClientUserServiceImpl(val clientUserRepository: ClientUserRepository, val 
         }
     }
 
+    override fun getClientUserByEmail(email: String): ClientUser? {
+        return clientUserRepository.findByEmail(email)
+    }
+
     override fun lookupClientUser(id: String): ClientUser? {
         return clientUserRepository.findById(id).orElse(null)
     }

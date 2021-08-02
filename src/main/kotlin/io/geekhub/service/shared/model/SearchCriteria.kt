@@ -9,15 +9,16 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
 
 data class SearchCriteria(
-        val interviewId: String?,
-        val filterByMine: Boolean,
-        val filterByClientAccount: Boolean,
-        val clientUser: ClientUser,
-        val invited: Boolean,
-        val keyword: String?,
-        val specialization: String?,
-        val userKey: String?,
-        val pageRequest: PageRequest
+    val interviewId: String?,
+    val filterByMine: Boolean,
+    val filterByClientAccount: Boolean,
+    val clientUser: ClientUser,
+    val invited: Boolean,
+    val template: Boolean,
+    val keyword: String?,
+    val specialization: String?,
+    val userKey: String?,
+    val pageRequest: PageRequest
 ) {
     companion object {
         fun fromRequestParameters(clientUser: ClientUser, map: Map<String, String>): SearchCriteria {
@@ -33,11 +34,11 @@ data class SearchCriteria(
             val page = map["page"]?.toInt() ?: 0
             val pageSize = map["pageSize"]?.toInt() ?: 50
             val sortField = map.getOrElse("sort") { "lastModifiedDate" }
-
+            val template = map["template"]?.toBoolean() ?: false
             val pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Order.desc(sortField)))
             val decoratedKeyword = if (keyword.isNullOrEmpty()) null else keyword
 
-            return SearchCriteria(interviewId, owner, organization, clientUser, invited, decoratedKeyword, specialization, userKey, pageRequest)
+            return SearchCriteria(interviewId, owner, organization, clientUser, invited, template, decoratedKeyword, specialization, userKey, pageRequest)
         }
     }
 
@@ -55,7 +56,7 @@ data class SearchCriteria(
             userKey?.let { key ->
                 it.addCriteria(Criteria.where("userKey").`is`(key))
             } ?: it.addCriteria(Criteria.where("userKey").isEqualTo(null))
-            
+
             it.addCriteria(Criteria.where("deleted").`is`(false))
 
             return it
