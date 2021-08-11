@@ -51,7 +51,7 @@ class ClientUserController(val clientUserService: ClientUserService,
         }
     }
 
-    @GetMapping("/{id:[\\w|]+}")
+    @GetMapping("/{id:[\\w-|]+}")
     fun getUserProfile(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                        @PathVariable id: String): ClientUserResponse {
 
@@ -87,7 +87,7 @@ class ClientUserController(val clientUserService: ClientUserService,
         }
     }
 
-    @PostMapping("/{id:[\\w|]+}/department")
+    @PostMapping("/{id:[\\w-|]+}/department")
     fun assignUserToDepartment(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                                @PathVariable id: String,
                                @Valid @RequestBody request: AssignDepartmentRequest): ClientUserResponse {
@@ -99,7 +99,7 @@ class ClientUserController(val clientUserService: ClientUserService,
         }
     }
 
-    @DeleteMapping("/{id:[\\w|]+}/department")
+    @DeleteMapping("/{id:[\\w-|]+}/department")
     fun removeUserFromDepartment(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                                  @PathVariable id: String): ClientUserResponse {
 
@@ -116,7 +116,7 @@ class ClientUserController(val clientUserService: ClientUserService,
         renderUserAvatar(clientUser, response)
     }
 
-    @GetMapping("/{id:[\\w|]+}/avatar")
+    @GetMapping("/{id:[\\w-|]+}/avatar")
     fun getUserAvatar(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                       @PathVariable id: String,
                       response: HttpServletResponse) {
@@ -170,7 +170,7 @@ class ClientUserController(val clientUserService: ClientUserService,
         }
     }
 
-    @GetMapping("/{id:[\\w|]+}/ownedInterviews")
+    @GetMapping("/{id:[\\w-|]+}/ownedInterviews")
     fun getOwnedInterviews(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                            @PathVariable id: String,
                            @RequestParam("page", defaultValue = "0") page: Int,
@@ -193,7 +193,7 @@ class ClientUserController(val clientUserService: ClientUserService,
         }
     }
 
-    @GetMapping("/{id:[\\w|]+}/likedInterviews")
+    @GetMapping("/{id:[\\w-|]+}/likedInterviews")
     fun getLikedInterviews(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                            @PathVariable id: String,
                            @RequestParam("page", defaultValue = "0") page: Int,
