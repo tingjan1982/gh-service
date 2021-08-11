@@ -32,7 +32,7 @@ class InterviewController(val interviewService: InterviewService,
     fun createInterview(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                         @Valid @RequestBody request: InterviewRequest): InterviewResponse {
 
-        val owningAccount = when (request.accountType) {
+        val owningAccount = when (request.ownershipType) {
             InterviewRequest.OwnershipType.DEFAULT -> clientUser.clientAccount
             InterviewRequest.OwnershipType.PERSONAL -> clientAccountService.getClientAccount(clientUser.id.toString())
         }

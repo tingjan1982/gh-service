@@ -226,8 +226,8 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
 
     data class UpdateUserRequest(val name: String,
                                  val nickname: String?,
-                                 @field:JsonProperty("user_metadata") val userMetadata: Map<String, Any>,
-                                 val connection: String = "Username-Password-Authentication")
+                                 @field:JsonProperty("user_metadata") val userMetadata: Map<String, Any>)
+                                 //val connection: String = "Username-Password-Authentication")
 
     data class UpdatePasswordRequest(val password: String, val connection: String = "Username-Password-Authentication")
 }

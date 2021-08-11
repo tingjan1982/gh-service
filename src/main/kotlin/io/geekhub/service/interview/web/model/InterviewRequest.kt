@@ -7,7 +7,7 @@ import io.geekhub.service.shared.model.Visibility
 import javax.validation.constraints.NotBlank
 
 data class InterviewRequest(
-    val accountType: OwnershipType = OwnershipType.DEFAULT,
+    val ownershipType: OwnershipType = OwnershipType.DEFAULT,
     @field:NotBlank
     val title: String,
     val description: String?,
