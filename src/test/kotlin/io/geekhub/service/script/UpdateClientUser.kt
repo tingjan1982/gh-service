@@ -13,7 +13,6 @@ import io.geekhub.service.interview.repository.PublishedInterviewRepository
 import io.geekhub.service.likes.data.LikeRecordRepository
 import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.annotation.IntegrationTest
-import io.geekhub.service.specialization.repository.Specialization
 import io.geekhub.service.specialization.repository.SpecializationRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
@@ -66,10 +65,6 @@ class UpdateClientUser {
 
         mongoTemplate.remove(Query(Criteria.where("email").`is`("test@geekhub.tw")), ClientUser::class.java).let {
             println("Removed ${it.deletedCount} client user")
-        }
-
-        mongoTemplate.remove(Query(Criteria.where("name").`is`("Test Engineer")), Specialization::class.java).let {
-            println("Removed ${it.deletedCount} specialization")
         }
 
         mongoTemplate.find<org.bson.Document>(query = Query(Criteria.where("clientAccount").exists(true)), collectionName = "question").forEach {

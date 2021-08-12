@@ -7,7 +7,6 @@ import io.geekhub.service.shared.model.BaseMongoObject
 import io.geekhub.service.shared.model.Visibility
 import io.geekhub.service.shared.service.data.ClientUserObject
 import io.geekhub.service.shared.userkey.UserKeyObject
-import io.geekhub.service.specialization.repository.Specialization
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.TextIndexed
@@ -27,8 +26,6 @@ data class Interview(
     @DBRef
     override var clientUser: ClientUser,
     var clientAccount: String? = null,
-    @DBRef
-    var specialization: Specialization?,
     var defaultDuration: Int = -1,
     var visibility: Visibility,
     var releaseResult: ReleaseResult,
@@ -37,10 +34,6 @@ data class Interview(
     override var likeCount: Long = 0,
     override var userKey: String? = null
 ) : BaseMongoObject(), LikableObject, ClientUserObject, UserKeyObject {
-
-    @Deprecated("uses lightInterviewSessions instead")
-    @DBRef(lazy = true)
-    var interviewSessions: MutableList<InterviewSession> = mutableListOf()
 
     @DBRef
     var lightInterviewSessions: MutableList<LightInterviewSession> = mutableListOf()

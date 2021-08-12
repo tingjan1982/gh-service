@@ -14,7 +14,6 @@ import javax.validation.constraints.NotEmpty
 data class QuestionRequest(
         @field:NotEmpty val question: String,
         val questionType: Question.QuestionType?,
-        val specializationId: String?,
         val jobTitle: String?,
         val visibility: Visibility = Visibility.PUBLIC,
         val possibleAnswers: List<PossibleAnswerRequest> = listOf()

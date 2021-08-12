@@ -1,14 +1,13 @@
 package io.geekhub.service.script
 
-import assertk.assertThat
-import assertk.assertions.hasSize
-import assertk.assertions.isEmpty
-import io.geekhub.service.interview.model.LightInterviewSession
+import io.geekhub.service.account.repository.ClientUserRepository
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.interview.repository.InterviewSessionRepository
 import io.geekhub.service.interview.repository.LightInterviewSessionRepository
 import io.geekhub.service.interview.repository.PublishedInterviewRepository
+import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.annotation.IntegrationTest
+import io.geekhub.service.specialization.repository.SpecializationRepository
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,6 +31,15 @@ class ManageInterviewObjects {
 
     @Autowired
     private lateinit var lightInterviewSessionRepository: LightInterviewSessionRepository
+
+    @Autowired
+    private lateinit var questionRepository: QuestionRepository
+
+    @Autowired
+    private lateinit var clientUserRepository: ClientUserRepository
+
+    @Autowired
+    private lateinit var specializationRepository: SpecializationRepository
 
 
     @Test
@@ -68,36 +76,46 @@ class ManageInterviewObjects {
     @WithMockUser("script@geekhub.tw")
     fun `refactor interview's interview session reference`() {
 
+        val count = AtomicInteger(0)
+
         interviewRepository.findAll().forEach { itvw ->
 
-            if (itvw.interviewSessions.isNotEmpty()) {
-                val verifyCount = itvw.interviewSessions.size
-
-                itvw.lightInterviewSessions = itvw.interviewSessions.map {
-                    lightInterviewSessionRepository.findById(it.id.toString()).orElseGet {
-                        lightInterviewSessionRepository.save(LightInterviewSession(it))
-                    }
-
-                }.toMutableList()
-                itvw.interviewSessions.clear()
-
+            if (itvw.lightInterviewSessions.isNotEmpty()) {
+                itvw.lightInterviewSessions.clear()
                 interviewRepository.save(itvw)
-                println(itvw)
 
-                assertThat(itvw.lightInterviewSessions).hasSize(verifyCount)
-                assertThat(itvw.interviewSessions).isEmpty()
+                count.incrementAndGet()
             }
         }
+
+        println("Updated interviews: $count")
     }
 
     @Test
     @WithMockUser("script@geekhub.tw")
-    fun `get interview status`() {
+    fun `delete interviews`() {
+
+        questionRepository.deleteAll()
+        lightInterviewSessionRepository.deleteAll()
+        interviewSessionRepository.deleteAll()
+        specializationRepository.deleteAll()
+
+        println("Interview count: ${interviewRepository.count()}")
+        val templateCount = AtomicInteger()
+
+        val templateUser = clientUserRepository.findByEmail("template@geekhub.tw")
 
         interviewRepository.findAll().forEach {
-            it.interviewSessions.clear()
 
-            interviewRepository.save(it)
+            if (it.clientUser == templateUser) {
+                templateCount.incrementAndGet()
+            } else {
+                publishedInterviewRepository.deleteAllByReferencedInterview_Id(it.id.toString())
+
+                interviewRepository.delete(it)
+            }
         }
+
+        println("Template interviews: $templateCount")
     }
 }

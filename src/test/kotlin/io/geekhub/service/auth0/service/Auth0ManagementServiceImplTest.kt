@@ -44,15 +44,17 @@ internal class Auth0ManagementServiceImplTest(@Autowired val auth0ManagementServ
 
                 auth0ManagementService.addRoleToUser(user.userId, "rol_2kVbpqyNmJ0qGYRs", it)
 
-                Auth0ManagementServiceImpl.UpdateUserRequest(name = "integration-test",
-                        nickname = "int",
-                        userMetadata = mapOf(
-                                "companyName" to "geekhub",
-                                "note" to "this is a brief description that i have added to describe me",
-                                "socialProfiles" to listOf(
-                                        UpdateClientUserRequest.SocialProfile("linkedIn", "https://linkedin.com/profile/integration-test")
-                                )
-                        )).let { request ->
+                Auth0ManagementServiceImpl.UpdateUserRequest(
+                    //name = "integration-test",
+                    //nickname = "int",
+                    userMetadata = mapOf(
+                        "companyName" to "geekhub",
+                        "note" to "this is a brief description that i have added to describe me",
+                        "socialProfiles" to listOf(
+                            UpdateClientUserRequest.SocialProfile("linkedIn", "https://linkedin.com/profile/integration-test")
+                        )
+                    )
+                ).let { request ->
                     auth0ManagementService.updateUser(user.userId, request, it)
                 }
 

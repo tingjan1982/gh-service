@@ -5,7 +5,6 @@ import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.model.Visibility
-import io.geekhub.service.specialization.repository.Specialization
 
 object DummyObject {
 
@@ -23,8 +22,6 @@ object DummyObject {
         clientAccount = clientAccount
     )
 
-    fun dummySpecialization() = Specialization(name = "Test Engineer")
-
     fun dummyQuestion(clientUser: ClientUser) = Question(
         question = "dummy question",
         clientUser = clientUser,
@@ -32,11 +29,10 @@ object DummyObject {
         jobTitle = "dummy job title"
     )
 
-    fun dummyInterview(clientUser: ClientUser, specialization: Specialization) = Interview(
+    fun dummyInterview(clientUser: ClientUser) = Interview(
         title = "dummy interview",
         clientUser = clientUser,
         jobTitle = "dummy job title",
-        specialization = specialization,
         visibility = Visibility.PUBLIC,
         releaseResult = Interview.ReleaseResult.YES
     )

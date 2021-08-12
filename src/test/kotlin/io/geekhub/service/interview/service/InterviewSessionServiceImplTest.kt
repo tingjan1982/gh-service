@@ -45,7 +45,6 @@ internal class InterviewSessionServiceImplTest {
             title = "dummy interview",
             jobTitle = "Engineer",
             clientUser = clientUser,
-            specialization = specialization,
             visibility = Visibility.PUBLIC,
             releaseResult = Interview.ReleaseResult.YES
         ).apply {

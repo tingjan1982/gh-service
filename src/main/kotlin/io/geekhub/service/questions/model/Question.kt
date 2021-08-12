@@ -4,7 +4,6 @@ import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.likes.data.LikableObject
 import io.geekhub.service.shared.model.BaseMongoObject
 import io.geekhub.service.shared.model.Visibility
-import io.geekhub.service.specialization.repository.Specialization
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.TextIndexed
@@ -22,10 +21,6 @@ data class Question(
         var jobTitle: String?,
         @DBRef
         var clientUser: ClientUser,
-//        @DBRef
-//        var clientAccount: ClientAccount?, // optional - represent user's corporate account
-        @DBRef
-        var specialization: Specialization? = null,
         var visibility: Visibility = Visibility.PUBLIC,
         var possibleAnswers: MutableList<PossibleAnswer> = mutableListOf(),
         val attributes: MutableMap<String, QuestionAttribute> = mutableMapOf(),

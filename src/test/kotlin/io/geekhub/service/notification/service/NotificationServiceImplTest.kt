@@ -6,7 +6,6 @@ import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.shared.extensions.DummyObject
-import io.geekhub.service.specialization.repository.Specialization
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.test.context.support.WithMockUser
@@ -26,13 +25,10 @@ internal class NotificationServiceImplTest {
     @Autowired
     lateinit var clientUser: ClientUser
 
-    @Autowired
-    lateinit var specialization: Specialization
-
     @Test
     @WithMockUser
     fun sendInterviewInvitation() {
-        val publishedInterview = DummyObject.dummyInterview(clientUser = clientUser, specialization = specialization).let {
+        val publishedInterview = DummyObject.dummyInterview(clientUser = clientUser).let {
             interviewService.saveInterview(it)
             interviewService.publishInterview(it.id.toString())
         }
@@ -51,7 +47,7 @@ internal class NotificationServiceImplTest {
     @Test
     @WithMockUser
     fun sendInterviewResult() {
-        val publishedInterview = DummyObject.dummyInterview(clientUser = clientUser, specialization = specialization).let {
+        val publishedInterview = DummyObject.dummyInterview(clientUser = clientUser).let {
             interviewService.saveInterview(it)
             interviewService.publishInterview(it.id.toString())
         }

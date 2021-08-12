@@ -7,7 +7,6 @@ import io.geekhub.service.account.repository.ClientUserRepository
 import io.geekhub.service.account.service.ClientAccountService
 import io.geekhub.service.account.service.ClientUserService
 import io.geekhub.service.shared.extensions.DummyObject
-import io.geekhub.service.specialization.repository.Specialization
 import io.geekhub.service.specialization.service.SpecializationService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -25,8 +24,6 @@ class TestConfig(
     val clientAccount = DummyObject.dummyClientAccount()
 
     var clientUser: ClientUser? = null
-
-    val specialization = DummyObject.dummySpecialization()
 
     @Bean
     fun defaultClientAccount(): ClientAccount {
@@ -46,12 +43,6 @@ class TestConfig(
 
             return it
         }
-    }
-
-    @Bean
-    fun defaultSpecialization(): Specialization {
-
-        return specializationService.getSpecializationByName(specialization.name) ?: specializationService.saveSpecialization(specialization)
     }
 
     @PreDestroy

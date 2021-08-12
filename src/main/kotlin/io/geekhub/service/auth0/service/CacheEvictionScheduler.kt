@@ -29,7 +29,7 @@ class CacheEvictionScheduler(val cacheManager: CacheManager, @Value("\${app.cach
      */
     @Scheduled(fixedDelayString = "#{@cacheEvictionScheduler.evictionInterval.toMillis()}")
     fun evictManagementTokenCache() {
-        LOGGER.info("Evicting management token cache after the specified delay")
+        LOGGER.debug("Evicting management token cache after the specified delay")
 
         cacheManager.getCache("managementToken")?.clear()
     }

@@ -10,7 +10,6 @@ import io.geekhub.service.interview.service.bean.SectionAverageStats
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.shared.extensions.DummyObject
-import io.geekhub.service.specialization.repository.Specialization
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.test.context.support.WithMockUser
@@ -31,14 +30,11 @@ internal class InterviewSessionAggregationServiceImplTest {
     @Autowired
     lateinit var clientUser: ClientUser
 
-    @Autowired
-    lateinit var specialization: Specialization
-
     @Test
     @WithMockUser
     fun getAverageScores() {
 
-        val interviewSession = DummyObject.dummyInterview(clientUser, specialization).let {
+        val interviewSession = DummyObject.dummyInterview(clientUser).let {
             Interview.Section(title = "default").apply {
                 this.questions.add(
                         Interview.QuestionSnapshot(id = "qid-1",

@@ -224,17 +224,19 @@ class Auth0ManagementServiceImpl(val managementApiProperties: Auth0ManagementApi
                           @field:JsonAlias("scope") val scope: String,
                           @field:JsonAlias("expires_in") val expireInSeconds: Int)
 
-    data class UpdateUserRequest(val name: String,
-                                 val nickname: String?,
-                                 @field:JsonProperty("user_metadata") val userMetadata: Map<String, Any>)
-                                 //val connection: String = "Username-Password-Authentication")
+    data class UpdateUserRequest(
+        //val name: String,
+        //val nickname: String?,
+        @field:JsonProperty("user_metadata") val userMetadata: Map<String, Any>
+    )
+    //val connection: String = "Username-Password-Authentication")
 
     data class UpdatePasswordRequest(val password: String, val connection: String = "Username-Password-Authentication")
 }
 
 fun UpdateClientUserRequest.toUpdateUserRequest() = Auth0ManagementServiceImpl.UpdateUserRequest(
-    name = this.name,
-    nickname = this.nickname,
+    //name = this.name,
+    //nickname = this.nickname,
     userMetadata = mapOf(
         "companyName" to (this.companyName ?: ""),
         "note" to (this.note ?: ""),

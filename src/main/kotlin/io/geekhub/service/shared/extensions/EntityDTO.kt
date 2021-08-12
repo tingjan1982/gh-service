@@ -18,11 +18,10 @@ import io.geekhub.service.specialization.web.model.SpecializationResponse
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
 
 
-fun QuestionRequest.toEntity(user: ClientUser, spec: Specialization?) = Question(
+fun QuestionRequest.toEntity(user: ClientUser) = Question(
         question = this.question,
         questionType = this.questionType ?: Question.QuestionType.MULTI_CHOICE,
         clientUser = user,
-        specialization = spec,
         jobTitle = this.jobTitle,
         visibility = this.visibility,
         possibleAnswers = this.possibleAnswers.map { it.toEntity() }.toMutableList()
@@ -47,13 +46,12 @@ fun Question.toDTO(liked: Boolean = false) = QuestionResponse(
 
 fun PossibleAnswer.toDTO(showAnswer: Boolean) = QuestionResponse.PossibleAnswerResponse(this.answerId, this.answer, if (showAnswer) this.correctAnswer else null)
 
-fun InterviewRequest.toEntity(user: ClientUser, owningAccount: ClientAccount, spec: Specialization? = null) = Interview(
+fun InterviewRequest.toEntity(user: ClientUser, owningAccount: ClientAccount) = Interview(
         title = this.title,
         description = this.description,
         jobTitle = this.jobTitle,
         clientUser = user,
         clientAccount = owningAccount.id,
-        specialization = spec,
         visibility = this.visibility,
         defaultDuration = this.defaultDuration,
         releaseResult = this.releaseResult
@@ -67,7 +65,6 @@ fun InterviewRequest.InterviewQuestionRequest.toEntity(interview: Interview) = Q
         question = this.question,
         questionType = this.questionType,
         clientUser = interview.clientUser,
-        specialization = interview.specialization,
         jobTitle = interview.jobTitle,
         visibility = interview.visibility,
         possibleAnswers = this.possibleAnswers.map { it.toEntity() }.toMutableList()

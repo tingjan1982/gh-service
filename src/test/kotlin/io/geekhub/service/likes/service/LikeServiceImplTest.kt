@@ -13,7 +13,6 @@ import io.geekhub.service.questions.model.Question
 import io.geekhub.service.questions.service.QuestionService
 import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.shared.extensions.DummyObject
-import io.geekhub.service.specialization.repository.Specialization
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
@@ -37,9 +36,6 @@ internal class LikeServiceImplTest {
 
     @Autowired
     lateinit var clientUser: ClientUser
-
-    @Autowired
-    lateinit var specialization: Specialization
 
     @Test
     @WithMockUser
@@ -80,7 +76,7 @@ internal class LikeServiceImplTest {
     @WithMockUser
     fun likeInterview() {
 
-        DummyObject.dummyInterview(clientUser, specialization).let {
+        DummyObject.dummyInterview(clientUser).let {
             interviewService.saveInterview(it)
 
         }.let {

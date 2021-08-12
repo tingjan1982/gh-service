@@ -34,11 +34,7 @@ class QuestionController(val questionService: QuestionService,
                        @Valid @RequestBody questionRequest: QuestionRequest): QuestionResponse {
         logger.info("Received creation request for: $questionRequest")
 
-        val specialization = questionRequest.specializationId?.let {
-            specializationService.getSpecialization(it)
-        }
-
-        val questionToCreate = questionRequest.toEntity(clientUser, specialization)
+        val questionToCreate = questionRequest.toEntity(clientUser)
 
         return this.questionService.saveQuestion(questionToCreate).toDTO()
     }
@@ -79,9 +75,7 @@ class QuestionController(val questionService: QuestionService,
             request.questionType?.let {
                 q.questionType = it
             }
-            request.specializationId?.let {
-                q.specialization = specializationService.getSpecialization(it)
-            }
+
             q.jobTitle = request.jobTitle
             q.visibility = request.visibility
 
