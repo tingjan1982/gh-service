@@ -33,11 +33,11 @@ class InterviewController(val interviewService: InterviewService,
                         @Valid @RequestBody request: InterviewRequest): InterviewResponse {
 
         val owningAccount = when (request.ownershipType) {
-            InterviewRequest.OwnershipType.DEFAULT -> clientUser.clientAccount
-            InterviewRequest.OwnershipType.PERSONAL -> clientAccountService.getClientAccount(clientUser.id.toString())
+            Interview.OwnershipType.DEFAULT -> clientUser.clientAccount
+            Interview.OwnershipType.PERSONAL -> clientAccountService.getClientAccount(clientUser.id.toString())
         }
 
-        request.toEntity(clientUser, owningAccount).let {
+        request.toEntity(clientUser, request.ownershipType, owningAccount).let {
             it.sections = toSections(it, request.sections)
 
             interviewService.saveInterview(it).let { created ->

@@ -25,6 +25,7 @@ data class Interview(
     var jobTitle: String,
     @DBRef
     override var clientUser: ClientUser,
+    val ownershipType: OwnershipType = OwnershipType.DEFAULT,
     var clientAccount: String? = null,
     var defaultDuration: Int = -1,
     var visibility: Visibility,
@@ -80,5 +81,18 @@ data class Interview(
 
     enum class ReleaseResult {
         YES, NO
+    }
+
+    enum class OwnershipType {
+
+        /**
+         * User's belonging client account
+         */
+        DEFAULT,
+
+        /**
+         * User's individual client account
+         */
+        PERSONAL
     }
 }

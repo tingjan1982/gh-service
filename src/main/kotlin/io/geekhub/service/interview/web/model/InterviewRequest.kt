@@ -7,7 +7,7 @@ import io.geekhub.service.shared.model.Visibility
 import javax.validation.constraints.NotBlank
 
 data class InterviewRequest(
-    val ownershipType: OwnershipType = OwnershipType.DEFAULT,
+    val ownershipType: Interview.OwnershipType = Interview.OwnershipType.DEFAULT,
     @field:NotBlank
     val title: String,
     val description: String?,
@@ -32,16 +32,4 @@ data class InterviewRequest(
         val possibleAnswers: List<QuestionRequest.PossibleAnswerRequest> = listOf()
     )
 
-    enum class OwnershipType {
-
-        /**
-         * User's belonging client account
-         */
-        DEFAULT,
-
-        /**
-         * User's individual client account
-         */
-        PERSONAL
-    }
 }

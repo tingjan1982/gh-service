@@ -46,11 +46,12 @@ fun Question.toDTO(liked: Boolean = false) = QuestionResponse(
 
 fun PossibleAnswer.toDTO(showAnswer: Boolean) = QuestionResponse.PossibleAnswerResponse(this.answerId, this.answer, if (showAnswer) this.correctAnswer else null)
 
-fun InterviewRequest.toEntity(user: ClientUser, owningAccount: ClientAccount) = Interview(
+fun InterviewRequest.toEntity(user: ClientUser, ownershipType: Interview.OwnershipType, owningAccount: ClientAccount) = Interview(
         title = this.title,
         description = this.description,
         jobTitle = this.jobTitle,
         clientUser = user,
+        ownershipType = ownershipType,
         clientAccount = owningAccount.id,
         visibility = this.visibility,
         defaultDuration = this.defaultDuration,
@@ -76,8 +77,7 @@ fun InterviewRequest.InterviewQuestionRequest.toSnapshot() = Interview.QuestionS
         possibleAnswers = this.possibleAnswers.map { it.toEntity() }.toMutableList()
 )
 
-fun Interview.toDTO(currentUser: ClientUser, showSection: Boolean = false): InterviewResponse {
-    val showAnswer = currentUser.id == this.clientUser.id
+fun Interview.toDTO(currentUser: ClientUser, showSection: Boolean = false, showAnswer: Boolean = currentUser.id == this.clientUser.id): InterviewResponse {
 
     return InterviewResponse(
             id = this.id.toString(),
@@ -85,6 +85,7 @@ fun Interview.toDTO(currentUser: ClientUser, showSection: Boolean = false): Inte
             description = this.description,
             jobTitle = this.jobTitle,
             clientUser = this.clientUser.toDTO(),
+            ownershipType = this.ownershipType,
             sections = if (showSection) { this.sections.map { it.toDTO(showAnswer) } } else { listOf() },
             visibility = this.visibility,
             defaultDuration = this.defaultDuration,

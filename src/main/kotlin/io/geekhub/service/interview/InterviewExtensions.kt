@@ -38,7 +38,7 @@ fun InterviewSession.showCorrectAnswer(currentUser: ClientUser): Boolean {
 
     val (isOwner, releaseResult) = this.publishedInterview.referencedInterview.let {
         val interviewOwner = it.clientUser.id == currentUser.id
-        val releaseResult = it.releaseResult == Interview.ReleaseResult.YES
+        val releaseResult = it.releaseResult == Interview.ReleaseResult.YES && this.status == InterviewSession.Status.ENDED
 
         return@let Pair(interviewOwner, releaseResult)
     }
@@ -48,9 +48,13 @@ fun InterviewSession.showCorrectAnswer(currentUser: ClientUser): Boolean {
 
 fun InterviewSession.toDTO(currentUser: ClientUser): InterviewSessionResponse {
 
-    val updatedAnswerAttemptSection = if (this.showCorrectAnswer(currentUser)) {
+    val showCorrectAnswer = this.showCorrectAnswer(currentUser)
+
+    val updatedAnswerAttemptSection = if (showCorrectAnswer) {
         this.answerAttemptSections
     } else {
+        this.totalScore = BigDecimal.ZERO
+
         this.answerAttemptSections.forEach { section ->
             section.value.answerStats.forEach { stats ->
                 stats.value.correct = 0
@@ -66,7 +70,7 @@ fun InterviewSession.toDTO(currentUser: ClientUser): InterviewSessionResponse {
 
     return InterviewSessionResponse(
             this.id.toString(),
-            this.publishedInterview.referencedInterview.toDTO(currentUser, true),
+            this.publishedInterview.referencedInterview.toDTO(currentUser, true, showCorrectAnswer),
             this.clientUser.toLightDTO(),
             this.userEmail,
             this.name,

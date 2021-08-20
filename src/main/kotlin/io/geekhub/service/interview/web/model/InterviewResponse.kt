@@ -15,6 +15,7 @@ data class InterviewResponse(
         val description: String?,
         val jobTitle: String,
         val clientUser: ClientUserResponse,
+        val ownershipType: Interview.OwnershipType,
         val sections: List<SectionResponse>,
         val visibility: Visibility,
         val defaultDuration: Int,
