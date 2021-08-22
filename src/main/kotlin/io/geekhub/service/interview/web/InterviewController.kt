@@ -55,7 +55,7 @@ class InterviewController(val interviewService: InterviewService,
 //                throw BusinessException("You are not the owner of this assessment")
 //            }
 
-            return it.toDTO(clientUser, it.clientUser == clientUser)
+            return it.toDTO(clientUser, true)
         }
     }
 
