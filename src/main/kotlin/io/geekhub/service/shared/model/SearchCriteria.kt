@@ -54,7 +54,9 @@ data class SearchCriteria(
             }
 
             userKey?.let { key ->
-                it.addCriteria(Criteria.where("userKey").`is`(key))
+                if (!template) {
+                    it.addCriteria(Criteria.where("userKey").`is`(key))
+                }
             } ?: it.addCriteria(Criteria.where("userKey").isEqualTo(null))
 
             it.addCriteria(Criteria.where("deleted").`is`(false))
