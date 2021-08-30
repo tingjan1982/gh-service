@@ -5,7 +5,6 @@ import assertk.assertThat
 import assertk.assertions.*
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.interview.model.Interview
-import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.shared.exception.BusinessException
@@ -22,7 +21,7 @@ internal class InterviewServiceImplIntegrationTest {
     private lateinit var interviewService: InterviewService
 
     @Autowired
-    private lateinit var interviewRepository: InterviewRepository
+    private lateinit var interviewSessionService: InterviewSessionService
 
     @Autowired
     private lateinit var clientUser: ClientUser
@@ -31,34 +30,14 @@ internal class InterviewServiceImplIntegrationTest {
     @WithMockUser("dummy-user")
     fun createInterview() {
 
-        Interview(
+        val interview = Interview(
             title = "sample interview",
             jobTitle = "Engineer",
             clientUser = clientUser,
             visibility = Visibility.PUBLIC,
             releaseResult = Interview.ReleaseResult.YES
         ).let {
-            this.interviewService.saveInterview(it)
-
-        }.let {
-            assertThat(it.id).isNotNull()
-            assertThat(it.sections).isEmpty()
-
-            assertThat {
-                interviewService.publishInterview(it.id.toString())
-            }.isFailure().isInstanceOf(BusinessException::class)
-
-            it.sections.add(Interview.Section(title = "foundation"))
-
-            interviewService.saveInterview(it)
-
-            assertThat {
-                interviewService.publishInterview(it.id.toString())
-            }.isFailure().isInstanceOf(BusinessException::class)
-
-            it
-        }.let {
-            val section = Interview.Section(title = "foundation").apply {
+            Interview.Section(title = "foundation").apply {
                 questions.add(
                     Interview.QuestionSnapshot(
                         "qid",
@@ -67,25 +46,32 @@ internal class InterviewServiceImplIntegrationTest {
                         listOf(Question.PossibleAnswer(answer = "dummy answer", correctAnswer = true))
                     )
                 )
+            }.let { sec ->
+                it.sections.add(sec)
             }
 
-            it.sections = mutableListOf(section)
+            this.interviewService.saveInterview(it)
 
-            interviewService.saveInterview(it)
         }.let {
+            assertThat(it.id).isNotNull()
+            assertThat(it.latestPublishedInterviewId).isNotNull()
             assertThat(it.sections).all {
                 hasSize(1)
                 index(0).prop(Interview.Section::questions).hasSize(1)
             }
 
+            it
+        }.let {
             assertThat(interviewService.getInterview(it.id.toString())).isNotNull()
 
             it
         }.let {
-            interviewService.publishInterview(it.id.toString()).run {
+            interviewService.getPublishedInterviewByInterview(it.id.toString()).run {
                 assertThat(this.referencedInterview.id).isEqualTo(it.id)
                 assertThat(this.referencedInterview.latestPublishedInterviewId).isEqualTo(this.id)
             }
+
+            return@let it
         }
 
         interviewService.getInterviews(SearchCriteria.fromRequestParameters(clientUser, mapOf())).let {
@@ -95,6 +81,16 @@ internal class InterviewServiceImplIntegrationTest {
 
         interviewService.getInterviews(SearchCriteria.fromRequestParameters(clientUser, mapOf("template" to "true"))).let {
             assertThat(it.totalElements).isZero()
+        }
+
+        interviewSessionService.createInterviewSession(interview)
+
+        interview.apply {
+            title = "this update should not work because interview session exists"
+        }.let {
+            assertThat {
+                interviewService.saveInterview(it)
+            }.isFailure().isInstanceOf(BusinessException::class)
         }
     }
 }

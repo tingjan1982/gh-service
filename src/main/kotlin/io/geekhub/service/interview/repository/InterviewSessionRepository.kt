@@ -7,6 +7,8 @@ import org.springframework.data.repository.PagingAndSortingRepository
 
 interface InterviewSessionRepository : PagingAndSortingRepository<InterviewSession, String> {
 
+    fun existsByPublishedInterview(publishedInterview: PublishedInterview): Boolean
+
     fun existsByPublishedInterviewAndUserEmail(publishedInterview: PublishedInterview, userEmail: String): Boolean
 
     fun findByPublishedInterviewAndCandidateUser(publishedInterview: PublishedInterview, candidateUser: ClientUser): InterviewSession?

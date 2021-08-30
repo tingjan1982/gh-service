@@ -51,11 +51,9 @@ class InterviewController(val interviewService: InterviewService,
                      @PathVariable id: String): InterviewResponse {
 
         interviewService.getInterview(id).let {
-//            if (it.visibility == Visibility.PRIVATE && it.clientUser != clientUser) {
-//                throw BusinessException("You are not the owner of this assessment")
-//            }
+            val showAnswer = clientUser.id == it.clientUser.id || it.clientUser.isTemplateUser()
 
-            return it.toDTO(clientUser, true)
+            return it.toDTO(clientUser, true, showAnswer)
         }
     }
 
@@ -135,6 +133,7 @@ class InterviewController(val interviewService: InterviewService,
         }
     }
 
+    @Deprecated("To be removed once frontend doesn't use it anymore.")
     @PostMapping("/{id}/publish")
     fun publishInterview(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                          @PathVariable id: String): PublishedInterviewResponse {

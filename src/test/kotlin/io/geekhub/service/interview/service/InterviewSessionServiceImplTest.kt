@@ -11,7 +11,6 @@ import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.model.Visibility
-import io.geekhub.service.specialization.repository.Specialization
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,9 +30,6 @@ internal class InterviewSessionServiceImplTest {
 
     @Autowired
     lateinit var clientUser: ClientUser
-
-    @Autowired
-    lateinit var specialization: Specialization
 
     lateinit var interview: Interview
 

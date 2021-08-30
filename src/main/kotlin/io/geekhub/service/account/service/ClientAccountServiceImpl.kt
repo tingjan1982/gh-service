@@ -181,7 +181,7 @@ class ClientAccountServiceImpl(
 
             interviewService.getInterviews(clientUser).forEach { iv ->
                 iv.clientUser = owner
-                interviewService.saveInterview(iv)
+                interviewService.saveInterviewDirectly(iv)
             }
         }
 

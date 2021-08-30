@@ -1,6 +1,7 @@
 package io.geekhub.service.interview.service
 
 import io.geekhub.service.account.repository.ClientUser
+import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.shared.model.SearchCriteria
 import org.springframework.data.domain.Page
@@ -8,6 +9,8 @@ import org.springframework.data.domain.Page
 interface InterviewSessionService {
 
     fun createInterviewSession(interviewSession: InterviewSession): InterviewSession
+
+    fun createInterviewSession(interview: Interview): InterviewSession
 
     fun saveInterviewSession(interviewSession: InterviewSession): InterviewSession
 

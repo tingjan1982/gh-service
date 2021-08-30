@@ -5,15 +5,14 @@ import io.geekhub.service.account.service.ClientUserService
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.model.PublishedInterview
 import io.geekhub.service.interview.repository.InterviewRepository
+import io.geekhub.service.interview.repository.InterviewSessionRepository
 import io.geekhub.service.interview.repository.PublishedInterviewRepository
-import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.annotation.TransactionSupport
 import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.shared.exception.OwnershipException
 import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.model.Visibility
-import io.geekhub.service.specialization.service.SpecializationService
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,21 +31,41 @@ import org.springframework.stereotype.Service
 @TransactionSupport
 class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
                            val clientUserService: ClientUserService,
-                           val questionRepository: QuestionRepository,
                            val interviewRepository: InterviewRepository,
                            val publishedInterviewRepository: PublishedInterviewRepository,
-                           val specializationService: SpecializationService) : InterviewService {
+                           val interviewSessionRepository: InterviewSessionRepository) : InterviewService {
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(InterviewServiceImpl::class.java)
     }
 
+    /**
+     * This is the main saveInterview function that should be called by external facing client (i.e. Controller) as it
+     * checks for existence of created interview sessions.
+     */
     override fun saveInterview(interview: Interview): Interview {
 
-        this.interviewRepository.save(interview).also {
+        interview.latestPublishedInterviewId?.let { id ->
+            publishedInterviewRepository.findById(id).orElseThrow {
+                throw BusinessObjectNotFoundException(PublishedInterview::class, id)
+            }.let {
+                if (interviewSessionRepository.existsByPublishedInterview(it)) {
+                    throw BusinessException("Interview cannot be saved because there is at least one InterviewSession")
+                }
+            }
+        }
+
+        interviewRepository.save(interview).also {
             logger.info("Saved interview: $it")
+
+            publishInterview(it)
+
             return it
         }
+    }
+
+    override fun saveInterviewDirectly(interview: Interview): Interview {
+        return interviewRepository.save(interview)
     }
 
     override fun getInterview(id: String): Interview {
@@ -56,8 +75,15 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
     override fun publishInterview(id: String): PublishedInterview {
 
         getInterview(id).let {
+            return this.publishInterview(it)
+        }
+    }
+
+    fun publishInterview(interview: Interview): PublishedInterview {
+
+        interview.let {
             if (it.sections.isEmpty()) {
-                throw BusinessException("Interview $id must have at least one section.")
+                throw BusinessException("Interview ${interview.id} must have at least one section.")
             }
 
             it.sections.forEach {section ->
@@ -86,7 +112,7 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
             }
 
             interview.clientUser = it
-            return this.saveInterview(interview)
+            return this.saveInterviewDirectly(interview)
         }
     }
 
@@ -117,9 +143,9 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
     override fun getInterviews(searchCriteria: SearchCriteria): Page<Interview> {
 
         searchCriteria.toQuery().let {
-            if (!searchCriteria.filterByMine && !searchCriteria.filterByClientAccount && !searchCriteria.template) {
+            if (!searchCriteria.filterByMine && !searchCriteria.filterByClientAccount) {
                 it.addCriteria(Criteria.where("visibility").`in`(Visibility.PUBLIC, null))
-                it.addCriteria(Criteria.where("latestPublishedInterviewId").ne(null))
+                //it.addCriteria(Criteria.where("latestPublishedInterviewId").ne(null))
             }
 
             if (searchCriteria.template) {

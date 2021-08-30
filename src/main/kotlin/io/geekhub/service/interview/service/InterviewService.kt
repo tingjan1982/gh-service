@@ -10,6 +10,8 @@ interface InterviewService {
 
     fun saveInterview(interview: Interview): Interview
 
+    fun saveInterviewDirectly(interview: Interview): Interview
+
     fun getInterview(id: String): Interview
 
     fun publishInterview(id: String): PublishedInterview

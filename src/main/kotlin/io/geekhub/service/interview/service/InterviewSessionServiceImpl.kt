@@ -48,17 +48,36 @@ class InterviewSessionServiceImpl(
             throw BusinessObjectAlreadyExistsException("Interview session is already created for ${interviewSession.userEmail}")
         }
 
-        return interviewSessionRepository.save(interviewSession).let {
+        this.saveInterviewSession(interviewSession).let {
             val lightSession = lightInterviewSessionRepository.findById(it.id.toString()).orElseThrow {
                 throw BusinessObjectNotFoundException(LightInterviewSession::class, it.id.toString())
             }
 
             interviewService.getInterview(it.publishedInterview.referencedInterview.id.toString()).let { interview ->
                 interview.addInterviewSession(lightSession)
-                interviewService.saveInterview(interview)
+                interviewService.saveInterviewDirectly(interview)
             }
 
-            it
+            return it
+        }
+    }
+
+    override fun createInterviewSession(interview: Interview): InterviewSession {
+
+        interviewService.getPublishedInterviewByPublishedId(interview.latestPublishedInterviewId).let {
+            val clientUser = interview.clientUser
+
+            InterviewSession(
+                publishedInterview = it,
+                currentInterview = interview,
+                clientUser = clientUser,
+                userEmail = clientUser.email,
+                name = clientUser.name,
+                interviewMode = InterviewSession.InterviewMode.MOCK,
+                duration = 60
+            )
+        }.let {
+            return this.createInterviewSession(it)
         }
     }
 

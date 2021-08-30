@@ -38,6 +38,10 @@ data class ClientUser(
         return clientAccount.accountType == ClientAccount.AccountType.CORPORATE
     }
 
+    fun isTemplateUser(): Boolean {
+        return email == "template@geekhub.tw"
+    }
+
     /**
      * UserType will allow the system to determine if user profile information can be updated and synced
      * back to Auth0.
