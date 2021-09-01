@@ -39,6 +39,9 @@ data class InterviewSession(
 
     var followupInterviews: MutableList<FollowUpInterview> = mutableListOf()
 
+    fun addAnswerAttemptSection(answerAttemptSection: AnswerAttemptSection) {
+        answerAttemptSections[answerAttemptSection.id] = answerAttemptSection
+    }
 
     data class AnswerAttemptSection(
             val id: String,
@@ -70,13 +73,18 @@ data class InterviewSession(
     }
 
     data class QuestionAnswerAttempt(
-            val sectionId: String,
-            val questionSnapshotId: String,
-            var questionType: Question.QuestionType? = null,
-            var answerIds: List<String>? = null,
-            var answer: String? = null,
-            var correct: Boolean? = null
-    )
+        val sectionId: String,
+        val questionSnapshotId: String,
+        var answerIds: List<String>? = null,
+        var answer: String? = null,
+        var correct: Boolean? = null
+    ) {
+        var questionType: Question.QuestionType = if (this.answer != null) {
+            Question.QuestionType.SHORT_ANSWER
+        } else {
+            Question.QuestionType.MULTI_CHOICE
+        }
+    }
 
     data class FollowUpInterview(
             var interviewDate: Date,

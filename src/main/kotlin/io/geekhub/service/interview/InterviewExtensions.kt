@@ -11,8 +11,8 @@ import io.geekhub.service.shared.extensions.toLightDTO
 import java.math.BigDecimal
 
 fun PublishedInterview.toDTO(currentUser: ClientUser) = PublishedInterviewResponse(
-        this.id,
-        this.referencedInterview.toDTO(currentUser, true)
+    this.id,
+    this.referencedInterview.toDTO(currentUser, true)
 )
 
 fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientUser: ClientUser): InterviewSession {
@@ -24,13 +24,13 @@ fun InterviewSessionRequest.toEntity(interview: PublishedInterview, clientUser: 
     }
 
     return InterviewSession(
-            publishedInterview = interview,
-            currentInterview = interview.referencedInterview,
-            clientUser = clientUser,
-            userEmail = this.userEmail,
-            name = this.name,
-            interviewMode = this.interviewMode,
-            duration = duration
+        publishedInterview = interview,
+        currentInterview = interview.referencedInterview,
+        clientUser = clientUser,
+        userEmail = this.userEmail,
+        name = this.name,
+        interviewMode = this.interviewMode,
+        duration = duration
     )
 }
 
@@ -69,28 +69,9 @@ fun InterviewSession.toDTO(currentUser: ClientUser): InterviewSessionResponse {
     }
 
     return InterviewSessionResponse(
-            this.id.toString(),
-            this.publishedInterview.referencedInterview.toDTO(currentUser, true, showCorrectAnswer),
-            this.clientUser.toLightDTO(),
-            this.userEmail,
-            this.name,
-            this.candidateUser?.toLightDTO(),
-            this.interviewMode,
-            this.duration,
-            this.status,
-            this.interviewSentDate,
-            this.interviewStartDate,
-            this.interviewEndDate,
-            this.totalScore,
-            updatedAnswerAttemptSection,
-            this.currentInterview.groupInterviewSessions(),
-            this.followupInterviews
-    )
-}
-
-fun InterviewSession.toLightDTO() = InterviewSessionsResponse.LightInterviewSessionResponse(
         this.id.toString(),
-        this.publishedInterview.referencedInterview.toLightDTO(),
+        this.publishedInterview.referencedInterview.toDTO(currentUser, true, showCorrectAnswer),
+        this.clientUser.toLightDTO(),
         this.userEmail,
         this.name,
         this.candidateUser?.toLightDTO(),
@@ -100,7 +81,26 @@ fun InterviewSession.toLightDTO() = InterviewSessionsResponse.LightInterviewSess
         this.interviewSentDate,
         this.interviewStartDate,
         this.interviewEndDate,
-        this.totalScore
+        this.totalScore,
+        updatedAnswerAttemptSection,
+        this.currentInterview.groupInterviewSessions(),
+        this.followupInterviews
+    )
+}
+
+fun InterviewSession.toLightDTO() = InterviewSessionsResponse.LightInterviewSessionResponse(
+    this.id.toString(),
+    this.publishedInterview.referencedInterview.toLightDTO(),
+    this.userEmail,
+    this.name,
+    this.candidateUser?.toLightDTO(),
+    this.interviewMode,
+    this.duration,
+    this.status,
+    this.interviewSentDate,
+    this.interviewStartDate,
+    this.interviewEndDate,
+    this.totalScore
 )
 
 fun AnswerAttemptRequest.toEntity() = InterviewSession.QuestionAnswerAttempt(
@@ -111,10 +111,10 @@ fun AnswerAttemptRequest.toEntity() = InterviewSession.QuestionAnswerAttempt(
 )
 
 fun SectionAverageStats.toDTO() = InterviewSessionAverageStatsResponse(
-        averageScore = if (this.averageScore.isNotEmpty()) {
-            this.averageScore[0]
-        } else {
-            SectionAverageStats.OverallAverageScore("", BigDecimal.ZERO, 0)
-        },
-        sectionsAverageScore = this.sectionsAverageScore
+    averageScore = if (this.averageScore.isNotEmpty()) {
+        this.averageScore[0]
+    } else {
+        SectionAverageStats.OverallAverageScore("", BigDecimal.ZERO, 0)
+    },
+    sectionsAverageScore = this.sectionsAverageScore
 )

@@ -103,7 +103,25 @@ class InterviewSessionServiceImpl(
         interviewSession.status = InterviewSession.Status.STARTED
         interviewSession.interviewStartDate = Date()
 
+        initializeAnswerAttemptSection(interviewSession)
+
         return saveInterviewSession(interviewSession)
+    }
+
+    private fun initializeAnswerAttemptSection(interviewSession: InterviewSession) {
+
+        LOGGER.info("Initialize answer attempt sections")
+
+        interviewSession.publishedInterview.referencedInterview.sections
+            .forEach {
+                val answerStats = it.questions.groupBy({ q -> q.questionType }, { qsnapshot -> qsnapshot })
+                    .map { entry -> Pair(entry.key, InterviewSession.AnswerAttemptSection.AnswerStats(questionTotal = entry.value.size)) }
+                    .toMap()
+
+                InterviewSession.AnswerAttemptSection(id = it.id, answerStats = answerStats).let { aas ->
+                    interviewSession.addAnswerAttemptSection(aas)
+                }
+            }
     }
 
     override fun addAnswerAttempt(
@@ -118,18 +136,10 @@ class InterviewSessionServiceImpl(
         checkInterviewSessionTime(interviewSession)
         validateSectionAndQuestion(interviewSession, answerAttempt.sectionId, answerAttempt.questionSnapshotId)
 
-        answerAttempt.let {
-            it.questionType = if (it.answer != null) {
-                Question.QuestionType.SHORT_ANSWER
-            } else {
-                Question.QuestionType.MULTI_CHOICE
-            }
-        }
-
-        interviewSession.answerAttemptSections.getOrPut(answerAttempt.sectionId) { initializeAnswerAttemptSection(interviewSession, answerAttempt.sectionId) }.let {
+        interviewSession.answerAttemptSections[answerAttempt.sectionId]?.let {
             it.answerAttempts[answerAttempt.questionSnapshotId] = answerAttempt
-        }
 
+        } ?: throw BusinessObjectNotFoundException(InterviewSession.AnswerAttemptSection::class, answerAttempt.sectionId)
 
         return saveInterviewSession(interviewSession)
     }
@@ -147,13 +157,12 @@ class InterviewSessionServiceImpl(
 
         validateSectionAndQuestion(interviewSession, sectionId, questionSnapshotId)
 
-        interviewSession.answerAttemptSections.getOrPut(sectionId) { initializeAnswerAttemptSection(interviewSession, sectionId) }.let {
-
+        interviewSession.answerAttemptSections[sectionId]?.let {
             val incorrectAttempt = InterviewSession.QuestionAnswerAttempt(
                 sectionId = sectionId,
                 questionSnapshotId = questionSnapshotId,
-                questionType = Question.QuestionType.SHORT_ANSWER,
-                correct = false
+                correct = false,
+                answer = ""
             )
 
             it.answerAttempts.getOrPut(questionSnapshotId) { incorrectAttempt }.let { attempt ->
@@ -161,7 +170,7 @@ class InterviewSessionServiceImpl(
             }
 
             it.computeAnswerStats(Question.QuestionType.SHORT_ANSWER)
-        }
+        } ?: throw BusinessObjectNotFoundException(InterviewSession.AnswerAttemptSection::class, sectionId)
 
         return saveInterviewSession(interviewSession)
     }
@@ -176,24 +185,6 @@ class InterviewSessionServiceImpl(
 
         } ?: throw BusinessObjectNotFoundException(Interview.Section::class, sectionId)
 
-    }
-
-    private fun initializeAnswerAttemptSection(
-        interviewSession: InterviewSession,
-        sectionId: String
-    ): InterviewSession.AnswerAttemptSection {
-
-        LOGGER.info("Initialize AnswerAttemptSection for section: $sectionId")
-
-        interviewSession.publishedInterview.referencedInterview.sections
-            .find { it.id == sectionId }?.let {
-                val answerStats = it.questions.groupBy({ q -> q.questionType }, { qsnapshot -> qsnapshot })
-                    .map { entry -> Pair(entry.key, InterviewSession.AnswerAttemptSection.AnswerStats(questionTotal = entry.value.size)) }
-                    .toMap()
-
-                return InterviewSession.AnswerAttemptSection(id = sectionId, answerStats = answerStats)
-
-            } ?: throw BusinessException("Provided section id is not found :${sectionId}")
     }
 
     private fun checkInterviewSessionTime(interviewSession: InterviewSession) {
@@ -238,7 +229,7 @@ class InterviewSessionServiceImpl(
             .associate { Pair(it.id, it.possibleAnswers.filter { ans -> ans.correctAnswer }.map { ans -> ans.answerId }.toList()) }
 
         interviewSession.answerAttemptSections.forEach { (sid, sec) ->
-            LOGGER.info("Scoring answers for section: $sid")
+            LOGGER.info("Auto scoring answers for section: $sid")
 
             sec.answerAttempts.forEach { (qid, ans) ->
                 correctAnswers[qid]?.let { correctAnswerIds ->

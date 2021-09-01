@@ -58,8 +58,7 @@ internal class InterviewSessionServiceImplTest {
                     Interview.QuestionSnapshot(
                         id = "qid-2",
                         question = "question that will be answered",
-                        questionType = Question.QuestionType.SHORT_ANSWER,
-                        possibleAnswers = listOf(Question.PossibleAnswer("answer-1", "answer", true))
+                        questionType = Question.QuestionType.SHORT_ANSWER
                     )
                 )
 
@@ -72,10 +71,10 @@ internal class InterviewSessionServiceImplTest {
                 )
             }.let {
                 this.sections.add(it)
-                interview = interviewService.saveInterview(this)
             }
+
         }.let {
-            publishedInterview = interviewService.publishInterview(it.id.toString())
+            interview = interviewService.saveInterview(it)
         }
     }
 
@@ -85,29 +84,24 @@ internal class InterviewSessionServiceImplTest {
 
         val sectionId = interview.sections[0].id
 
-        InterviewSession(
-            publishedInterview = publishedInterview,
-            currentInterview = publishedInterview.referencedInterview,
-            clientUser = interview.clientUser,
-            userEmail = "joelin@geekhub.tw",
-            name = "Joe Lin",
-            interviewMode = InterviewSession.InterviewMode.REAL,
-            duration = 1
-        ).let {
-            interviewSessionService.createInterviewSession(it)
+        interviewSessionService.createInterviewSession(interview).let {
+            assertThat(it.status).isEqualTo(InterviewSession.Status.NOT_STARTED)
 
-        }.let {
-            assertThat {
-                interviewSessionService.getCurrentInterviewSession(interview.id.toString(), clientUser)
-            }.isFailure().isInstanceOf(BusinessException::class)
+            interviewSessionService.startInterviewSession(it, clientUser).run {
+                assertThat(this.interviewStartDate).isNotNull()
+                assertThat(this.status).isEqualTo(InterviewSession.Status.STARTED)
+                assertThat(this.answerAttemptSections).hasSize(1)
 
-            interviewSessionService.startInterviewSession(it, clientUser).also { session ->
-                assertThat(session.interviewStartDate).isNotNull()
+                this.answerAttemptSections.getValue(sectionId).run {
+                    assertThat(this.answerStats).hasSize(2)
+                    assertThat(this.answerStats.getValue(Question.QuestionType.MULTI_CHOICE).questionTotal).isEqualTo(1)
+                    assertThat(this.answerStats.getValue(Question.QuestionType.SHORT_ANSWER).questionTotal).isEqualTo(2)
+                }
             }
 
-            interviewSessionService.getCurrentInterviewSession(interview.id.toString(), clientUser).run {
-                assertThat(this).isEqualTo(it)
-            }
+            assertThat(interviewSessionService.getCurrentInterviewSession(interview.id.toString(), clientUser))
+                .isNotNull()
+                .isEqualTo(it)
 
             it
         }.let {
@@ -115,21 +109,15 @@ internal class InterviewSessionServiceImplTest {
                 it,
                 InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = "qid-1", answerIds = listOf("answer-1"))
             ).run {
-                assertThat(this.id).isNotNull()
-                assertThat(this.answerAttemptSections).hasSize(1)
-
                 this.answerAttemptSections.getValue(sectionId).run {
-                    assertThat(this.answerStats).hasSize(2)
-                    assertThat(this.answerStats.getValue(Question.QuestionType.MULTI_CHOICE).questionTotal).isEqualTo(1)
-                    assertThat(this.answerStats.getValue(Question.QuestionType.SHORT_ANSWER).questionTotal).isEqualTo(2)
                     assertThat(this.answerAttempts).hasSize(1)
                 }
             }
 
-            interviewSessionService.addAnswerAttempt(it, InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = "qid-2", answer = "short answer")).run {
-                assertThat(this.id).isNotNull()
-                assertThat(this.answerAttemptSections).hasSize(1)
-
+            interviewSessionService.addAnswerAttempt(
+                it,
+                InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = "qid-2", answer = "short answer")
+            ).run {
                 this.answerAttemptSections.getValue(sectionId).run {
                     assertThat(this.answerAttempts).hasSize(2)
                 }
@@ -142,17 +130,17 @@ internal class InterviewSessionServiceImplTest {
                 }
             }
 
-            return@let it
+            it
         }.let {
             assertThat {
                 interviewSessionService.startInterviewSession(it, clientUser)
             }.isFailure().isInstanceOf(BusinessException::class)
 
-            return@let it
+            it
         }.let {
             interviewSessionService.submitInterviewSession(it).run {
                 assertThat(this.interviewEndDate).isNotNull()
-                //assertThat(this.totalScore).isBetween(BigDecimal(0.33), BigDecimal(0.34))
+                assertThat(this.status).isEqualTo(InterviewSession.Status.ENDED)
                 assertThat(this.answerAttemptSections).hasSize(1)
 
                 this.answerAttemptSections.getValue(sectionId).run {
@@ -182,7 +170,7 @@ internal class InterviewSessionServiceImplTest {
                 }
             }
 
-            return@let it
+            it
         }.let {
             interviewSessionService.calculateScore(it).run {
                 assertThat(this.totalScore).isBetween(BigDecimal(0.6), BigDecimal(0.7))
@@ -192,19 +180,9 @@ internal class InterviewSessionServiceImplTest {
 
     @Test
     @WithMockUser
-    fun `verify failed add answer attempts`() {
+    fun `verify exception cases in interview session lifecycle`() {
 
-        InterviewSession(
-            publishedInterview = publishedInterview,
-            currentInterview = publishedInterview.referencedInterview,
-            clientUser = interview.clientUser,
-            userEmail = "joelin@geekhub.tw",
-            name = "Joe Lin",
-            interviewMode = InterviewSession.InterviewMode.REAL,
-            duration = 1
-        ).let {
-            interviewSessionService.createInterviewSession(it)
-        }.let {
+        interviewSessionService.createInterviewSession(interview).let {
             assertThat {
                 interviewSessionService.addAnswerAttempt(
                     it,
@@ -212,9 +190,11 @@ internal class InterviewSessionServiceImplTest {
                 )
             }.isFailure().isInstanceOf(BusinessException::class)
 
-            return@let it
+            it
         }.let {
-            it.interviewStartDate = Date.from(Instant.now().minusSeconds(300))
+            interviewSessionService.startInterviewSession(it, clientUser)
+
+            it.interviewStartDate = Date.from(Instant.now().minusSeconds(60 * 120))
             interviewSessionService.saveInterviewSession(it)
         }.let {
             assertThat {
@@ -224,10 +204,20 @@ internal class InterviewSessionServiceImplTest {
                 )
             }.isFailure().isInstanceOf(BusinessException::class)
 
-            return@let it
+            it
         }.let {
             assertThat {
-                interviewSessionService.submitInterviewSession(it)
+                interviewSessionService.markInterviewSessionAnswer(it, sectionId = "whatever", questionSnapshotId = "whatever", correct = true)
+
+            }.isFailure().isInstanceOf(BusinessException::class)
+
+            interviewSessionService.submitInterviewSession(it)
+
+            assertThat {
+                interviewSessionService.addAnswerAttempt(
+                    it,
+                    InterviewSession.QuestionAnswerAttempt(sectionId = "whatever", questionSnapshotId = "whatever", answerIds = listOf("whatever"))
+                )
             }.isFailure().isInstanceOf(BusinessException::class)
         }
     }
@@ -236,17 +226,7 @@ internal class InterviewSessionServiceImplTest {
     @WithMockUser
     fun `check interview's interviewSessions reference`() {
 
-        InterviewSession(
-            publishedInterview = publishedInterview,
-            currentInterview = publishedInterview.referencedInterview,
-            clientUser = interview.clientUser,
-            userEmail = "joelin@geekhub.tw",
-            name = "Joe Lin",
-            interviewMode = InterviewSession.InterviewMode.REAL,
-            duration = 1
-        ).let {
-            interviewSessionService.createInterviewSession(it)
-        }.let {
+        interviewSessionService.createInterviewSession(interview).let {
             interviewService.getInterview(interview.id.toString()).run {
                 assertThat(this.lightInterviewSessions).hasSize(1)
 
