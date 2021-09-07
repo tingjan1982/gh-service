@@ -46,7 +46,7 @@ internal class InterviewSessionAggregationServiceImplTest {
                         id = "qid-1",
                         question = "question 1",
                         questionType = Question.QuestionType.MULTI_CHOICE,
-                        possibleAnswers = listOf(Question.PossibleAnswer("answer-1", "answer", true))
+                        possibleAnswers = mutableListOf(Question.PossibleAnswer("answer-1", "answer", true))
                     )
                 )
 
@@ -55,7 +55,7 @@ internal class InterviewSessionAggregationServiceImplTest {
                         id = "qid-2",
                         question = "question 2",
                         questionType = Question.QuestionType.MULTI_CHOICE,
-                        possibleAnswers = listOf(Question.PossibleAnswer("answer-2", "answer", true))
+                        possibleAnswers = mutableListOf(Question.PossibleAnswer("answer-2", "answer", true))
                     )
                 )
 
@@ -64,7 +64,7 @@ internal class InterviewSessionAggregationServiceImplTest {
                         id = "qid-3",
                         question = "question 3",
                         questionType = Question.QuestionType.SHORT_ANSWER,
-                        possibleAnswers = listOf(Question.PossibleAnswer("answer-3", "answer", true))
+                        possibleAnswers = mutableListOf(Question.PossibleAnswer("answer-3", "answer", true))
                     )
                 )
 
@@ -80,7 +80,7 @@ internal class InterviewSessionAggregationServiceImplTest {
                         id = "qid-a1",
                         question = "question a1",
                         questionType = Question.QuestionType.MULTI_CHOICE,
-                        possibleAnswers = listOf(Question.PossibleAnswer("answer-a1", "answer", true))
+                        possibleAnswers = mutableListOf(Question.PossibleAnswer("answer-a1", "answer", true))
                     )
                 )
             }.let { section ->

@@ -7,6 +7,7 @@ import io.geekhub.service.interview.model.PublishedInterview
 import io.geekhub.service.interview.repository.InterviewRepository
 import io.geekhub.service.interview.repository.InterviewSessionRepository
 import io.geekhub.service.interview.repository.PublishedInterviewRepository
+import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.annotation.TransactionSupport
 import io.geekhub.service.shared.exception.BusinessException
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
@@ -55,12 +56,37 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
             }
         }
 
+        validateInterview(interview)
+
         interviewRepository.save(interview).also {
             logger.info("Saved interview: $it")
 
             publishInterview(it)
 
             return it
+        }
+    }
+
+    private fun validateInterview(interview: Interview) {
+
+        if (interview.sections.isEmpty()) {
+            throw BusinessException("There needs at least one interview section")
+        }
+
+        val (emptyQuestions, hasQuestions) = interview.sections.partition { it.questions.isEmpty() }
+
+        if (emptyQuestions.isNotEmpty()) {
+            throw BusinessException("Section must have at least one question")
+        }
+
+        val containsInvalidQuestions = hasQuestions.flatMap { it.questions }
+            .filter { it.questionType == Question.QuestionType.MULTI_CHOICE }
+            .any {
+                it.possibleAnswers.size < 2 || it.possibleAnswers.none { ca -> ca.correctAnswer }
+            }
+
+        if (containsInvalidQuestions) {
+            throw BusinessException("Question needs to have at least two answers and one correct answer")
         }
     }
 

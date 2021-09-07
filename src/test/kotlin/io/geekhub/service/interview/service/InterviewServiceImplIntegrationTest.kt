@@ -43,12 +43,18 @@ internal class InterviewServiceImplIntegrationTest {
                         "qid",
                         "dummy question",
                         Question.QuestionType.MULTI_CHOICE,
-                        listOf(Question.PossibleAnswer(answer = "dummy answer", correctAnswer = true))
+                        mutableListOf(Question.PossibleAnswer(answer = "dummy answer", correctAnswer = true))
                     )
                 )
             }.let { sec ->
                 it.sections.add(sec)
             }
+
+            assertThat {
+                interviewService.saveInterview(it)
+            }.isFailure().isInstanceOf(BusinessException::class)
+
+            it.sections[0].questions[0].possibleAnswers.add(Question.PossibleAnswer(answer = "incorrect", correctAnswer = false))
 
             interviewService.saveInterview(it)
 
