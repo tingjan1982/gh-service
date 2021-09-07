@@ -50,7 +50,7 @@ internal class InterviewServiceImplIntegrationTest {
                 it.sections.add(sec)
             }
 
-            this.interviewService.saveInterview(it)
+            interviewService.saveInterview(it)
 
         }.let {
             assertThat(it.id).isNotNull()

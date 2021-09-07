@@ -69,6 +69,16 @@ internal class InterviewSessionServiceImplTest {
                         questionType = Question.QuestionType.SHORT_ANSWER
                     )
                 )
+
+                this.questions.add(
+                    Interview.QuestionSnapshot(
+                        id = "qid-4",
+                        question = "question 4",
+                        questionType = Question.QuestionType.MULTI_CHOICE,
+                        possibleAnswers = listOf(Question.PossibleAnswer("answer-4", "answer", true))
+                    )
+                )
+
             }.let {
                 this.sections.add(it)
             }
@@ -80,7 +90,7 @@ internal class InterviewSessionServiceImplTest {
 
     @Test
     @WithMockUser
-    fun saveInterviewSession() {
+    fun `test interview session lifecycle`() {
 
         val sectionId = interview.sections[0].id
 
@@ -94,7 +104,7 @@ internal class InterviewSessionServiceImplTest {
 
                 this.answerAttemptSections.getValue(sectionId).run {
                     assertThat(this.answerStats).hasSize(2)
-                    assertThat(this.answerStats.getValue(Question.QuestionType.MULTI_CHOICE).questionTotal).isEqualTo(1)
+                    assertThat(this.answerStats.getValue(Question.QuestionType.MULTI_CHOICE).questionTotal).isEqualTo(2)
                     assertThat(this.answerStats.getValue(Question.QuestionType.SHORT_ANSWER).questionTotal).isEqualTo(2)
                 }
             }
@@ -123,6 +133,15 @@ internal class InterviewSessionServiceImplTest {
                 }
             }
 
+            interviewSessionService.addAnswerAttempt(
+                it,
+                InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = "qid-4", answerIds = listOf())
+            ).run {
+                this.answerAttemptSections.getValue(sectionId).run {
+                    assertThat(this.answerAttempts).hasSize(3)
+                }
+            }
+
             interviewSessionService.getInterviewSession(it.id.toString()).run {
                 assertThat(this).all {
                     isNotNull()
@@ -144,10 +163,11 @@ internal class InterviewSessionServiceImplTest {
                 assertThat(this.answerAttemptSections).hasSize(1)
 
                 this.answerAttemptSections.getValue(sectionId).run {
-                    assertThat(this.answerStats.getValue(Question.QuestionType.MULTI_CHOICE).answered).isEqualTo(1)
+                    assertThat(this.answerStats.getValue(Question.QuestionType.MULTI_CHOICE).answered).isEqualTo(2)
                     assertThat(this.answerStats.getValue(Question.QuestionType.MULTI_CHOICE).correct).isEqualTo(1)
 
                     assertThat(this.answerAttempts.getValue("qid-1").correct).isEqualTo(true)
+                    assertThat(this.answerAttempts.getValue("qid-4").correct).isEqualTo(false)
                 }
             }
 
@@ -173,14 +193,14 @@ internal class InterviewSessionServiceImplTest {
             it
         }.let {
             interviewSessionService.calculateScore(it).run {
-                assertThat(this.totalScore).isBetween(BigDecimal(0.6), BigDecimal(0.7))
+                assertThat(this.totalScore).isEqualByComparingTo(BigDecimal(0.50))
             }
         }
     }
 
     @Test
     @WithMockUser
-    fun `verify exception cases in interview session lifecycle`() {
+    fun `verify exceptional cases in interview session lifecycle`() {
 
         interviewSessionService.createInterviewSession(interview).let {
             assertThat {

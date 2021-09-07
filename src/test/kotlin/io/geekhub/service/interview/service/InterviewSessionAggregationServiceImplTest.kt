@@ -34,97 +34,119 @@ internal class InterviewSessionAggregationServiceImplTest {
     @WithMockUser
     fun getAverageScores() {
 
+        val section1: String
+        val section2: String
+
         val interviewSession = DummyObject.dummyInterview(clientUser).let {
             Interview.Section(title = "default").apply {
-                this.questions.add(
-                        Interview.QuestionSnapshot(id = "qid-1",
-                                question = "question 1",
-                                questionType = Question.QuestionType.MULTI_CHOICE,
-                                possibleAnswers = listOf(Question.PossibleAnswer("answer-1", "answer", true))))
+                section1 = this.id
 
                 this.questions.add(
-                        Interview.QuestionSnapshot(id = "qid-2",
-                                question = "question 2",
-                                questionType = Question.QuestionType.MULTI_CHOICE,
-                                possibleAnswers = listOf(Question.PossibleAnswer("answer-2", "answer", true))))
+                    Interview.QuestionSnapshot(
+                        id = "qid-1",
+                        question = "question 1",
+                        questionType = Question.QuestionType.MULTI_CHOICE,
+                        possibleAnswers = listOf(Question.PossibleAnswer("answer-1", "answer", true))
+                    )
+                )
 
                 this.questions.add(
-                        Interview.QuestionSnapshot(id = "qid-3",
-                                question = "question 3",
-                                questionType = Question.QuestionType.SHORT_ANSWER,
-                                possibleAnswers = listOf(Question.PossibleAnswer("answer-3", "answer", true))))
+                    Interview.QuestionSnapshot(
+                        id = "qid-2",
+                        question = "question 2",
+                        questionType = Question.QuestionType.MULTI_CHOICE,
+                        possibleAnswers = listOf(Question.PossibleAnswer("answer-2", "answer", true))
+                    )
+                )
+
+                this.questions.add(
+                    Interview.QuestionSnapshot(
+                        id = "qid-3",
+                        question = "question 3",
+                        questionType = Question.QuestionType.SHORT_ANSWER,
+                        possibleAnswers = listOf(Question.PossibleAnswer("answer-3", "answer", true))
+                    )
+                )
 
             }.let { section ->
                 it.sections.add(section)
             }
 
             Interview.Section(title = "advanced").apply {
+                section2 = this.id
+
                 this.questions.add(
-                        Interview.QuestionSnapshot(id = "qid-a1",
-                                question = "question a1",
-                                questionType = Question.QuestionType.MULTI_CHOICE,
-                                possibleAnswers = listOf(Question.PossibleAnswer("answer-a1", "answer", true))))
+                    Interview.QuestionSnapshot(
+                        id = "qid-a1",
+                        question = "question a1",
+                        questionType = Question.QuestionType.MULTI_CHOICE,
+                        possibleAnswers = listOf(Question.PossibleAnswer("answer-a1", "answer", true))
+                    )
+                )
             }.let { section ->
                 it.sections.add(section)
             }
 
             interviewService.saveInterview(it)
-            interviewService.publishInterview(it.id.toString())
         }.let {
-            InterviewSession(
-                    publishedInterview = it,
-                    currentInterview = it.referencedInterview,
-                    clientUser = clientUser,
-                    userEmail = "joelin@geekhub.tw",
-                    name = "Joe Lin",
-                    interviewMode = InterviewSession.InterviewMode.REAL,
-                    duration = 1).apply {
-                //this.totalScore = BigDecimal("100")
-            }.let { session ->
-                interviewSessionService.createInterviewSession(session)
+            interviewSessionService.createInterviewSession(it).let { session ->
                 interviewSessionService.startInterviewSession(session, clientUser)
 
-                it.referencedInterview.sections[0].run {
+            }.let { session ->
+                it.sections[0].run {
                     val q = this.questions[0]
-                    interviewSessionService.addAnswerAttempt(session, InterviewSession.QuestionAnswerAttempt(sectionId = this.id,
+                    interviewSessionService.addAnswerAttempt(
+                        session,
+                        InterviewSession.QuestionAnswerAttempt(
+                            sectionId = this.id,
                             questionSnapshotId = q.id,
-                            answerIds = listOf(q.possibleAnswers[0].answerId))
+                            answerIds = listOf(q.possibleAnswers[0].answerId)
+                        )
                     )
                 }
 
-                it.referencedInterview.sections[1].run {
-                    val q = this.questions[0]
-                    interviewSessionService.addAnswerAttempt(session, InterviewSession.QuestionAnswerAttempt(sectionId = this.id,
-                            questionSnapshotId = q.id,
-                            answerIds = listOf(q.possibleAnswers[0].answerId))
-                    )
-                }
+//                session.referencedInterview.sections[1].run {
+//                    val q = this.questions[0]
+//                    interviewSessionService.addAnswerAttempt(
+//                        session, InterviewSession.QuestionAnswerAttempt(
+//                            sectionId = this.id,
+//                            questionSnapshotId = q.id,
+//                            answerIds = listOf(q.possibleAnswers[0].answerId)
+//                        )
+//                    )
+//                }
 
                 interviewSessionService.submitInterviewSession(session)
-                interviewSessionService.calculateScore(session)
             }
         }
+
 
         interviewSessionAggregationService.getAverageScores(interviewSession)?.run {
             println(this)
 
             assertThat(this.averageScore).hasSize(1)
-            assertThat(this.averageScore[0].averageScore).isEqualTo(BigDecimal("0.50"))
+            assertThat(this.averageScore[0].averageScore).isEqualTo(BigDecimal("0.25"))
             assertThat(this.averageScore[0].interviewSessionCount).isEqualTo(1)
 
             assertThat(this.sectionsAverageScore).hasSize(2)
-            assertThat(this.sectionsAverageScore[0]).all {
+
+            this.sectionsAverageScore.forEach { avg ->
+
+
+            }
+
+            assertThat(this.sectionsAverageScore.find { it.sectionId == section1 }!!).all {
                 prop(SectionAverageStats.SectionAverageScore::sectionId).isNotNull()
                 prop(SectionAverageStats.SectionAverageScore::questionTotal).isEqualTo(3)
                 prop(SectionAverageStats.SectionAverageScore::correctTotal).isEqualTo(1)
                 prop(SectionAverageStats.SectionAverageScore::averageSectionScore).isBetween(BigDecimal("0.3"), BigDecimal("0.4"))
             }
 
-            assertThat(this.sectionsAverageScore[1]).all {
+            assertThat(this.sectionsAverageScore.find { it.sectionId == section2 }!!).all {
                 prop(SectionAverageStats.SectionAverageScore::sectionId).isNotNull()
                 prop(SectionAverageStats.SectionAverageScore::questionTotal).isEqualTo(1)
-                prop(SectionAverageStats.SectionAverageScore::correctTotal).isEqualTo(1)
-                prop(SectionAverageStats.SectionAverageScore::averageSectionScore).isEqualTo(BigDecimal("1.0"))
+                prop(SectionAverageStats.SectionAverageScore::correctTotal).isEqualTo(0)
+                prop(SectionAverageStats.SectionAverageScore::averageSectionScore).isEqualTo(BigDecimal("0.00"))
             }
         }
     }

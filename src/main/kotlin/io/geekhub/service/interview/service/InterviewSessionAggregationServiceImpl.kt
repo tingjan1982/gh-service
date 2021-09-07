@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.aggregation.ConvertOperators.ToDeci
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Service
+import java.math.RoundingMode
 import javax.transaction.Transactional
 
 @Service
@@ -19,28 +20,28 @@ class InterviewSessionAggregationServiceImpl(val mongoTemplate: MongoTemplate) :
     override fun getAverageScores(interviewSession: InterviewSession): SectionAverageStats? {
 
         val filter = Aggregation.match(
-                Criteria.where("publishedInterview.id").isEqualTo(interviewSession.publishedInterview.id)
+            Criteria.where("publishedInterview.id").isEqualTo(interviewSession.publishedInterview.id)
         )
 
         // flattenedSections is a result of converting from map to array for subsequent processing.
         val projection = Aggregation.project()
-                .and("publishedInterview").`as`("publishedInterview")
-                .and(createToDecimal("totalScore")).`as`("totalScore")
-                .and {
-                    Document.parse("{ \$objectToArray: '\$answerAttemptSections' }")
-                }.`as`("sectionsArray")
+            .and("publishedInterview").`as`("publishedInterview")
+            .and(createToDecimal("totalScore")).`as`("totalScore")
+            .and {
+                Document.parse("{ \$objectToArray: '\$answerAttemptSections' }")
+            }.`as`("sectionsArray")
 
         val averageScore = Aggregation.group()
-                .avg("totalScore").`as`("averageScore")
-                .count().`as`("interviewSessionCount")
+            .avg("totalScore").`as`("averageScore")
+            .count().`as`("interviewSessionCount")
 
         val flattenedSections = Aggregation.unwind("sectionsArray")
 
         val flattenedAnswerStats = Aggregation.project("sectionsArray.v")
-                .and("sectionsArray.v._id").`as`("sectionId")
-                .and {
-                    Document.parse("{ \$objectToArray: '\$sectionsArray.v.answerStats' }")
-                }.`as`("answerStatsArray")
+            .and("sectionsArray.v._id").`as`("sectionId")
+            .and {
+                Document.parse("{ \$objectToArray: '\$sectionsArray.v.answerStats' }")
+            }.`as`("answerStatsArray")
 
         // add the questions count and correct answer count using reduce operation.
         val sectionAnswersCount = Aggregation.project("sectionId").and {
@@ -48,22 +49,47 @@ class InterviewSessionAggregationServiceImpl(val mongoTemplate: MongoTemplate) :
         }.`as`("sectionAnswersCount")
 
         // work out average score using Spring MongoDB's spEL expression.
-        val averageSectionScore = Aggregation.project("sectionId")
-                .and("sectionAnswersCount.qTotal").`as`("questionTotal")
-                .and("sectionAnswersCount.correct").`as`("correctTotal")
-                .andExpression("sectionAnswersCount.correct / sectionAnswersCount.qTotal").`as`("averageSectionScore")
+        val flattenedSectionScore = Aggregation.project("sectionId")
+            .and("sectionAnswersCount.qTotal").`as`("questionTotal")
+            .and("sectionAnswersCount.correct").`as`("correctTotal")
+        //.andExpression("sectionAnswersCount.correct / sectionAnswersCount.qTotal").`as`("averageSectionScore")
+
+        val groupedSectionScore = Aggregation.group("sectionId")
+            .first("sectionId").`as`("sectionId")
+            .first("questionTotal").`as`("questionTotal")
+            .first("correctTotal").`as`("correctTotal")
+            .sum("questionTotal").`as`("questionSum")
+            .sum("correctTotal").`as`("correctSum")
+
+        val averageSectionScore = Aggregation.project("sectionId", "questionTotal", "correctTotal")
+            .andExpression("correctSum / questionSum").`as`("averageSectionScore")
 
         val facets = Aggregation.facet(averageScore).`as`("averageScore")
-                .and(flattenedSections, flattenedAnswerStats, sectionAnswersCount, averageSectionScore).`as`("sectionsAverageScore")
+            .and(
+                flattenedSections,
+                flattenedAnswerStats,
+                sectionAnswersCount,
+                flattenedSectionScore,
+                groupedSectionScore,
+                averageSectionScore
+            ).`as`("sectionsAverageScore")
 
-        val aggregation = Aggregation.newAggregation(InterviewSession::class.java,
-                filter,
-                projection,
-                facets
+        val aggregation = Aggregation.newAggregation(
+            InterviewSession::class.java,
+            filter,
+            projection,
+            facets
         )
 
-        mongoTemplate.aggregate(aggregation, SectionAverageStats::class.java).let {
-            return it.uniqueMappedResult
+
+        mongoTemplate.aggregate(aggregation, SectionAverageStats::class.java).let { r ->
+            return r.uniqueMappedResult?.apply {
+                this.averageScore[0].averageScore = this.averageScore[0].averageScore.setScale(2, RoundingMode.HALF_UP)
+
+                this.sectionsAverageScore.forEach {
+                    it.averageSectionScore = it.averageSectionScore.setScale(2, RoundingMode.HALF_UP)
+                }
+            }
         }
     }
 
