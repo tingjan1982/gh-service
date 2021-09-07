@@ -87,7 +87,7 @@ internal class InterviewSessionAggregationServiceImplTest {
                 it.sections.add(section)
             }
 
-            interviewService.saveInterview(it)
+            interviewService.saveInterview(it, false)
         }.let {
             interviewSessionService.createInterviewSession(it).let { session ->
                 interviewSessionService.startInterviewSession(session, clientUser)

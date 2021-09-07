@@ -40,11 +40,15 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
         val logger: Logger = LoggerFactory.getLogger(InterviewServiceImpl::class.java)
     }
 
+    override fun saveInterview(interview: Interview): Interview {
+        return this.saveInterview(interview, true)
+    }
+
     /**
      * This is the main saveInterview function that should be called by external facing client (i.e. Controller) as it
      * checks for existence of created interview sessions.
      */
-    override fun saveInterview(interview: Interview): Interview {
+    override fun saveInterview(interview: Interview, validate: Boolean): Interview {
 
         interview.latestPublishedInterviewId?.let { id ->
             publishedInterviewRepository.findById(id).orElseThrow {
@@ -56,7 +60,9 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
             }
         }
 
-        validateInterview(interview)
+        if (validate) {
+            validateInterview(interview)
+        }
 
         interviewRepository.save(interview).also {
             logger.info("Saved interview: $it")

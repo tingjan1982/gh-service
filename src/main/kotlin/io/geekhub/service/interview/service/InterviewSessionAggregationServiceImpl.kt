@@ -56,11 +56,11 @@ class InterviewSessionAggregationServiceImpl(val mongoTemplate: MongoTemplate) :
 
         val groupedSectionScore = Aggregation.group("sectionId")
             .first("sectionId").`as`("sectionId")
-            .sum("questionTotal").`as`("questionSum")
-            .sum("correctTotal").`as`("correctSum")
+            .sum("questionTotal").`as`("questionTotal")
+            .sum("correctTotal").`as`("correctTotal")
 
-        val averageSectionScore = Aggregation.project("sectionId")
-            .andExpression("correctSum / questionSum").`as`("averageSectionScore")
+        val averageSectionScore = Aggregation.project("sectionId", "questionTotal", "correctTotal")
+            .andExpression("correctTotal / questionTotal").`as`("averageSectionScore")
 
         val facets = Aggregation.facet(averageScore).`as`("averageScore")
             .and(
