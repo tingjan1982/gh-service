@@ -98,5 +98,14 @@ internal class InterviewServiceImplIntegrationTest {
                 interviewService.saveInterview(it)
             }.isFailure().isInstanceOf(BusinessException::class)
         }
+
+        interviewService.copyInterview(interview, clientUser).let { copy ->
+            assertThat(copy.id).isNotEqualTo(interview.id)
+            assertThat(copy.title).contains(interview.title)
+            assertThat(copy.latestPublishedInterviewId).isNotNull()
+            assertThat(copy.sections).isSameAs(interview.sections)
+            assertThat(copy.likeCount).isZero()
+            assertThat(copy.userKey).isNull()
+        }
     }
 }

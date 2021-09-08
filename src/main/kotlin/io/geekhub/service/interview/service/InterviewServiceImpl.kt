@@ -100,15 +100,16 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
         return interviewRepository.save(interview)
     }
 
-    override fun getInterview(id: String): Interview {
-        return interviewRepository.findById(id).orElseThrow { BusinessObjectNotFoundException(Interview::class, id) }
+    override fun copyInterview(interview: Interview, clientUser: ClientUser): Interview {
+
+        interview.copy(clientUser).let {
+            return this.saveInterview(it)
+        }
+
     }
 
-    override fun publishInterview(id: String): PublishedInterview {
-
-        getInterview(id).let {
-            return this.publishInterview(it)
-        }
+    override fun getInterview(id: String): Interview {
+        return interviewRepository.findById(id).orElseThrow { BusinessObjectNotFoundException(Interview::class, id) }
     }
 
     fun publishInterview(interview: Interview): PublishedInterview {

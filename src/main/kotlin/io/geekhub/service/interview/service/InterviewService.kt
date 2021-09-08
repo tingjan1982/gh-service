@@ -14,9 +14,9 @@ interface InterviewService {
 
     fun saveInterviewDirectly(interview: Interview): Interview
 
-    fun getInterview(id: String): Interview
+    fun copyInterview(interview: Interview, clientUser: ClientUser): Interview
 
-    fun publishInterview(id: String): PublishedInterview
+    fun getInterview(id: String): Interview
 
     fun updateInterviewOwner(interview: Interview, userId: String): Interview
 

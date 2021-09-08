@@ -2,8 +2,8 @@ package io.geekhub.service.notification.service
 
 import io.geekhub.service.account.repository.ClientAccount
 import io.geekhub.service.account.repository.ClientUser
-import io.geekhub.service.interview.model.InterviewSession
 import io.geekhub.service.interview.service.InterviewService
+import io.geekhub.service.interview.service.InterviewSessionService
 import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.shared.extensions.DummyObject
 import org.junit.jupiter.api.Test
@@ -20,6 +20,9 @@ internal class NotificationServiceImplTest {
     lateinit var interviewService: InterviewService
 
     @Autowired
+    lateinit var interviewSessionService: InterviewSessionService
+
+    @Autowired
     lateinit var clientAccount: ClientAccount
 
     @Autowired
@@ -28,18 +31,12 @@ internal class NotificationServiceImplTest {
     @Test
     @WithMockUser
     fun sendInterviewInvitation() {
-        val publishedInterview = DummyObject.dummyInterview(clientUser = clientUser).let {
-            interviewService.saveInterview(it)
-            interviewService.publishInterview(it.id.toString())
-        }
 
-        InterviewSession(
-            publishedInterview = publishedInterview,
-            currentInterview = publishedInterview.referencedInterview,
-            clientUser = clientUser,
-            userEmail = "joelin@geekhub.tw",
-            interviewMode = InterviewSession.InterviewMode.REAL
-        ).let {
+        DummyObject.dummyInterview(clientUser = clientUser).let {
+            interviewService.saveInterview(it)
+        }.let {
+            interviewSessionService.createInterviewSession(it)
+        }.let {
             notificationService.sendInterviewInvitation(clientUser, it)
         }
     }
@@ -47,18 +44,12 @@ internal class NotificationServiceImplTest {
     @Test
     @WithMockUser
     fun sendInterviewResult() {
-        val publishedInterview = DummyObject.dummyInterview(clientUser = clientUser).let {
-            interviewService.saveInterview(it)
-            interviewService.publishInterview(it.id.toString())
-        }
 
-        InterviewSession(
-            publishedInterview = publishedInterview,
-            currentInterview = publishedInterview.referencedInterview,
-            clientUser = clientUser,
-            userEmail = "candidate@geekhub.tw",
-            interviewMode = InterviewSession.InterviewMode.REAL
-        ).let {
+        DummyObject.dummyInterview(clientUser = clientUser).let {
+            interviewService.saveInterview(it)
+        }.let {
+            interviewSessionService.createInterviewSession(it)
+        }.let {
             notificationService.sendInterviewResult(it)
         }
     }

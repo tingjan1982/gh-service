@@ -69,14 +69,31 @@ data class Interview(
         return this::class.toString()
     }
 
-    data class Section(val id: String = ObjectId.get().toString(),
-                       val title: String,
-                       var questions: MutableList<QuestionSnapshot> = mutableListOf())
+    fun copy(clientUser: ClientUser): Interview {
 
-    data class QuestionSnapshot(val id: String = ObjectId().toString(),
-                                val question: String,
-                                val questionType: Question.QuestionType,
-                                val possibleAnswers: MutableList<Question.PossibleAnswer> = mutableListOf()
+        return this.copy(
+            id = null,
+            title = "Copy of ${this.title}",
+            clientUser = clientUser,
+            clientAccount = clientUser.clientAccount.id,
+            sections = this.sections,
+            latestPublishedInterviewId = null,
+            likeCount = 0,
+            userKey = null
+            )
+    }
+
+    data class Section(
+        val id: String = ObjectId.get().toString(),
+        val title: String,
+        var questions: MutableList<QuestionSnapshot> = mutableListOf()
+    )
+
+    data class QuestionSnapshot(
+        val id: String = ObjectId().toString(),
+        val question: String,
+        val questionType: Question.QuestionType,
+        val possibleAnswers: MutableList<Question.PossibleAnswer> = mutableListOf()
     )
 
     enum class ReleaseResult {

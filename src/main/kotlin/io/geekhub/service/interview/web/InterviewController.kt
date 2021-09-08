@@ -113,6 +113,18 @@ class InterviewController(val interviewService: InterviewService,
         }
     }
 
+    @PostMapping("/{id}/copy")
+    fun copyInterview(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        @PathVariable id: String
+    ): InterviewResponse {
+
+        interviewService.getInterview(id).let {
+            return interviewService.copyInterview(it, clientUser).toDTO(clientUser)
+        }
+    }
+
+
     @PostMapping("/{id}/like")
     fun likeInterview(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
                       @PathVariable id: String): InterviewResponse {
@@ -130,18 +142,6 @@ class InterviewController(val interviewService: InterviewService,
         interviewService.getInterview(id).let {
             likeService.unlike(clientUser, it)
             return interviewService.getInterview(id).toDTO(clientUser)
-        }
-    }
-
-    @Deprecated("To be removed once frontend doesn't use it anymore.")
-    @PostMapping("/{id}/publish")
-    fun publishInterview(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                         @PathVariable id: String): PublishedInterviewResponse {
-
-        objectOwnershipService.checkObjectOwnership(clientUser) { interviewService.getInterview(id) }.let {
-            interviewService.publishInterview(id).let {
-                return it.toDTO(clientUser)
-            }
         }
     }
 
