@@ -7,7 +7,6 @@ import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.model.Visibility
-import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -25,8 +24,7 @@ import javax.transaction.Transactional
 @Service
 @Transactional
 class QuestionServiceImpl(val mongoTemplate: MongoTemplate,
-                          val questionRepository: QuestionRepository,
-                          val specializationService: SpecializationService) : QuestionService {
+                          val questionRepository: QuestionRepository) : QuestionService {
     companion object {
         val logger: Logger = LoggerFactory.getLogger(QuestionServiceImpl::class.java)
     }

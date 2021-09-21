@@ -11,7 +11,6 @@ import io.geekhub.service.shared.extensions.toDTO
 import io.geekhub.service.shared.extensions.toEntity
 import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_USER_KEY
-import io.geekhub.service.specialization.service.SpecializationService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -22,7 +21,6 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/questions")
 class QuestionController(val questionService: QuestionService,
-                         val specializationService: SpecializationService,
                          val likeService: LikeService) {
 
     companion object {

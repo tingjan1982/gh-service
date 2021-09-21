@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
+@Deprecated("Concept is no longer valid.")
 @RestController
 @RequestMapping("/specializations")
 class SpecializationController(val specializationService: SpecializationService) {

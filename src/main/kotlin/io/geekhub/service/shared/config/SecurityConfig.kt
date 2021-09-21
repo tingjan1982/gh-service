@@ -22,7 +22,10 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
 
-
+/**
+ * Spring + Auth0 integration guide:
+ * https://auth0.com/blog/spring-boot-authorization-tutorial-secure-an-api-java/
+ */
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(
     prePostEnabled = true,
@@ -53,14 +56,20 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         http.csrf().disable().cors()
 
         http.authorizeRequests()
-            .mvcMatchers(HttpMethod.POST, "/specializations/**").authenticated()
-            .mvcMatchers(HttpMethod.DELETE, "/specializations/**").authenticated()
+            .mvcMatchers(HttpMethod.GET, "/users/**").authenticated()
+            .mvcMatchers(HttpMethod.POST, "/users/**").not().hasAuthority("SCOPE_Guest")
+            .mvcMatchers(HttpMethod.DELETE, "/users/**").not().hasAuthority("SCOPE_Guest")
+            .mvcMatchers(HttpMethod.GET, "/organizations/**").authenticated()
+            .mvcMatchers(HttpMethod.POST, "/organizations/**").not().hasAuthority("SCOPE_Guest")
+            .mvcMatchers(HttpMethod.DELETE, "/organizations/**").not().hasAuthority("SCOPE_Guest")
+            .mvcMatchers(HttpMethod.GET, "/departments/**").authenticated()
+            .mvcMatchers(HttpMethod.POST, "/departments/**").not().hasAuthority("SCOPE_Guest")
+            .mvcMatchers(HttpMethod.DELETE, "/departments/**").not().hasAuthority("SCOPE_Guest")
             .mvcMatchers(HttpMethod.POST, "/questions/**").authenticated()
             .mvcMatchers(HttpMethod.DELETE, "/questions/**").authenticated()
             .mvcMatchers(HttpMethod.POST, "/interviews/**").authenticated()
             .mvcMatchers(HttpMethod.DELETE, "/interviews/**").authenticated()
             .mvcMatchers(HttpMethod.POST, "/interviewSessions/**").authenticated()
-            .mvcMatchers(HttpMethod.POST, "/organizations/**").authenticated()
             .mvcMatchers("/**").permitAll()
             .and()
             .oauth2ResourceServer().jwt {
@@ -69,12 +78,19 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     }
 
+    /**
+     * Introspect and extract permissions and roles from JWT token claims
+     * into a list of GrantedAuthorities for authorization later.
+     */
     fun jwtAuthenticationConverter(): JwtAuthenticationConverter {
-        val grantedAuthoritiesConverter = JwtGrantedAuthoritiesConverter()
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("permissions")
+        val permissionsConverter = JwtGrantedAuthoritiesConverter()
+        permissionsConverter.setAuthoritiesClaimName("permissions")
+
+        val rolesConverter = JwtGrantedAuthoritiesConverter()
+        rolesConverter.setAuthoritiesClaimName("https://api.geekhub.tw/roles")
 
         val jwtAuthenticationConverter = JwtAuthenticationConverter()
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter)
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(CompositeGrantedAuthoritiesConverter(listOf(permissionsConverter, rolesConverter)))
 
         return jwtAuthenticationConverter
     }

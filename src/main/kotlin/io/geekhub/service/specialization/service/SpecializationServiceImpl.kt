@@ -1,16 +1,12 @@
 package io.geekhub.service.specialization.service
 
-import io.geekhub.service.interview.repository.InterviewRepository
-import io.geekhub.service.questions.repository.QuestionRepository
 import io.geekhub.service.shared.exception.BusinessObjectNotFoundException
 import io.geekhub.service.specialization.repository.Specialization
 import io.geekhub.service.specialization.repository.SpecializationRepository
 import org.springframework.stereotype.Service
 
 @Service
-class SpecializationServiceImpl(val repository: SpecializationRepository,
-                                val interviewRepository: InterviewRepository,
-                                val questionRepository: QuestionRepository) : SpecializationService {
+class SpecializationServiceImpl(val repository: SpecializationRepository) : SpecializationService {
 
     override fun saveSpecialization(specialization: Specialization): Specialization {
         return repository.save(specialization)
