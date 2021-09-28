@@ -233,7 +233,7 @@ class InterviewSessionServiceImpl(
 
             sec.answerAttempts.forEach { (qid, ans) ->
                 correctAnswers[qid]?.let { correctAnswerIds ->
-                    ans.correct = !ans.answerIds.isNullOrEmpty() && correctAnswerIds.containsAll(ans.answerIds.orEmpty())
+                    ans.correct = ans.answerIds.orEmpty().containsAll(correctAnswerIds)
                 }
             }
 

@@ -91,7 +91,7 @@ data class Interview(
 
     data class QuestionSnapshot(
         val id: String = ObjectId().toString(),
-        val question: String,
+        var question: String,
         val questionType: Question.QuestionType,
         val possibleAnswers: MutableList<Question.PossibleAnswer> = mutableListOf()
     )

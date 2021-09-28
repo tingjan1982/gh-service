@@ -15,6 +15,8 @@ import io.geekhub.service.shared.exception.OwnershipException
 import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.model.Visibility
 import org.bson.types.ObjectId
+import org.jsoup.Jsoup
+import org.jsoup.safety.Safelist
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -94,6 +96,23 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
         if (containsInvalidQuestions) {
             throw BusinessException("Question needs to have at least two answers and one correct answer")
         }
+
+        // sanitize
+        interview.description?.let {
+            interview.description = it.sanitize()
+        }
+
+        interview.sections.flatMap { it.questions }
+            .forEach {
+                it.question = it.question.sanitize()
+                it.possibleAnswers.forEach { ans ->
+                    ans.answer = ans.answer.sanitize()
+                }
+            }
+    }
+
+    fun String.sanitize(): String {
+        return Jsoup.clean(this, Safelist.basic())
     }
 
     override fun saveInterviewDirectly(interview: Interview): Interview {
@@ -101,6 +120,10 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
     }
 
     override fun copyInterview(interview: Interview, clientUser: ClientUser): Interview {
+
+        if (interview.clientUser.id != clientUser.id) {
+            throw OwnershipException.notOwner()
+        }
 
         interview.copy(clientUser).let {
             return this.saveInterview(it)

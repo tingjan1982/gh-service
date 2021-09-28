@@ -7,7 +7,6 @@ import io.geekhub.service.account.repository.ClientUserRepository
 import io.geekhub.service.account.service.ClientAccountService
 import io.geekhub.service.account.service.ClientUserService
 import io.geekhub.service.shared.extensions.DummyObject
-import io.geekhub.service.specialization.service.SpecializationService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import javax.annotation.PreDestroy
@@ -16,7 +15,6 @@ import javax.annotation.PreDestroy
 class TestConfig(
     val clientAccountService: ClientAccountService,
     val clientUserService: ClientUserService,
-    val specializationService: SpecializationService,
     val clientAccountRepository: ClientAccountRepository,
     val clientUserRepository: ClientUserRepository
 ) {

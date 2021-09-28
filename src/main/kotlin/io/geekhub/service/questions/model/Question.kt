@@ -56,7 +56,7 @@ data class Question(
 
     data class PossibleAnswer(
             val answerId: String = ObjectId.get().toString(),
-            val answer: String,
+            var answer: String,
             val correctAnswer: Boolean
     )
 

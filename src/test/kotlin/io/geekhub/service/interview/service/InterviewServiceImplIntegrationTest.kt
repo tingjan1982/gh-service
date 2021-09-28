@@ -4,10 +4,13 @@ import assertk.all
 import assertk.assertThat
 import assertk.assertions.*
 import io.geekhub.service.account.repository.ClientUser
+import io.geekhub.service.account.service.ClientUserService
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.questions.model.Question
 import io.geekhub.service.shared.annotation.IntegrationTest
 import io.geekhub.service.shared.exception.BusinessException
+import io.geekhub.service.shared.exception.OwnershipException
+import io.geekhub.service.shared.extensions.DummyObject
 import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.model.Visibility
 import org.junit.jupiter.api.Test
@@ -24,6 +27,9 @@ internal class InterviewServiceImplIntegrationTest {
     private lateinit var interviewSessionService: InterviewSessionService
 
     @Autowired
+    private lateinit var clientUserService: ClientUserService
+
+    @Autowired
     private lateinit var clientUser: ClientUser
 
     @Test
@@ -32,6 +38,7 @@ internal class InterviewServiceImplIntegrationTest {
 
         val interview = Interview(
             title = "sample interview",
+            description = "<img src=\\\"nonexistent.png\\\" onerror=\\\"alert(localStorage);\\\" />",
             jobTitle = "Engineer",
             clientUser = clientUser,
             visibility = Visibility.PUBLIC,
@@ -41,9 +48,9 @@ internal class InterviewServiceImplIntegrationTest {
                 questions.add(
                     Interview.QuestionSnapshot(
                         "qid",
-                        "dummy question",
+                        "<script>dummy question</script>",
                         Question.QuestionType.MULTI_CHOICE,
-                        mutableListOf(Question.PossibleAnswer(answer = "dummy answer", correctAnswer = true))
+                        mutableListOf(Question.PossibleAnswer(answer = "<script>dummy answer</script>", correctAnswer = true))
                     )
                 )
             }.let { sec ->
@@ -61,9 +68,14 @@ internal class InterviewServiceImplIntegrationTest {
         }.let {
             assertThat(it.id).isNotNull()
             assertThat(it.latestPublishedInterviewId).isNotNull()
+            assertThat(it.description).isNullOrEmpty()
             assertThat(it.sections).all {
                 hasSize(1)
                 index(0).prop(Interview.Section::questions).hasSize(1)
+                index(0).prop(Interview.Section::questions).index(0).all {
+                    prop(Interview.QuestionSnapshot::question).isEmpty()
+                    prop(Interview.QuestionSnapshot::possibleAnswers).index(0).prop(Question.PossibleAnswer::answer).isEmpty()
+                }
             }
 
             it
@@ -107,5 +119,16 @@ internal class InterviewServiceImplIntegrationTest {
             assertThat(copy.likeCount).isZero()
             assertThat(copy.userKey).isNull()
         }
+
+        val anotherUser = DummyObject.dummyClientUser(clientUser.clientAccount).apply {
+            this.name = "Another User"
+        }.let {
+            clientUserService.saveClientUser(it)
+        }
+
+        assertThat {
+            interviewService.copyInterview(interview, anotherUser)
+        }.isFailure().isInstanceOf(OwnershipException::class)
+
     }
 }

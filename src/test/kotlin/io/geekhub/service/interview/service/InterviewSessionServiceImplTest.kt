@@ -50,7 +50,8 @@ internal class InterviewSessionServiceImplTest {
                         id = "qid-1",
                         question = "question 1",
                         questionType = Question.QuestionType.MULTI_CHOICE,
-                        possibleAnswers = mutableListOf(Question.PossibleAnswer("answer-1", "answer", true))
+                        possibleAnswers = mutableListOf(Question.PossibleAnswer("answer-1", "answer", true),
+                            Question.PossibleAnswer("answer-2", "answer", true))
                     )
                 )
 
@@ -75,7 +76,8 @@ internal class InterviewSessionServiceImplTest {
                         id = "qid-4",
                         question = "question 4",
                         questionType = Question.QuestionType.MULTI_CHOICE,
-                        possibleAnswers = mutableListOf(Question.PossibleAnswer("answer-4", "answer", true))
+                        possibleAnswers = mutableListOf(Question.PossibleAnswer("answer-4", "answer", true),
+                            Question.PossibleAnswer("answer-4", "answer", false))
                     )
                 )
 
@@ -117,7 +119,7 @@ internal class InterviewSessionServiceImplTest {
         }.let {
             interviewSessionService.addAnswerAttempt(
                 it,
-                InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = "qid-1", answerIds = listOf("answer-1"))
+                InterviewSession.QuestionAnswerAttempt(sectionId = sectionId, questionSnapshotId = "qid-1", answerIds = listOf("answer-1", "answer-2"))
             ).run {
                 this.answerAttemptSections.getValue(sectionId).run {
                     assertThat(this.answerAttempts).hasSize(1)
