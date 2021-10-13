@@ -126,6 +126,8 @@ class ClientUserController(val clientUserService: ClientUserService,
 
     private fun renderUserAvatar(clientUser: ClientUser, response: HttpServletResponse) {
 
+        response.contentType = "image/jpeg"
+
         clientUser.avatarBinary?.let {
             FileCopyUtils.copy(it.binary.data, response.outputStream);
         } ?: run {
