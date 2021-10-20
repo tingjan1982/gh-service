@@ -233,7 +233,9 @@ class InterviewSessionServiceImpl(
 
             sec.answerAttempts.forEach { (qid, ans) ->
                 correctAnswers[qid]?.let { correctAnswerIds ->
-                    ans.correct = ans.answerIds.orEmpty().containsAll(correctAnswerIds)
+                    ans.answerIds.orEmpty().let {
+                        ans.correct = it.containsAll(correctAnswerIds) && it.size == correctAnswerIds.size
+                    }
                 }
             }
 

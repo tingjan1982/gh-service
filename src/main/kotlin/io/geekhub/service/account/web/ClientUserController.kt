@@ -22,6 +22,7 @@ import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.web.filter.ClientAccountFilter.Companion.CLIENT_USER_KEY
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.util.FileCopyUtils
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -126,10 +127,10 @@ class ClientUserController(val clientUserService: ClientUserService,
 
     private fun renderUserAvatar(clientUser: ClientUser, response: HttpServletResponse) {
 
-        response.contentType = "image/jpeg"
+        response.contentType = MediaType.IMAGE_JPEG_VALUE
 
         clientUser.avatarBinary?.let {
-            FileCopyUtils.copy(it.binary.data, response.outputStream);
+            FileCopyUtils.copy(it.binary.data, response.outputStream)
         } ?: run {
             response.status = 204
         }
