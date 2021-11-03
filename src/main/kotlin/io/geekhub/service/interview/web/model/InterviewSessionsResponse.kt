@@ -9,21 +9,25 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.math.BigDecimal
 import java.util.*
 
-data class InterviewSessionsResponse(@JsonIgnore val page: Page<LightInterviewSessionResponse>,
-                                     @JsonIgnore val navigationLinkBuilder: UriComponentsBuilder) : PageableResponse<InterviewSessionsResponse.LightInterviewSessionResponse>(page, navigationLinkBuilder) {
+data class InterviewSessionsResponse(
+    @JsonIgnore val page: Page<LightInterviewSessionResponse>,
+    @JsonIgnore val navigationLinkBuilder: UriComponentsBuilder
+) : PageableResponse<InterviewSessionsResponse.LightInterviewSessionResponse>(page, navigationLinkBuilder) {
 
     data class LightInterviewSessionResponse(
-            val id: String,
-            val interview: InterviewsResponse.LightInterviewResponse,
-            val userEmail: String,
-            val name: String?,
-            val candidateUser: LightClientUserResponse?,
-            val interviewMode: InterviewSession.InterviewMode,
-            val duration: Int,
-            val status: InterviewSession.Status,
-            val interviewSentDate: Date?,
-            val interviewStartDate: Date?,
-            val interviewEndDate: Date?,
-            val totalScore: BigDecimal)
+        val id: String,
+        val interview: InterviewsResponse.LightInterviewResponse,
+        val userEmail: String,
+        val name: String?,
+        val candidateUser: LightClientUserResponse?,
+        val interviewMode: InterviewSession.InterviewMode,
+        val duration: Int,
+        val status: InterviewSession.Status,
+        val interviewSentDate: Date?,
+        val interviewStartDate: Date?,
+        val interviewEndDate: Date?,
+        val totalScore: BigDecimal,
+        val answerAttemptSections: Map<String, InterviewSession.AnswerAttemptSection>
+    )
 
 }

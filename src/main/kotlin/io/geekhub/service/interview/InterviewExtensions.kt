@@ -100,7 +100,8 @@ fun InterviewSession.toLightDTO() = InterviewSessionsResponse.LightInterviewSess
     this.interviewSentDate,
     this.interviewStartDate,
     this.interviewEndDate,
-    this.totalScore
+    this.totalScore,
+    this.answerAttemptSections
 )
 
 fun AnswerAttemptRequest.toEntity() = InterviewSession.QuestionAnswerAttempt(
