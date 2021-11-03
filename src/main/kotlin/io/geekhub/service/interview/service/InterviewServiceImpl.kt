@@ -207,7 +207,11 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
             if (searchCriteria.template) {
                 clientUserService.getClientUserByEmail("template@geekhub.tw")?.let { templateUser ->
                     it.addCriteria(Criteria.where("clientUser").`is`(templateUser))
-                } ?: it.addCriteria(Criteria.where("clientUser").`is`(null))
+                } ?: it.addCriteria(Criteria.where("clientUser").`is`(null)) // this is to ensure only template interviews are returned.
+            } else {
+                clientUserService.getClientUserByEmail("template@geekhub.tw")?.let { templateUser ->
+                    it.addCriteria(Criteria.where("clientUser").ne(templateUser))
+                }
             }
 
             searchCriteria.keyword?.let { keyword ->
