@@ -202,15 +202,15 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
             if (!searchCriteria.filterByMine && !searchCriteria.filterByClientAccount) {
                 it.addCriteria(Criteria.where("visibility").`in`(Visibility.PUBLIC, null))
                 //it.addCriteria(Criteria.where("latestPublishedInterviewId").ne(null))
-            }
 
-            if (searchCriteria.template) {
-                clientUserService.getClientUserByEmail("template@geekhub.tw")?.let { templateUser ->
-                    it.addCriteria(Criteria.where("clientUser").`is`(templateUser))
-                } ?: it.addCriteria(Criteria.where("clientUser").`is`(null)) // this is to ensure only template interviews are returned.
-            } else {
-                clientUserService.getClientUserByEmail("template@geekhub.tw")?.let { templateUser ->
-                    it.addCriteria(Criteria.where("clientUser").ne(templateUser))
+                if (searchCriteria.template) {
+                    clientUserService.getClientUserByEmail("template@geekhub.tw")?.let { templateUser ->
+                        it.addCriteria(Criteria.where("clientUser").`is`(templateUser))
+                    } ?: it.addCriteria(Criteria.where("clientUser").`is`(null)) // this is to ensure only template interviews are returned.
+                } else {
+                    clientUserService.getClientUserByEmail("template@geekhub.tw")?.let { templateUser ->
+                        it.addCriteria(Criteria.where("clientUser").ne(templateUser))
+                    }
                 }
             }
 
