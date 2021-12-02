@@ -56,7 +56,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         http.csrf().disable().cors()
 
         http.authorizeRequests()
-            .mvcMatchers(HttpMethod.GET, "/users/**/avatar").permitAll()
+            .mvcMatchers(HttpMethod.GET, "/users/**/avatar", "/users/*").permitAll()
             .mvcMatchers(HttpMethod.GET, "/users/**").authenticated()
             .mvcMatchers(HttpMethod.POST, "/users/**").not().hasAuthority("SCOPE_Guest")
             .mvcMatchers(HttpMethod.DELETE, "/users/**").not().hasAuthority("SCOPE_Guest")
