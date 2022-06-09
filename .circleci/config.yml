@@ -46,9 +46,6 @@ jobs:
           version: 20.10.11
 
       - checkout
-      # required by persist_to_space step
-      - run: yum install -y tar
-      - run: yum install -y gzip
       # Download and cache dependencies
       - restore_cache:
           keys:
