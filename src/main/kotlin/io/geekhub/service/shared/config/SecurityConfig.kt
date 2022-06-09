@@ -19,11 +19,10 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator
 import org.springframework.security.oauth2.jwt.*
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
-import org.springframework.web.client.RestOperations
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
-import java.time.Duration
+import java.util.List
 
 /**
  * Spring + Auth0 integration guide:
@@ -135,10 +134,11 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
 
         val corsConfig = CorsConfiguration()
         corsConfig.allowCredentials = true
-        corsConfig.addAllowedOrigin("*")
         corsConfig.addAllowedHeader("*")
         corsConfig.addAllowedMethod("*")
         corsConfig.maxAge = 3600L
+        corsConfig.allowedOriginPatterns = listOf("*")
+
         source.registerCorsConfiguration("/**", corsConfig)
 
         val bean = FilterRegistrationBean(CorsFilter(source))
