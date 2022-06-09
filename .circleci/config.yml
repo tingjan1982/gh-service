@@ -18,7 +18,7 @@ workflows:
 #          context: "Docker"
       - deploy:
           requires:
-            - docker
+            - build
           context: "Docker"
 
 jobs:
