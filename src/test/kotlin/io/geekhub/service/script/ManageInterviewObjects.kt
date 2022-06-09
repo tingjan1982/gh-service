@@ -59,6 +59,32 @@ class ManageInterviewObjects {
 
     @Test
     @WithMockUser("script@geekhub.tw")
+    fun `Transfer interview to template user`() {
+
+        val templateUser = clientUserRepository.findByEmail("template@geekhub.tw")!!
+        println("Template user: $templateUser")
+        interviewRepository.findAllByClientUser(templateUser).forEach {
+            println(it.title)
+        }
+
+        clientUserRepository.findFirstByNickname("Stu")?.let { u ->
+            interviewRepository.findAllByClientUser(u).forEach {
+                val tested = it.lightInterviewSessions.isNotEmpty()
+                println("${it.title} has been tested: $tested")
+
+                if (!tested) {
+                    println("Transferring to template user")
+                    it.clientAccount = templateUser.clientAccount.id
+                    it.clientUser = templateUser
+
+                    interviewRepository.save(it)
+                }
+            }
+        }
+    }
+
+    @Test
+    @WithMockUser("script@geekhub.tw")
     fun `populate field in Interview`() {
 
         val count = AtomicInteger()

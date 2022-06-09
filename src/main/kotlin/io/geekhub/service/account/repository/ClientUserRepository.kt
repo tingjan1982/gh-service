@@ -13,4 +13,6 @@ interface ClientUserRepository : MongoRepository<ClientUser, String> {
     fun existsByDepartment(department: ClientDepartment): Boolean
 
     fun existsByClientAccountAndEmail(organization: ClientAccount, email: String): Boolean
+
+    fun findFirstByNickname(name: String): ClientUser?
 }

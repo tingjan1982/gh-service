@@ -3,6 +3,7 @@ package io.geekhub.service.shared.config
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.core.Ordered
@@ -18,9 +19,11 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator
 import org.springframework.security.oauth2.jwt.*
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
+import org.springframework.web.client.RestOperations
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
+import java.time.Duration
 
 /**
  * Spring + Auth0 integration guide:
@@ -97,8 +100,17 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     }
 
     @Bean
-    fun jwtDecoder(): JwtDecoder? {
-        val jwtDecoder: NimbusJwtDecoder = JwtDecoders.fromOidcIssuerLocation(issuer) as NimbusJwtDecoder
+    fun jwtDecoder(builder: RestTemplateBuilder): JwtDecoder? {
+
+//        val rest: RestOperations = builder
+//            .setConnectTimeout(Duration.ofSeconds(2))
+//            .setReadTimeout(Duration.ofSeconds(2))
+//            .build()
+//        val jwtDecoder = NimbusJwtDecoder.withJwkSetUri(issuer).restOperations(rest).build()
+
+        val jwtDecoder: NimbusJwtDecoder = JwtDecoders
+            .fromOidcIssuerLocation(issuer) as NimbusJwtDecoder
+
         val audienceValidator: OAuth2TokenValidator<Jwt> = AudienceValidator(audience)
         val withIssuer: OAuth2TokenValidator<Jwt> = JwtValidators.createDefaultWithIssuer(issuer)
         val withAudience: OAuth2TokenValidator<Jwt> = DelegatingOAuth2TokenValidator(withIssuer, audienceValidator)

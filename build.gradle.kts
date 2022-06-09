@@ -9,17 +9,17 @@
 
 plugins {
     // kotlin core
-    kotlin("jvm") version "1.4.32"
-    kotlin("kapt") version "1.4.32"
+    kotlin("jvm") version "1.6.21"
+    kotlin("kapt") version "1.6.21"
 
     // spring support
-    id("org.springframework.boot") version "2.2.5.RELEASE"
-    kotlin("plugin.spring") version "1.4.32"
-    kotlin("plugin.noarg") version "1.4.32"
+    id("org.springframework.boot") version "2.5.14"
+    kotlin("plugin.spring") version "1.6.21"
+    kotlin("plugin.noarg") version "1.6.21"
 //    kotlin("plugin.allopen") version "1.4.32" // plugin.spring offers the same functionality - https://kotlinlang.org/docs/all-open-plugin.html#spring-support
 
     // build info
-    id("com.gorylenko.gradle-git-properties") version "2.2.2"
+    id("com.gorylenko.gradle-git-properties") version "2.4.1"
 
 }
 
@@ -32,7 +32,7 @@ version = "1.0.0"
  */
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions.freeCompilerArgs = listOf("-Xjsr305=strict")
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "17"
 }
 
 sourceSets {
@@ -56,6 +56,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-mail")
@@ -65,23 +66,23 @@ dependencies {
     // security and oauth2
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-    implementation("org.springframework.security.oauth:spring-security-oauth2:2.2.5.RELEASE")
+    implementation("org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE")
 
     implementation("org.apache.httpcomponents:httpclient")
     
     // swagger 2
-    implementation("io.springfox:springfox-swagger2:2.7.0")
-    implementation("io.springfox:springfox-swagger-ui:2.7.0")
-    implementation("org.jsoup:jsoup:1.14.2")
+    implementation("io.springfox:springfox-swagger2:3.0.0")
+    implementation("io.springfox:springfox-swagger-ui:3.0.0")
+    implementation("org.jsoup:jsoup:1.14.3")
 
     runtimeOnly("org.hsqldb:hsqldb")
-    implementation("net.sf.ehcache:ehcache:2.10.5")
+    implementation("net.sf.ehcache:ehcache:2.10.9.2")
 
 
     // test dependency
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit5"))
-    testImplementation("com.willowtreeapps.assertk:assertk:0.22")
+    testImplementation("com.willowtreeapps.assertk:assertk:0.25")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
@@ -111,6 +112,10 @@ tasks {
 
         from("${buildDir}/resources/main/git.properties", "${buildDir}/resources/main/META-INF")
         into("out/production/resources/")
+    }
+
+    "processResources"(Copy::class) {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
 
     "test"(Test::class) {
