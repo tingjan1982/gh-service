@@ -11,6 +11,6 @@ COPY ${JAR_FILE} /app.jar
 COPY ${SERVICE_ACCOUNT_JSON} /service_account.json
 ENV PROFILE default
 ENV GOOGLE_APPLICATION_CREDENTIALS /service_account.json
-ENV JVM_ARGS='-Dadd-exports=java.base/sun.nio.ch=ALL-UNNAMED -Dadd-opens=java.base/java.lang=ALL-UNNAMED -Dadd-opens=java.base/java.lang.reflect=ALL-UNNAMED -Dadd-opens=java.base/java.io=ALL-UNNAMED -Dadd-opens=java.base/java.util=ALL-UNNAMED -Dadd-exports=jdk.unsupported/sun.misc=ALL-UNNAMED'
+ENV JVM_ARGS='--add-exports=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED'
 
 ENTRYPOINT ["sh", "-c", "java $JVM_ARGS -Djava.security.egd=file:/dev/./urandom -Djdk.tls.client.protocols='TLSv1,TLSv1.1,TLSv1.2' -Dspring.profiles.active=$PROFILE -jar /app.jar"]
