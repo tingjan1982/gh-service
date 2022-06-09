@@ -11,10 +11,6 @@ COPY ${JAR_FILE} /app.jar
 COPY ${SERVICE_ACCOUNT_JSON} /service_account.json
 ENV PROFILE default
 ENV GOOGLE_APPLICATION_CREDENTIALS /service_account.json
+ENV JVM_ARGS=-Dadd-exports=java.base/sun.nio.ch=ALL-UNNAMED -Dadd-opens=java.base/java.lang=ALL-UNNAMED -Dadd-opens=java.base/java.lang.reflect=ALL-UNNAMED -Dadd-opens=java.base/java.io=ALL-UNNAMED -Dadd-opens=java.base/java.util=ALL-UNNAMED -Dadd-exports=jdk.unsupported/sun.misc=ALL-UNNAMED
 
-##  Google Cloud Debugger Agent: https://cloud.google.com/debugger/docs/setup/java
-#RUN  mkdir /opt/cdbg && \
-#     wget -qO- https://storage.googleapis.com/cloud-debugger/compute-java/debian-wheezy/cdbg_java_agent_gce.tar.gz | \
-#     tar xvz -C /opt/cdbg
-
-ENTRYPOINT ["sh", "-c", "java -Djava.security.egd=file:/dev/./urandom -Djdk.tls.client.protocols='TLSv1,TLSv1.1,TLSv1.2' -Dspring.profiles.active=$PROFILE -jar /app.jar"]
+ENTRYPOINT ["sh", "-c", "java ${JVM_ARGS} -Djava.security.egd=file:/dev/./urandom -Djdk.tls.client.protocols='TLSv1,TLSv1.1,TLSv1.2' -Dspring.profiles.active=$PROFILE -jar /app.jar"]

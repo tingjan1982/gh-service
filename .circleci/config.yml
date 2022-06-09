@@ -22,7 +22,7 @@ workflows:
 jobs:
   build:
     docker:
-      - image: amazoncorretto:11
+      - image: cimg/openjdk:17.0
         auth:
           username: $DOCKER_USERNAME
           password: $DOCKER_PASSWORD
@@ -40,6 +40,9 @@ jobs:
       TERM: dumb
 
     steps:
+      - setup_remote_docker:
+          version: 20.10.11
+
       - checkout
       # required by persist_to_space step
       - run: yum install -y tar
@@ -60,16 +63,6 @@ jobs:
 
       - run: ./gradlew clean build -x test
       - run: mkdir -p source/libs ; cp build/libs/*.jar source/libs ; cp Dockerfile source/libs
-      - persist_to_workspace:
-          root: source
-          paths:
-            - libs
-
-  docker:
-    machine: true
-    steps:
-      - attach_workspace:
-          at: source
       - run:
           name: build docker image
           command: |
@@ -83,6 +76,29 @@ jobs:
           name: push docker image
           command: |
             docker push joelin/gh-service:latest
+#      - persist_to_workspace:
+#          root: source
+#          paths:
+#            - libs
+
+#  docker:
+#    machine: true
+#    steps:
+#      - attach_workspace:
+#          at: source
+#      - run:
+#          name: build docker image
+#          command: |
+#            echo $GOOGLE_SERVICE_ACCOUNT_JSON | base64 -d > source/libs/service_account.json
+#            docker build -t joelin/gh-service:latest --build-arg JAR_FILE=gh-service-1.0.0.jar --build-arg SERVICE_ACCOUNT_JSON=service_account.json source/libs
+#      - run:
+#          name: docker login
+#          command: |
+#            echo $DOCKER_PASSWORD | docker login -u "$DOCKER_USERNAME" --password-stdin
+#      - run:
+#          name: push docker image
+#          command: |
+#            docker push joelin/gh-service:latest
   deploy:
     docker:
       - image: google/cloud-sdk:249.0.0-alpine
