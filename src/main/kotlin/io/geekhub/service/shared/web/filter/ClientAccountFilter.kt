@@ -65,7 +65,7 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService, val cl
                     "zh"
                 }
 
-                ClientUser(id, it.email, it.name, it.nickname, it.picture, locale, it.getUserType(), ClientUser.AccountPrivilege.OWNER, account).let { user ->
+                ClientUser(id, it.email, it.name, it.nickname, locale, it.picture, it.getUserType(), ClientUser.AccountPrivilege.OWNER, account).let { user ->
                     return clientUserService.saveClientUser(user)
                 }
             }
