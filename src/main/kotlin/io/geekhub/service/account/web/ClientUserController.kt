@@ -81,6 +81,7 @@ class ClientUserController(val clientUserService: ClientUserService,
                 clientUser.apply {
                     this.name = updateClientUserRequest.name
                     this.nickname = updateClientUserRequest.nickname
+                    this.locale = updateClientUserRequest.locale
 
                     return clientUserService.saveClientUser(this).toDTO(updatedUser.userMetadata)
                 }

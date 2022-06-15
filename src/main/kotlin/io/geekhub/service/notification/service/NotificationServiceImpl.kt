@@ -27,9 +27,10 @@ class NotificationServiceImpl(@Value("\${spring.mail.password}") val apiKey: Str
     override fun sendInterviewInvitation(sender: ClientUser, interviewSession: InterviewSession) {
 
         val emailRequest = SendGridRequest(
-                SendGridRequest.EmailAddress("notification-noreply@geekhub.tw"),
-                listOf(interviewSession.toInterviewInvitationPersonalization(sender)),
-                "d-60c9ba1a412a4281aa633136408f7185")
+            SendGridRequest.EmailAddress("notification-noreply@geekhub.tw"),
+            listOf(interviewSession.toInterviewInvitationPersonalization(sender)),
+            "d-60c9ba1a412a4281aa633136408f7185"
+        )
 
         sendNotification(emailRequest)
     }
@@ -37,9 +38,10 @@ class NotificationServiceImpl(@Value("\${spring.mail.password}") val apiKey: Str
     override fun sendInterviewResult(interviewSession: InterviewSession) {
 
         val emailRequest = SendGridRequest(
-                SendGridRequest.EmailAddress("notification-noreply@geekhub.tw"),
-                listOf(interviewSession.toInterviewResultPersonalization()),
-                "d-bbd50935af584855b0c45f4057f185df")
+            SendGridRequest.EmailAddress("notification-noreply@geekhub.tw"),
+            listOf(interviewSession.toInterviewResultPersonalization()),
+            "d-bbd50935af584855b0c45f4057f185df"
+        )
 
         sendNotification(emailRequest)
     }
@@ -49,11 +51,12 @@ class NotificationServiceImpl(@Value("\${spring.mail.password}") val apiKey: Str
         val emailRequest = SendGridRequest(
             SendGridRequest.EmailAddress("notification-noreply@geekhub.tw"),
             listOf(clientAccount.toOrganizationInvitationPersonalization(invitation)),
-            "d-dd747e161f77482c8bf94ba3479dfd95")
+            "d-dd747e161f77482c8bf94ba3479dfd95"
+        )
 
         sendNotification(emailRequest)
     }
-    
+
     private fun sendNotification(emailRequest: SendGridRequest) {
 
         val headers = HttpHeaders().apply {
@@ -63,18 +66,23 @@ class NotificationServiceImpl(@Value("\${spring.mail.password}") val apiKey: Str
 
         val requestEntity = HttpEntity(emailRequest, headers)
 
-        restTemplate.exchange("https://api.sendgrid.com/v3/mail/send", HttpMethod.POST, requestEntity, String::class.java).run {
+        restTemplate.exchange(
+            "https://api.sendgrid.com/v3/mail/send",
+            HttpMethod.POST,
+            requestEntity,
+            String::class.java
+        ).run {
             LOGGER.debug(this.body)
         }
-        
+
     }
 
     data class SendGridRequest(
-            val from: EmailAddress,
-            val personalizations: List<Personalization>,
-            val template_id: String?,
-            val subject: String? = null,
-            val content: List<EmailContent>? = null
+        val from: EmailAddress,
+        val personalizations: List<Personalization>,
+        val template_id: String?,
+        val subject: String? = null,
+        val content: List<EmailContent>? = null
     ) {
 
         data class Personalization(val to: List<EmailAddress>, val dynamic_template_data: Map<String, String>)
@@ -85,30 +93,34 @@ class NotificationServiceImpl(@Value("\${spring.mail.password}") val apiKey: Str
     }
 }
 
-fun InterviewSession.toInterviewInvitationPersonalization(sender: ClientUser) = NotificationServiceImpl.SendGridRequest.Personalization(
+fun InterviewSession.toInterviewInvitationPersonalization(sender: ClientUser): NotificationServiceImpl.SendGridRequest.Personalization {
+
+    return NotificationServiceImpl.SendGridRequest.Personalization(
         to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(this.userEmail)),
         dynamic_template_data = mapOf(
-                Pair("candidateName", this.name ?: this.userEmail),
-                Pair("senderName", sender.name),
-                Pair("clientAccountName", this.clientUser.clientAccount.clientName),
-                Pair("interviewSessionLink", "https://geekhub.tw/interviews/${this.id}/test")
+            Pair("candidateName", this.name ?: this.userEmail),
+            Pair("senderName", sender.name),
+            Pair("clientAccountName", this.clientUser.clientAccount.clientName),
+            Pair("interviewSessionLink", "https://geekhub.tw/interviews/${this.id}/test")
         )
-)
+    )
+}
 
 fun InterviewSession.toInterviewResultPersonalization() = NotificationServiceImpl.SendGridRequest.Personalization(
-        to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(this.clientUser.email)),
-        dynamic_template_data = mapOf(
-                Pair("candidateName", this.name ?: this.userEmail),
-                Pair("clientAccountName", this.clientUser.clientAccount.clientName),             
-                Pair("interviewSessionLink", "https://geekhub.tw/manageInterviews/${this.currentInterview.id}/${this.id}")
-        )
-)
-
-fun ClientAccount.toOrganizationInvitationPersonalization(invitation: ClientAccount.UserInvitation) = NotificationServiceImpl.SendGridRequest.Personalization(
-    to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(invitation.email)),
+    to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(this.clientUser.email)),
     dynamic_template_data = mapOf(
-        Pair("organization", invitation.inviterOrganization),
-        Pair("inviterName", invitation.inviterName),
-        Pair("invitationLink", "https://geekhub.tw/organization")
+        Pair("candidateName", this.name ?: this.userEmail),
+        Pair("clientAccountName", this.clientUser.clientAccount.clientName),
+        Pair("interviewSessionLink", "https://geekhub.tw/manageInterviews/${this.currentInterview.id}/${this.id}")
     )
 )
+
+fun ClientAccount.toOrganizationInvitationPersonalization(invitation: ClientAccount.UserInvitation) =
+    NotificationServiceImpl.SendGridRequest.Personalization(
+        to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(invitation.email)),
+        dynamic_template_data = mapOf(
+            Pair("organization", invitation.inviterOrganization),
+            Pair("inviterName", invitation.inviterName),
+            Pair("invitationLink", "https://geekhub.tw/organization")
+        )
+    )

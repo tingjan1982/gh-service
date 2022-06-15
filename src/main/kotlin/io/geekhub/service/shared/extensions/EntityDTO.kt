@@ -143,6 +143,14 @@ fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf(), invitations: List<Us
 
         val uriPrefix = MvcUriComponentsBuilder.fromController(ClientUserController::class.java).toUriString()
 
+        val locale = metadata?.get("locale")?.let {
+                if (it is List<*> && it.isNotEmpty()) {
+                        return@let it[0] as String
+                } else {
+                        return@let "zh"
+                }
+        } ?: "zh"
+
         return ClientUserResponse(
                 id = this.id.toString(),
                 email = this.email,
@@ -154,6 +162,7 @@ fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf(), invitations: List<Us
                 accountPrivilege = this.accountPrivilege,
                 organization = if (this.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) { this.clientAccount.toLightOrganization() } else { null },
                 department = this.department?.toDTO(),
+                locale = locale,
                 metadata = metadata,
                 invitations = invitations
         )

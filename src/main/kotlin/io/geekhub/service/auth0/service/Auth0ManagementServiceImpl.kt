@@ -238,6 +238,7 @@ fun UpdateClientUserRequest.toUpdateUserRequest() = Auth0ManagementServiceImpl.U
     //name = this.name,
     //nickname = this.nickname,
     userMetadata = mapOf(
+        "locale" to listOf(this.locale),
         "companyName" to (this.companyName ?: ""),
         "note" to (this.note ?: ""),
         "linkedIn" to (this.linkedIn ?: ""),

@@ -59,7 +59,13 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService, val cl
             ClientAccount(id, ClientAccount.AccountType.INDIVIDUAL, ClientAccount.PlanType.FREE, it.name).let { account ->
                 clientAccountService.saveClientAccount(account)
 
-                ClientUser(id, it.email, it.name, it.nickname, it.picture, it.getUserType(), ClientUser.AccountPrivilege.OWNER, account).let { user ->
+                val locale = if (it.locale?.isNotEmpty() == true) {
+                    it.locale[0]
+                } else {
+                    "zh"
+                }
+
+                ClientUser(id, it.email, it.name, it.nickname, it.picture, locale, it.getUserType(), ClientUser.AccountPrivilege.OWNER, account).let { user ->
                     return clientUserService.saveClientUser(user)
                 }
             }

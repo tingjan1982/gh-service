@@ -8,6 +8,7 @@ data class Auth0UserInfo(
         val name: String,
         val nickname: String,
         val email: String,
+        val locale: List<String>?,
         val picture: String
 ) {
 
