@@ -10,5 +10,5 @@ interface NotificationService {
 
     fun sendInterviewResult(interviewSession: InterviewSession)
 
-    fun sendOrganizationInvitation(invitation: ClientAccount.UserInvitation, clientAccount: ClientAccount)
+    fun sendOrganizationInvitation(invitation: ClientAccount.UserInvitation, invitingClientUser: ClientUser)
 }

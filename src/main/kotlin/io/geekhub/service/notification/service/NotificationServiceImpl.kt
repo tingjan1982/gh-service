@@ -46,11 +46,11 @@ class NotificationServiceImpl(@Value("\${spring.mail.password}") val apiKey: Str
         sendNotification(emailRequest)
     }
 
-    override fun sendOrganizationInvitation(invitation: ClientAccount.UserInvitation, clientAccount: ClientAccount) {
+    override fun sendOrganizationInvitation(invitation: ClientAccount.UserInvitation, invitingClientUser: ClientUser) {
 
         val emailRequest = SendGridRequest(
             SendGridRequest.EmailAddress("notification-noreply@geekhub.tw"),
-            listOf(clientAccount.toOrganizationInvitationPersonalization(invitation)),
+            listOf(invitingClientUser.toOrganizationInvitationPersonalization(invitation)),
             "d-dd747e161f77482c8bf94ba3479dfd95"
         )
 
@@ -95,13 +95,16 @@ class NotificationServiceImpl(@Value("\${spring.mail.password}") val apiKey: Str
 
 fun InterviewSession.toInterviewInvitationPersonalization(sender: ClientUser): NotificationServiceImpl.SendGridRequest.Personalization {
 
+
+
     return NotificationServiceImpl.SendGridRequest.Personalization(
         to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(this.userEmail)),
         dynamic_template_data = mapOf(
             Pair("candidateName", this.name ?: this.userEmail),
             Pair("senderName", sender.name),
             Pair("clientAccountName", this.clientUser.clientAccount.clientName),
-            Pair("interviewSessionLink", "https://geekhub.tw/interviews/${this.id}/test")
+            Pair("interviewSessionLink", "https://geekhub.tw/interviews/${this.id}/test"),
+            Pair("locale", sender.locale)
         )
     )
 }
@@ -111,16 +114,18 @@ fun InterviewSession.toInterviewResultPersonalization() = NotificationServiceImp
     dynamic_template_data = mapOf(
         Pair("candidateName", this.name ?: this.userEmail),
         Pair("clientAccountName", this.clientUser.clientAccount.clientName),
-        Pair("interviewSessionLink", "https://geekhub.tw/manageInterviews/${this.currentInterview.id}/${this.id}")
+        Pair("interviewSessionLink", "https://geekhub.tw/manageInterviews/${this.currentInterview.id}/${this.id}"),
+        Pair("locale", this.clientUser.locale)
     )
 )
 
-fun ClientAccount.toOrganizationInvitationPersonalization(invitation: ClientAccount.UserInvitation) =
+fun ClientUser.toOrganizationInvitationPersonalization(invitation: ClientAccount.UserInvitation) =
     NotificationServiceImpl.SendGridRequest.Personalization(
         to = listOf(NotificationServiceImpl.SendGridRequest.EmailAddress(invitation.email)),
         dynamic_template_data = mapOf(
             Pair("organization", invitation.inviterOrganization),
             Pair("inviterName", invitation.inviterName),
-            Pair("invitationLink", "https://geekhub.tw/organization")
+            Pair("invitationLink", "https://geekhub.tw/organization"),
+            Pair("locale", this.locale)
         )
     )

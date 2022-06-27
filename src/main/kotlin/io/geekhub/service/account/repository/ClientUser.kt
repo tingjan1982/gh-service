@@ -16,7 +16,7 @@ data class ClientUser(
     var email: String,
     var name: String,
     var nickname: String?,
-    var locale: String? = "zh",
+    var locale: String = "zh",
     var avatar: String? = null,
     val userType: UserType,
     var accountPrivilege: AccountPrivilege = AccountPrivilege.OWNER,

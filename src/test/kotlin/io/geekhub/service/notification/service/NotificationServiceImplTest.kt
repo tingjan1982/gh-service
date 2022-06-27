@@ -67,6 +67,6 @@ internal class NotificationServiceImplTest {
             "joelin@geekhub.tw"
         )
 
-        notificationService.sendOrganizationInvitation(invitation, clientAccount)
+        notificationService.sendOrganizationInvitation(invitation, clientUser)
     }
 }

@@ -42,6 +42,10 @@ class ClientUserServiceImpl(val clientUserRepository: ClientUserRepository, val 
 
     /**
      * todo: check that the passed in token contains the required scope: openid profile email
+     *
+     * Populate user metadata in id token in Auth0 rule:
+     * https://auth0.com/docs/manage-users/user-accounts/metadata
+     * https://community.auth0.com/t/how-to-get-user-metadata-and-app-metadata-in-id-token/20898
      */
     override fun getAuth0UserInfo(token: String): Auth0UserInfo {
 

@@ -119,7 +119,7 @@ class ClientAccountServiceImpl(
                 throw BusinessException("User has declined this invitation")
             }
 
-            notificationService.sendOrganizationInvitation(it, organizationAccount)
+            notificationService.sendOrganizationInvitation(it, inviter)
 
             return saveClientAccount(organizationAccount)
         }
