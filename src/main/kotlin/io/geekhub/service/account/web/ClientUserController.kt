@@ -9,6 +9,7 @@ import io.geekhub.service.account.web.model.ClientUserResponse
 import io.geekhub.service.account.web.model.UpdateClientUserRequest
 import io.geekhub.service.account.web.model.UpdateUserPasswordRequest
 import io.geekhub.service.auth0.service.Auth0ManagementService
+import io.geekhub.service.auth0.service.Auth0ManagementServiceImpl
 import io.geekhub.service.auth0.service.toUpdateUserRequest
 import io.geekhub.service.binarystorage.service.BinaryStorageService
 import io.geekhub.service.interview.model.Interview
@@ -32,20 +33,23 @@ import javax.validation.Valid
 
 @RestController
 @RequestMapping("/users")
-class ClientUserController(val clientUserService: ClientUserService,
-                           val clientAccountService: ClientAccountService,
-                           val clientDepartmentService: ClientDepartmentService,
-                           val interviewService: InterviewService,
-                           val likeService: LikeService,
-                           val auth0ManagementService: Auth0ManagementService,
-                           val binaryStorageService: BinaryStorageService) {
+class ClientUserController(
+    val clientUserService: ClientUserService,
+    val clientAccountService: ClientAccountService,
+    val clientDepartmentService: ClientDepartmentService,
+    val interviewService: InterviewService,
+    val likeService: LikeService,
+    val auth0ManagementService: Auth0ManagementService,
+    val binaryStorageService: BinaryStorageService
+) {
 
     @GetMapping("/me")
     fun getMyProfile(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser): ClientUserResponse {
 
         auth0ManagementService.getManagementToken().let { token ->
             auth0ManagementService.getUser(clientUser.id.toString(), token).let { auth0User ->
-                val invitations = clientAccountService.getInvitedCorporateAccounts(clientUser.email).map { it.toDTO() }.toList()
+                val invitations =
+                    clientAccountService.getInvitedCorporateAccounts(clientUser.email).map { it.toDTO() }.toList()
 
                 return clientUser.toDTO(auth0User.userMetadata, invitations)
             }
@@ -53,13 +57,16 @@ class ClientUserController(val clientUserService: ClientUserService,
     }
 
     @GetMapping("/{id:[\\w-|]+}")
-    fun getUserProfile(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                       @PathVariable id: String): ClientUserResponse {
+    fun getUserProfile(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        @PathVariable id: String
+    ): ClientUserResponse {
 
         clientUserService.getClientUser(id).let {
             auth0ManagementService.getManagementToken().let { token ->
                 auth0ManagementService.getUser(id, token).let { auth0User ->
-                    val invitations = clientAccountService.getInvitedCorporateAccounts(clientUser.email).map { it.toDTO() }.toList()
+                    val invitations =
+                        clientAccountService.getInvitedCorporateAccounts(clientUser.email).map { it.toDTO() }.toList()
 
                     return it.toDTO(auth0User.userMetadata, invitations)
                 }
@@ -68,8 +75,10 @@ class ClientUserController(val clientUserService: ClientUserService,
     }
 
     @PostMapping("/me")
-    fun updateUserProfile(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                          @Valid @RequestBody updateClientUserRequest: UpdateClientUserRequest): ClientUserResponse {
+    fun updateUserProfile(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        @Valid @RequestBody updateClientUserRequest: UpdateClientUserRequest
+    ): ClientUserResponse {
 
         auth0ManagementService.getManagementToken().let {
             updateClientUserRequest.toUpdateUserRequest().let { updateRequest ->
@@ -89,10 +98,30 @@ class ClientUserController(val clientUserService: ClientUserService,
         }
     }
 
+    @PatchMapping("/me")
+    fun patchUserProfile(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        @Valid @RequestBody attributes: Map<String, String>
+    ): ClientUserResponse {
+
+        auth0ManagementService.getManagementToken().let {
+            val updateUserRequest = Auth0ManagementServiceImpl.UpdateUserRequest(attributes)
+            val updatedUser = auth0ManagementService.updateUser(clientUser.id.toString(), updateUserRequest, it)
+
+            clientUser.apply {
+                this.locale = attributes["locale"] ?: ClientUser.DEFAULT_LOCALE
+
+                return clientUserService.saveClientUser(this).toDTO(updatedUser.userMetadata)
+            }
+        }
+    }
+
     @PostMapping("/{id:[\\w-|]+}/department")
-    fun assignUserToDepartment(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                               @PathVariable id: String,
-                               @Valid @RequestBody request: AssignDepartmentRequest): ClientUserResponse {
+    fun assignUserToDepartment(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        @PathVariable id: String,
+        @Valid @RequestBody request: AssignDepartmentRequest
+    ): ClientUserResponse {
 
         val user = clientUserService.getClientUser(id)
         clientDepartmentService.getDepartment(request.departmentId).let {
@@ -102,8 +131,10 @@ class ClientUserController(val clientUserService: ClientUserService,
     }
 
     @DeleteMapping("/{id:[\\w-|]+}/department")
-    fun removeUserFromDepartment(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                                 @PathVariable id: String): ClientUserResponse {
+    fun removeUserFromDepartment(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        @PathVariable id: String
+    ): ClientUserResponse {
 
         clientUserService.getClientUser(id).let {
             it.department = null
@@ -112,16 +143,20 @@ class ClientUserController(val clientUserService: ClientUserService,
     }
 
     @GetMapping("/me/avatar")
-    fun getAvatar(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                  response: HttpServletResponse) {
+    fun getAvatar(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        response: HttpServletResponse
+    ) {
 
         renderUserAvatar(clientUser, response)
     }
 
     @GetMapping("/{id:[\\w-|]+}/avatar")
-    fun getUserAvatar(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                      @PathVariable id: String,
-                      response: HttpServletResponse) {
+    fun getUserAvatar(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        @PathVariable id: String,
+        response: HttpServletResponse
+    ) {
 
         renderUserAvatar(clientUserService.getClientUser(id), response)
     }
@@ -138,8 +173,10 @@ class ClientUserController(val clientUserService: ClientUserService,
     }
 
     @PostMapping("/me/avatar")
-    fun uploadAvatar(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                     @RequestParam("file") multipartFile: MultipartFile): ClientUserResponse {
+    fun uploadAvatar(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        @RequestParam("file") multipartFile: MultipartFile
+    ): ClientUserResponse {
 
         return binaryStorageService.saveClientUserAvatar(clientUser, multipartFile).toDTO()
     }
@@ -157,8 +194,10 @@ class ClientUserController(val clientUserService: ClientUserService,
 
     @PostMapping("/me/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun updateUserPassword(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                           @RequestBody updatePasswordRequest: UpdateUserPasswordRequest) {
+    fun updateUserPassword(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        @RequestBody updatePasswordRequest: UpdateUserPasswordRequest
+    ) {
 
         if (clientUser.userType != ClientUser.UserType.AUTH0) {
             throw BusinessException("Update password is not available to non AUTH0 users")
@@ -175,11 +214,13 @@ class ClientUserController(val clientUserService: ClientUserService,
     }
 
     @GetMapping("/{id:[\\w-|]+}/ownedInterviews")
-    fun getOwnedInterviews(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                           @PathVariable id: String,
-                           @RequestParam("page", defaultValue = "0") page: Int,
-                           @RequestParam("pageSize", defaultValue = "20") pageSize: Int,
-                           uriComponentsBuilder: UriComponentsBuilder): InterviewsResponse {
+    fun getOwnedInterviews(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        @PathVariable id: String,
+        @RequestParam("page", defaultValue = "0") page: Int,
+        @RequestParam("pageSize", defaultValue = "20") pageSize: Int,
+        uriComponentsBuilder: UriComponentsBuilder
+    ): InterviewsResponse {
 
         clientUserService.getClientUser(id).let { user ->
             val requestMap = mapOf("owner" to "true", "page" to page.toString(), "pageSize" to pageSize.toString())
@@ -198,12 +239,14 @@ class ClientUserController(val clientUserService: ClientUserService,
     }
 
     @GetMapping("/{id:[\\w-|]+}/likedInterviews")
-    fun getLikedInterviews(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
-                           @PathVariable id: String,
-                           @RequestParam("page", defaultValue = "0") page: Int,
-                           @RequestParam("pageSize", defaultValue = "20") pageSize: Int,
-                           @RequestParam("keyword", required = false) keyword: String?,
-                           uriComponentsBuilder: UriComponentsBuilder): InterviewsResponse {
+    fun getLikedInterviews(
+        @RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser,
+        @PathVariable id: String,
+        @RequestParam("page", defaultValue = "0") page: Int,
+        @RequestParam("pageSize", defaultValue = "20") pageSize: Int,
+        @RequestParam("keyword", required = false) keyword: String?,
+        uriComponentsBuilder: UriComponentsBuilder
+    ): InterviewsResponse {
 
         clientUserService.getClientUser(id).let {
             val pageRequest = PageRequest.of(page, pageSize)

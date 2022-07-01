@@ -5,7 +5,7 @@ metadata:
   name: gh-ingress
 spec:
   tls:
-    - secretName: gh-secret-tls
+    - secretName: gh-secret-tls2
   defaultBackend:
     service:
       name: gh-service-nodeport

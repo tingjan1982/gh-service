@@ -139,33 +139,46 @@ fun ClientAccount.toOrganization(): ClientOrganizationResponse {
         )
 }
 
-fun ClientUser.toDTO(metadata: Map<String, Any>? = mapOf(), invitations: List<UserInvitationResponse> = listOf()): ClientUserResponse {
+fun ClientUser.toDTO(
+    metadata: Map<String, Any>? = mapOf(),
+    invitations: List<UserInvitationResponse> = listOf()
+): ClientUserResponse {
 
-        val uriPrefix = MvcUriComponentsBuilder.fromController(ClientUserController::class.java).toUriString()
+    val uriPrefix = MvcUriComponentsBuilder.fromController(ClientUserController::class.java).toUriString()
 
-        val locale = metadata?.get("locale")?.let {
-                if (it is List<*> && it.isNotEmpty()) {
-                        return@let it[0] as String
-                } else {
-                        return@let "zh"
-                }
-        } ?: "zh"
+    val locale = metadata?.get("locale")?.let {
+        if (it is List<*> && it.isNotEmpty()) {
+            return@let it[0] as String
+        } else if (it is String) {
+            return@let it
+        } else {
+            return@let ClientUser.DEFAULT_LOCALE
+        }
+    } ?: ClientUser.DEFAULT_LOCALE
 
-        return ClientUserResponse(
-                id = this.id.toString(),
-                email = this.email,
-                name = this.name,
-                nickname = this.nickname,
-                avatar = if (this.avatarBinary != null) { "$uriPrefix/$id/avatar" } else { this.avatar },
-                userType = this.userType,
-                accountType = this.clientAccount.accountType,
-                accountPrivilege = this.accountPrivilege,
-                organization = if (this.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) { this.clientAccount.toLightOrganization() } else { null },
-                department = this.department?.toDTO(),
-                locale = locale,
-                metadata = metadata,
-                invitations = invitations
-        )
+    return ClientUserResponse(
+        id = this.id.toString(),
+        email = this.email,
+        name = this.name,
+        nickname = this.nickname,
+        avatar = if (this.avatarBinary != null) {
+            "$uriPrefix/$id/avatar"
+        } else {
+            this.avatar
+        },
+        userType = this.userType,
+        accountType = this.clientAccount.accountType,
+        accountPrivilege = this.accountPrivilege,
+        organization = if (this.clientAccount.accountType == ClientAccount.AccountType.CORPORATE) {
+            this.clientAccount.toLightOrganization()
+        } else {
+            null
+        },
+        department = this.department?.toDTO(),
+        locale = locale,
+        metadata = metadata,
+        invitations = invitations
+    )
 }
 
 fun ClientUser.toLightDTO(): LightClientUserResponse {

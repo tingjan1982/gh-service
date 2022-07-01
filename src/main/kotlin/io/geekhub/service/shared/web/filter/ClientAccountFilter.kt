@@ -62,7 +62,7 @@ class ClientAccountFilter(val clientAccountService: ClientAccountService, val cl
                 val locale = if (it.locale?.isNotEmpty() == true) {
                     it.locale[0]
                 } else {
-                    "zh"
+                    ClientUser.DEFAULT_LOCALE
                 }
 
                 ClientUser(id, it.email, it.name, it.nickname, locale, it.picture, it.getUserType(), ClientUser.AccountPrivilege.OWNER, account).let { user ->

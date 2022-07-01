@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef
 import org.springframework.data.mongodb.core.mapping.Document
 
 /**
- * Represents an user in the system. It contains user profile related information such as
+ * Represents a user in the system. It contains user profile related information such as
  * email, nickname, avatar and so on.
  */
 @Document
@@ -16,7 +16,7 @@ data class ClientUser(
     var email: String,
     var name: String,
     var nickname: String?,
-    var locale: String = "zh",
+    var locale: String = DEFAULT_LOCALE,
     var avatar: String? = null,
     val userType: UserType,
     var accountPrivilege: AccountPrivilege = AccountPrivilege.OWNER,
@@ -26,6 +26,10 @@ data class ClientUser(
     var department: ClientDepartment? = null,
     @DBRef
     var avatarBinary: BinaryFile? = null) {
+
+    companion object {
+        const val DEFAULT_LOCALE: String = "zh-TW"
+    }
 
     fun isOrgOwner(): Boolean {
         return isCorporateAccount() && accountPrivilege == AccountPrivilege.OWNER
