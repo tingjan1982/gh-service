@@ -44,8 +44,8 @@ class InterviewSessionServiceImpl(
 
     override fun createInterviewSession(interviewSession: InterviewSession): InterviewSession {
 
-        if (interviewSessionRepository.existsByPublishedInterviewAndUserEmail(interviewSession.publishedInterview, interviewSession.userEmail)) {
-            throw BusinessObjectAlreadyExistsException("Interview session is already created for ${interviewSession.userEmail}")
+        interviewSessionRepository.findByPublishedInterviewAndUserEmail(interviewSession.publishedInterview, interviewSession.userEmail)?.let {
+            throw BusinessObjectAlreadyExistsException("Interview session is already created for ${interviewSession.userEmail}", it.id.toString())
         }
 
         this.saveInterviewSession(interviewSession).let {

@@ -10,10 +10,13 @@ import io.geekhub.service.interview.toEntity
 import io.geekhub.service.interview.toLightDTO
 import io.geekhub.service.interview.web.model.*
 import io.geekhub.service.shared.exception.BusinessException
+import io.geekhub.service.shared.exception.BusinessObjectAlreadyExistsException
 import io.geekhub.service.shared.model.SearchCriteria
 import io.geekhub.service.shared.service.ObjectOwnershipService
 import io.geekhub.service.shared.web.filter.ClientAccountFilter
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.util.UriComponentsBuilder
 import javax.validation.Valid
@@ -31,11 +34,18 @@ class InterviewSessionController(
     @PostMapping
     fun createInterviewSession(
         @RequestAttribute(ClientAccountFilter.CLIENT_USER_KEY) clientUser: ClientUser,
-        @Valid @RequestBody request: InterviewSessionRequest
-    ): InterviewSessionResponse {
+        @Valid @RequestBody request: InterviewSessionRequest,
+        uriComponentsBuilder: UriComponentsBuilder
+    ): ResponseEntity<InterviewSessionResponse> {
 
         interviewService.getPublishedInterviewByInterview(request.interviewId).let {
-            return interviewSessionService.createInterviewSession(request.toEntity(it, clientUser)).toDTO(clientUser)
+            try {
+                return ResponseEntity(interviewSessionService.createInterviewSession(request.toEntity(it, clientUser)).toDTO(clientUser), HttpStatus.OK)
+            } catch (e: BusinessObjectAlreadyExistsException) {
+                val headers = HttpHeaders()
+                headers.location = uriComponentsBuilder.path("/interviewSessions/{id}").build(e.id)
+                return ResponseEntity(headers, HttpStatus.FOUND)
+            }
         }
     }
 

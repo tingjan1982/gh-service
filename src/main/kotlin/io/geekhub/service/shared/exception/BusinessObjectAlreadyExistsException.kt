@@ -1,3 +1,11 @@
 package io.geekhub.service.shared.exception
 
-class BusinessObjectAlreadyExistsException(msg: String) : RuntimeException(msg)
+class BusinessObjectAlreadyExistsException: RuntimeException {
+
+    var id: String? = null
+
+    constructor(msg: String): super(msg)
+    constructor(msg: String, id: String): this(msg) {
+        this.id = id
+    }
+}

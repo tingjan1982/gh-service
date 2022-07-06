@@ -9,7 +9,7 @@ interface InterviewSessionRepository : PagingAndSortingRepository<InterviewSessi
 
     fun existsByPublishedInterview(publishedInterview: PublishedInterview): Boolean
 
-    fun existsByPublishedInterviewAndUserEmail(publishedInterview: PublishedInterview, userEmail: String): Boolean
+    fun findByPublishedInterviewAndUserEmail(publishedInterview: PublishedInterview, userEmail: String): InterviewSession?
 
     fun findByPublishedInterviewAndCandidateUser(publishedInterview: PublishedInterview, candidateUser: ClientUser): InterviewSession?
 }
