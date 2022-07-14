@@ -175,6 +175,7 @@ fun ClientUser.toDTO(
             null
         },
         department = this.department?.toDTO(),
+        stats = this.assessmentStats,
         locale = locale,
         metadata = metadata,
         invitations = invitations

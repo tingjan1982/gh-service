@@ -19,13 +19,15 @@ data class ClientUser(
     var locale: String = DEFAULT_LOCALE,
     var avatar: String? = null,
     val userType: UserType,
+    val assessmentStats: AssessmentStats = AssessmentStats(),
     var accountPrivilege: AccountPrivilege = AccountPrivilege.OWNER,
     @DBRef
     var clientAccount: ClientAccount,
     @DBRef
     var department: ClientDepartment? = null,
     @DBRef
-    var avatarBinary: BinaryFile? = null) {
+    var avatarBinary: BinaryFile? = null
+) {
 
     companion object {
         const val DEFAULT_LOCALE: String = "zh-TW"
@@ -72,4 +74,10 @@ data class ClientUser(
          */
         USER
     }
+
+    data class AssessmentStats(
+        var mine: Int = 0,
+        var pending: Int = 0,
+        var liked: Int = 0
+    )
 }

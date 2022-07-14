@@ -14,6 +14,7 @@ data class ClientUserResponse(
         val accountPrivilege: ClientUser.AccountPrivilege,
         val organization: OrganizationResponse?,
         val department: ClientDepartmentResponse?,
+        val stats: ClientUser.AssessmentStats,
         val locale: String,
         val metadata: Map<String, Any>? = mapOf(),
         /**
