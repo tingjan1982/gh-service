@@ -228,4 +228,8 @@ class InterviewServiceImpl(val mongoTemplate: MongoTemplate,
     override fun getInterviews(clientUser: ClientUser): List<Interview> {
         return interviewRepository.findAllByClientUser(clientUser)
     }
+
+    override fun getInterviewsCount(clientUser: ClientUser): Int {
+        return interviewRepository.countAllByClientUser(clientUser)
+    }
 }

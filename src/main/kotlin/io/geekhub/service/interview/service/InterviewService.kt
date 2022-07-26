@@ -29,4 +29,5 @@ interface InterviewService {
     fun getInterviews(searchCriteria: SearchCriteria): Page<Interview>
 
     fun getInterviews(clientUser: ClientUser): List<Interview>
+    fun getInterviewsCount(clientUser: ClientUser): Int
 }

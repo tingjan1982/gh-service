@@ -2,6 +2,7 @@ package io.geekhub.service.interview.web
 
 import io.geekhub.service.account.repository.ClientUser
 import io.geekhub.service.account.service.ClientAccountService
+import io.geekhub.service.account.service.ClientUserService
 import io.geekhub.service.interview.model.Interview
 import io.geekhub.service.interview.service.InterviewService
 import io.geekhub.service.interview.service.InterviewSessionService
@@ -25,6 +26,7 @@ import javax.validation.Valid
 class InterviewController(val interviewService: InterviewService,
                           val interviewSessionService: InterviewSessionService,
                           val clientAccountService: ClientAccountService,
+                          val clientUserService: ClientUserService,
                           val likeService: LikeService,
                           val objectOwnershipService: ObjectOwnershipService) {
 
@@ -90,6 +92,19 @@ class InterviewController(val interviewService: InterviewService,
             val likedInterviews = likeService.getLikedObjects(clientUser, Interview::class).map { it.objectId }.toList()
 
             return InterviewsResponse(result.map { it.toLightDTO(likedInterviews.contains(it.id.toString())) }, navigationLinkBuilder)
+        }
+    }
+
+    @GetMapping("/stats")
+    fun getInterviewStats(@RequestAttribute(CLIENT_USER_KEY) clientUser: ClientUser): ClientUser.AssessmentStats {
+
+        clientUser.assessmentStats.apply {
+            this.mine = interviewService.getInterviewsCount(clientUser)
+            this.liked = likeService.getLikedObjects(clientUser, Interview::class).count()
+        }
+
+        clientUserService.saveClientUser(clientUser).let {
+            return it.assessmentStats
         }
     }
 
